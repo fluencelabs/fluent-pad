@@ -43,7 +43,7 @@ function App() {
     return (
         <div className="App">
             <header className="App-header">
-                <label>nickName</label>
+                <label>Nick name</label>
                 <input
                     type="text"
                     onChange={(e) => {
@@ -51,18 +51,17 @@ function App() {
                         setNickName(name);
                         service?.changeNickname(name);
                     }}
+                    value={nickName}
                 />
-                <p>
+                <div>
                     <ul>
-                        {Array.from(peers).map((key, value) => (
-                            <li>{value}</li>
-                        ))}
-
-                        <li>Create a component</li>
-                        <li>Write some code</li>
-                        <li>Enjoy!</li>
+                        <>
+                            {Array.from(peers).map((key, value) => (
+                                <li key={value}>{value}</li>
+                            ))}
+                        </>
                     </ul>
-                </p>
+                </div>
             </header>
         </div>
     );
