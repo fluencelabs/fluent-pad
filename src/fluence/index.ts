@@ -2,7 +2,7 @@ import Fluence from 'fluence';
 import { FluenceClient } from 'fluence/dist/fluenceClient';
 import { registerService } from 'fluence/dist/globalState';
 import { peerIdToSeed, seedToPeerId } from 'fluence/dist/seed';
-import { ServiceOne } from 'fluence/dist/service';
+import { ServiceMultiple, ServiceOne } from 'fluence/dist/service';
 import { faasNetHttps, dev } from './environments';
 
 const privKeyStorageKey = 'privKey';
@@ -27,6 +27,13 @@ const registerDebugStuff = async (c) => {
         console.log(fnName + ' called with args: ', args);
         return {};
     });
+
+    const op = new ServiceMultiple('op');
+    op.registerFunction('identity', (args: any[], _tetraplets) => {
+        return args;
+    });
+
+    registerService(op);
     registerService(s);
 };
 

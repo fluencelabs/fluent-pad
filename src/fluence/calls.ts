@@ -30,43 +30,119 @@ export const registerAsFluentPadUser = async () => {
 };
 
 export const debugDiscoverPeers = async () => {
-    const myPeerId = fluenceClient.selfPeerId.toB58String();
-    // const myRelay = fluenceClient.connection.nodePeerId.toB58String();
-    const myRelay = relay.peerId;
-
-    //   let script = `
-    // (seq
-    //   (seq
-    //     (call myRelay ("dht" "neighborhood") [key] neighbors)
-    //     (fold neighbors n
-    //       (seq
-    //         (call n ("dht" "get_providers") [key] providers)
-    //         (next n)
-    //       )
-    //     )
-    //   )
-    //   (seq
-    //     (call myRelay ("op" "identiy") [])
-    //     (call %init_peer_id% ("debug" "notifyDiscovered") [providers])
-    //   )
-    // )`;
+    const myPeerId = fluenceClient.selfPeerIdStr;
+    const myRelay = fluenceClient.connection.nodePeerId.toB58String();
+    //const myRelay = relay.peerId;
 
     let script = `
-    (seq
-      (call myRelay ("op" "identiy") [])
-      (seq 
-        (call myRelay ("op" "identiy") [])
-        (call %init_peer_id% ("debug" "notifyDiscovered") [value])
+      (seq
+        (call myRelay ("dht" "neighborhood") [myRelay] neighbors)
+        (fold neighbors n
+          (par
+            (seq
+              (call n ("dht" "get_providers") [key] providers)
+              (seq 
+                (call myRelay ("op" "identiy") [])
+                (call %init_peer_id% ("debug" "notifyDiscovered") [providers])
+              )
+            )
+            (next n)
+          )
+        )
       )
-    )`;
+    `;
+
+    script = `
+      (seq
+        (call myRelay ("dht" "neighborhood") [myRelay] neighbors)
+        (fold neighbors n
+          (seq
+            (seq
+              (call n ("op" "identity") [] x)
+              (seq 
+                (call myRelay ("op" "identiy") [])
+                (call %init_peer_id% ("debug" "notifyDiscovered") [key])
+              )
+            )
+            (next n)
+          )
+        )
+      )
+    `;
+
+    script = `
+    (seq
+      (call myRelay ("dht" "neighborhood") [myRelay] neighbors)
+      (seq 
+        (fold neighbors n
+          (next n)
+        )
+        (call %init_peer_id% ("debug" "notifyDiscovered") [key])
+      )
+    )
+  `;
+
+    script = `
+      (seq
+        (call myRelay ("dht" "neighborhood") [myRelay] neighbors)
+        (fold neighbors.$! n
+          (seq
+            (seq
+              (call n ("op" "identity") [])
+              (call %init_peer_id% ("debug" "notifyDiscovered") [n])
+            )
+            (next n)
+          )
+        )
+      )
+    `;
+
+    //   script = `
+    //   (seq
+    //     (seq
+    //       (call myRelay ("dht" "neighborhood") [myRelay] neighbors)
+    //       (fold neighbors n
+    //         (seq
+    //           (call n ("dht" "get_providers") [key] result[])
+    //           (next n)
+    //         )
+    //       )
+    //     )
+    //     (call %init_peer_id% ("debug" "notifyDiscovered") [result])
+    //   )
+    // `;
+
+    //     script = `
+    //   (seq
+    //     (seq
+    //       (call myRelay ("dht" "neighborhood") [myRelay] neighbors)
+    //       (fold neighbors n
+    //         (seq
+    //           (call n ("op" "identity") [])
+    //           (next n)
+    //         )
+    //       )
+    //     )
+    //     (call %init_peer_id% ("debug" "notifyDiscovered") [key])
+    //   )
+    // `;
 
     // script = `
-    //  (call %init_peer_id% ("debug" "notifyDiscovered") [value])`;
+    //   (seq
+    //     (call myRelay ("dht" "neighborhood") [myRelay] result)
+    //     (call %init_peer_id% ("debug" "notifyDiscovered") [result])
+    //   )`;
+
+    // script = `
+    //   (seq
+    //     (call myRelay ("dht" "get_providers") [key] result)
+    //     (call %init_peer_id% ("debug" "notifyDiscovered") [result])
+    //   )`;
 
     const data = new Map();
+    data.set('key', fluentPadProviderKey);
+    data.set('myPeerID', myPeerId);
     data.set('myRelay', myRelay);
-    data.set('myPeerId', myPeerId);
-    data.set('value', 'hello world!');
 
     let particle = await build(fluenceClient.selfPeerId, script, data);
     await fluenceClient.executeParticle(particle);
