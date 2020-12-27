@@ -55,7 +55,7 @@ export class FluentPadService extends ServiceMultiple {
 
     async connect(): Promise<void> {
         this.registerService();
-        //await calls.registerAsFluentPadUser();
+        await calls.registerAsFluentPadUser();
         //await calls.discoverPeers();
     }
 

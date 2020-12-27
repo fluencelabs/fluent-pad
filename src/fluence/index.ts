@@ -47,7 +47,7 @@ export const connect = async () => {
     const node = relay;
     const key = await getPrivKey();
     const peerId = await seedToPeerId(key);
-    const c = await Fluence.connect(node.multiaddr);
+    const c = await Fluence.connect(node.multiaddr, peerId);
 
     fluenceClient = c;
 

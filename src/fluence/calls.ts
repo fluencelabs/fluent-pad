@@ -8,14 +8,14 @@ export const registerAsFluentPadUser = async () => {
 
     let script = `
     (seq
+      (call myRelay ("dht" "add_provider") [key value])
       (seq
-        (call myRelay ("dht" "add_provider") [key value])
-        (call myRelay ("dht" "neighborhood") [] neighbors)
-      )
-      (fold neighbors n
-        (seq
-          (call n ("dht" "add_provider") [key value])
-          (next n)
+        (call myRelay ("dht" "neighborhood") [myRelay] neighbors)
+        (fold neighbors n
+          (par
+            (call n ("dht" "add_provider") [key value])
+            (next n)
+          )
         )
       )
     )`;
@@ -60,7 +60,7 @@ export const debugDiscoverPeers = async () => {
             (seq
               (call n ("op" "identity") [] x)
               (seq 
-                (call myRelay ("op" "identiy") [])
+                (call myRelay ("op" "identity") [])
                 (call %init_peer_id% ("debug" "notifyDiscovered") [key])
               )
             )
@@ -73,29 +73,26 @@ export const debugDiscoverPeers = async () => {
     script = `
     (seq
       (call myRelay ("dht" "neighborhood") [myRelay] neighbors)
-      (seq 
+      (par 
         (fold neighbors n
-          (next n)
-        )
-        (call %init_peer_id% ("debug" "notifyDiscovered") [key])
-      )
-    )
-  `;
-
-    script = `
-      (seq
-        (call myRelay ("dht" "neighborhood") [myRelay] neighbors)
-        (fold neighbors.$! n
-          (seq
+          (par
             (seq
-              (call n ("op" "identity") [])
-              (call %init_peer_id% ("debug" "notifyDiscovered") [n])
+              (call n ("dht" "get_providers") [key] result)
+              (seq
+                (call myRelay ("op" "identity") [])
+                (call %init_peer_id% ("debug" "notifyDiscovered") [result])
+              )
             )
             (next n)
           )
         )
+        (seq 
+          (call myRelay ("dht" "get_providers") [key] result)
+          (call %init_peer_id% ("debug" "notifyDiscovered") [result])
+        )
       )
-    `;
+    )
+  `;
 
     //   script = `
     //   (seq
