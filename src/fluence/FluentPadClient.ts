@@ -56,7 +56,7 @@ export class FluentPadService extends ServiceMultiple {
     async connect(): Promise<void> {
         this.registerService();
         await calls.registerAsFluentPadUser();
-        //await calls.discoverPeers();
+        await calls.discoverPeers();
     }
 
     async disconnect(): Promise<void> {
@@ -129,7 +129,6 @@ export class FluentPadService extends ServiceMultiple {
         const peers = args[0] as {
             knownPeers: FluentPadClientPeer[];
         };
-        console.log(args);
         setImmediate(this.reconcilePeers.bind(this), peers.knownPeers);
         return {};
     }

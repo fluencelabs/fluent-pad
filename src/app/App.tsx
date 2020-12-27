@@ -14,20 +14,23 @@ function App() {
             const service = new FluentPadService(fluenceClient, nickName);
             service.on('disconnected', (peer: FluentPadClientPeer) => {
                 setPeers((prev) => {
-                    prev.delete(peer.peerId);
-                    return prev;
+                    const res = new Map(prev.entries());
+                    res.delete(peer.peerId);
+                    return res;
                 });
             });
             service.on('newConnected', (peer: FluentPadClientPeer) => {
                 setPeers((prev) => {
-                    prev.set(peer.peerId, peer.nickname);
-                    return prev;
+                    const res = new Map(prev.entries());
+                    res.set(peer.peerId, peer.nickname);
+                    return res;
                 });
             });
             service.on('nameChanged', (peerId: string, newName: string) => {
                 setPeers((prev) => {
-                    prev.set(peerId, newName);
-                    return prev;
+                    const res = new Map(prev.entries());
+                    res.set(peerId, newName);
+                    return res;
                 });
             });
             setService(service);
