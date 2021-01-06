@@ -19,10 +19,6 @@ use fluence::fce;
 #[fce]
 #[derive(Clone, Debug, Default, Eq, PartialEq, Hash)]
 pub struct Message {
-    pub id: i64,
-    pub author: String,
+    pub id: u64,
     pub body: String,
-    pub reply_to: i64,
 }
-
-pub(crate) const MESSAGE_FIELDS_COUNT: usize = 4;

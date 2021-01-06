@@ -9,7 +9,7 @@ name = "user-list"
 path = "src/main.rs"
 
 [dependencies]
-fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
+fluence = { version = "0.2.16", features = ["logger"] }
 
 anyhow = "1.0.31"
 boolinator = "2.4.0"

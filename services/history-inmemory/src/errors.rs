@@ -16,23 +16,16 @@
 
 use crate::message::Message;
 use crate::service_api::AddServiceResult;
-use crate::service_api::CountServiceResult;
 use crate::service_api::GetMessagesServiceResult;
 use crate::Result;
-
-use fce_sqlite_connector::Error as SqliteConnectorError;
-use fce_sqlite_connector::Value;
 
 use std::convert::From;
 use std::error::Error;
 
 #[derive(Debug)]
 pub enum HistoryError {
-    SqliteConnectorError(SqliteConnectorError),
-    CorruptedMessage(Vec<Value>),
     InternalError(String),
     InvalidArgument(String),
-    UnexpectedValueType(Value, &'static str),
 }
 
 impl Error for HistoryError {}
@@ -40,26 +33,9 @@ impl Error for HistoryError {}
 impl std::fmt::Display for HistoryError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         match self {
-            Self::SqliteConnectorError(err) => writeln!(f, "{:?}", err),
-            Self::CorruptedMessage(values) => writeln!(
-                f,
-                "message can't be constructed from returned values: {:?}",
-                values
-            ),
             Self::InternalError(err_msg) => writeln!(f, "{}", err_msg),
             Self::InvalidArgument(err_msg) => writeln!(f, "{}", err_msg),
-            Self::UnexpectedValueType(value, expected_type) => writeln!(
-                f,
-                "expected type {}, but value {:?} received",
-                expected_type, value
-            ),
         }
-    }
-}
-
-impl From<SqliteConnectorError> for HistoryError {
-    fn from(err: SqliteConnectorError) -> Self {
-        HistoryError::SqliteConnectorError(err)
     }
 }
 
@@ -71,21 +47,18 @@ impl From<std::convert::Infallible> for HistoryError {
 
 fn to_error_core(err: &HistoryError) -> i32 {
     match err {
-        HistoryError::SqliteConnectorError(_) => 0,
-        HistoryError::CorruptedMessage(_) => 1,
         HistoryError::InternalError(_) => 2,
         HistoryError::InvalidArgument(_) => 3,
-        HistoryError::UnexpectedValueType(..) => 4,
     }
 }
 
-impl From<Result<i64>> for AddServiceResult {
-    fn from(result: Result<i64>) -> Self {
+impl From<Result<u64>> for AddServiceResult {
+    fn from(result: Result<u64>) -> Self {
         match result {
             Ok(msg_id) => Self {
                 ret_code: crate::service_api::SUCCESS_CODE,
                 err_msg: String::new(),
-                msg_id: msg_id as u64,
+                msg_id: msg_id,
             },
             Err(err) => Self {
                 ret_code: to_error_core(&err),
@@ -108,23 +81,6 @@ impl From<Result<Vec<Message>>> for GetMessagesServiceResult {
                 ret_code: to_error_core(&err),
                 err_msg: format!("{}", err),
                 messages: vec![],
-            },
-        }
-    }
-}
-
-impl From<Result<i64>> for CountServiceResult {
-    fn from(result: Result<i64>) -> Self {
-        match result {
-            Ok(messages_count) => Self {
-                ret_code: crate::service_api::SUCCESS_CODE,
-                err_msg: String::new(),
-                messages_count: messages_count as u64,
-            },
-            Err(err) => Self {
-                ret_code: to_error_core(&err),
-                err_msg: format!("{}", err),
-                messages_count: 0,
             },
         }
     }

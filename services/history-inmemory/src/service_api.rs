@@ -29,8 +29,8 @@ pub struct AddServiceResult {
 }
 
 #[fce]
-fn add(author: String, msg: String, reply_to: i64) -> AddServiceResult {
-    add_message(msg, author, reply_to).into()
+fn add(msg: String) -> AddServiceResult {
+    add_message(msg).into()
 }
 
 #[fce]
@@ -48,21 +48,4 @@ fn get_all() -> GetMessagesServiceResult {
 #[fce]
 fn get_last(last: u64) -> GetMessagesServiceResult {
     get_messages_with_limit(last).into()
-}
-
-#[fce]
-fn get_by_reply_to(reply_to: u64) -> GetMessagesServiceResult {
-    get_messages_by_reply_to(reply_to).into()
-}
-
-#[fce]
-pub struct CountServiceResult {
-    pub ret_code: i32,
-    pub err_msg: String,
-    pub messages_count: u64,
-}
-
-#[fce]
-fn count_by_reply_to(reply_to: u64) -> CountServiceResult {
-    count_messages_by_reply_to(reply_to).into()
 }

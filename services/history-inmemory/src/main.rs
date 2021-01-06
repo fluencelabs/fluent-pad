@@ -19,13 +19,13 @@ mod message;
 mod service_api;
 mod storage_api;
 
-use fluence::WasmLogger;
+use fluence::WasmLoggerBuilder;
 use storage_api::init;
 
 pub(crate) type Result<T> = std::result::Result<T, errors::HistoryError>;
 
 pub fn main() {
-    WasmLogger::new()
+    WasmLoggerBuilder::new()
         .with_log_level(log::Level::Info)
         .build()
         .unwrap();

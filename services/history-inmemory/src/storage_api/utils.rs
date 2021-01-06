@@ -16,30 +16,26 @@
 
 use crate::Result;
 
-use fce_sqlite_connector::Value;
-
-pub(super) fn value_to_string(value: &Value) -> Result<String> {
-    use crate::errors::HistoryError::UnexpectedValueType;
-
-    value
-        .as_string()
-        .ok_or_else(|| UnexpectedValueType(value.clone(), "string"))
-        .map(Into::into)
-}
-
-pub(super) fn value_to_integer(value: &Value) -> Result<i64> {
-    use crate::errors::HistoryError::UnexpectedValueType;
-
-    value
-        .as_integer()
-        .ok_or_else(|| UnexpectedValueType(value.clone(), "integer"))
-        .map(Into::into)
-}
-
 pub(super) fn u64_to_i64(value: u64) -> Result<i64> {
     use crate::errors::HistoryError::InvalidArgument;
     use std::convert::TryFrom;
 
     i64::try_from(value)
+        .map_err(|_| InvalidArgument(format!("limit should be less than {}", i64::max_value())))
+}
+
+pub(super) fn u64_to_usize(value: u64) -> Result<usize> {
+    use crate::errors::HistoryError::InvalidArgument;
+    use std::convert::TryFrom;
+
+    usize::try_from(value)
+        .map_err(|_| InvalidArgument(format!("limit should be less than {}", i64::max_value())))
+}
+
+pub(super) fn usize_to_u64(value: usize) -> Result<u64> {
+    use crate::errors::HistoryError::InvalidArgument;
+    use std::convert::TryFrom;
+
+    u64::try_from(value)
         .map_err(|_| InvalidArgument(format!("limit should be less than {}", i64::max_value())))
 }
