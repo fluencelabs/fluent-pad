@@ -1,0 +1,7 @@
+modules_dir = "../artifacts"
+
+[[module]]
+    name = "user-list"
+    mem_pages_count = 100
+    logger_enabled = true
+

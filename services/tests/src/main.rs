@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-use fluence::fce;
+/// This project is intended only to test services that can't be compiled to the native target.
 
-#[fce]
-#[derive(Clone, Debug, Default, Eq, PartialEq, Hash)]
-pub struct User {
-    pub peer_id: String,
-    pub relay_id: String,
-    pub name: String,
-}
+pub fn main() {}

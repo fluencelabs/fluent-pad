@@ -60,7 +60,7 @@ fn delete(peer_id: String) -> EmptyServiceResult {
         is_authenticated()?;
 
         delete_user(peer_id)
-    };
+    }
 
     delete_impl(peer_id).into()
 }

@@ -20,17 +20,16 @@ use crate::message::Message;
 use crate::Result;
 use utils::*;
 
-use once_cell::sync::{Lazy, OnceCell};
+use once_cell::sync::{OnceCell};
 use parking_lot::Mutex;
-use std::collections::HashMap;
 
-static INSTANCE: OnceCell<Mutex<HashMap<u64, Message>>> = OnceCell::new();
+static INSTANCE: OnceCell<Mutex<Vec<Message>>> = OnceCell::new();
 
 pub fn init() -> Result<()> {
     Ok(())
 }
 
-fn get_data() -> &'static Mutex<HashMap<u64, Message>> {
+fn get_data() -> &'static Mutex<Vec<Message>> {
     INSTANCE.get_or_init(|| {
         <_>::default()
     })
@@ -41,7 +40,7 @@ pub fn add_message(msg: String) -> Result<u64> {
 
     let id = usize_to_u64(data.len())?;
 
-    data.insert(id, Message { id, body: msg });
+    data.push(Message { id, body: msg });
 
     return Ok(id)
 
@@ -51,15 +50,13 @@ pub fn get_messages_with_limit(limit: u64) -> Result<Vec<Message>> {
     let data = get_data().lock();
     let limit = u64_to_usize(limit)?;
 
-    let mut msgs: Vec<Message> = data.values().map(|user| user.clone()).collect();
+    let msgs: Vec<Message> = data.to_vec().iter().rev().take(limit).map(|msg| msg.clone()).collect();
 
-    let last = &msgs[msgs.len() - limit..];
-
-    Ok(last.to_vec())
+    Ok(msgs)
 }
 
 pub fn get_all_messages() -> Result<Vec<Message>> {
     let data = get_data().lock();
 
-    Ok(data.values().map(|msg| msg.clone()).collect())
+    Ok(data.to_vec())
 }

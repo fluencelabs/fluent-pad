@@ -16,14 +16,6 @@
 
 use crate::Result;
 
-pub(super) fn u64_to_i64(value: u64) -> Result<i64> {
-    use crate::errors::HistoryError::InvalidArgument;
-    use std::convert::TryFrom;
-
-    i64::try_from(value)
-        .map_err(|_| InvalidArgument(format!("limit should be less than {}", i64::max_value())))
-}
-
 pub(super) fn u64_to_usize(value: u64) -> Result<usize> {
     use crate::errors::HistoryError::InvalidArgument;
     use std::convert::TryFrom;
