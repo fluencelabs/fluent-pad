@@ -41,10 +41,11 @@ pub struct GetMessagesServiceResult {
 fn get_all() {
     let mut app_service = create_app_service(TEST_CONFIG_PATH);
 
-    let result = call_app_service!(app_service, "add", json!(["body_1"]));
+    call_app_service!(app_service, "set_tetraplet", json!(["", "", "", ""]));
+    let result = call_app_service!(app_service, "add", json!(["body_1", 1]));
     assert_eq!(result, json!({ "ret_code": 0, "err_msg": "", "msg_id": 0 }));
 
-    let result = call_app_service!(app_service, "add", json!(["body_2"]));
+    let result = call_app_service!(app_service, "add", json!(["body_2", 1]));
     assert_eq!(result, json!({ "ret_code": 0, "err_msg": "", "msg_id": 1 }));
 
     let result = call_app_service!(app_service, "get_all", json!([]));

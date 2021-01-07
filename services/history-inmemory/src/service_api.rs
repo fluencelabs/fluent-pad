@@ -33,7 +33,7 @@ pub struct AddServiceResult {
 #[fce]
 fn add(msg: String, auth: bool) -> AddServiceResult {
     fn add_impl(msg: String, auth: bool) -> Result<u64> {
-        is_authenticated(auth, 2)?;
+        is_authenticated(auth, 1)?;
         add_message(msg)
     }
 
@@ -102,7 +102,8 @@ pub fn is_authenticated(auth: bool, index: u64) -> Result<()> {
 
             (st.peer_pk == t.peer_pk && st.function_name == t.fn_name
                 && st.service_id == t.service_id &&
-                st.json_path == t.json_path && auth).ok_or_else(|| Unauthorized("Tetraplet did not pass the check.".to_string()))
+                st.json_path == t.json_path && auth)
+                .ok_or_else(|| Unauthorized(format!("Tetraplet did not pass the check. Expected: {:?}, actual: {:?}", t, st)))
         }
     }
 }
