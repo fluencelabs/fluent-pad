@@ -79,11 +79,15 @@ fn is_exists(user_name: String) -> ExistsServiceResult {
 }
 
 #[fce]
-fn is_authenticated() -> bool {
-    match check_auth() {
-        Ok(_) => true,
-        Err(_) => false
-    }
+pub struct AuthResult {
+    pub ret_code: i32,
+    pub err_msg: String,
+    pub is_authenticated: bool,
+}
+
+#[fce]
+fn is_authenticated() -> AuthResult {
+    check_auth().into()
 }
 
 fn check_auth() -> Result<()> {
@@ -91,9 +95,10 @@ fn check_auth() -> Result<()> {
     use boolinator::Boolinator;
 
     let call_parameters: CallParameters = fluence::get_call_parameters();
-    let init_peer_id = call_parameters.init_peer_id;
+    let init_peer_id = call_parameters.init_peer_id.clone();
 
     let existed = get_user_by_peer_id(init_peer_id.clone())?.pop();
 
-    (init_peer_id == call_parameters.service_creator_peer_id || existed.is_some()).ok_or_else(|| UserNotExist(init_peer_id.clone()))
+    (init_peer_id == call_parameters.service_creator_peer_id || existed.is_some())
+        .ok_or_else(|| UserNotExist(format!("init_peer_id is {:?} and it is not existed or an owner. Owner: {:?}", &init_peer_id, &call_parameters.service_creator_peer_id)))
 }

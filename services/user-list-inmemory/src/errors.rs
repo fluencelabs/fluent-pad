@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::service_api::EmptyServiceResult;
+use crate::service_api::{EmptyServiceResult, AuthResult};
 use crate::service_api::ExistsServiceResult;
 use crate::service_api::GetUsersServiceResult;
 use crate::user::User;
@@ -62,6 +62,23 @@ impl From<Result<()>> for EmptyServiceResult {
             Err(err) => Self {
                 ret_code: to_error_core(&err),
                 err_msg: format!("{}", err),
+            },
+        }
+    }
+}
+
+impl From<Result<()>> for AuthResult {
+    fn from(result: Result<()>) -> Self {
+        match result {
+            Ok(users) => Self {
+                ret_code: crate::service_api::SUCCESS_CODE,
+                err_msg: String::new(),
+                is_authenticated: true,
+            },
+            Err(err) => Self {
+                ret_code: to_error_core(&err),
+                err_msg: format!("{}", err),
+                is_authenticated: false,
             },
         }
     }
