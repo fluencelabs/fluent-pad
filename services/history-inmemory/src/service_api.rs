@@ -17,7 +17,9 @@
 use crate::message::Message;
 use crate::storage_api::*;
 
-use fluence::fce;
+use fluence::{fce, CallParameters};
+use crate::Result;
+use crate::utils::u64_to_usize;
 
 pub const SUCCESS_CODE: i32 = 0;
 
@@ -29,8 +31,13 @@ pub struct AddServiceResult {
 }
 
 #[fce]
-fn add(msg: String) -> AddServiceResult {
-    add_message(msg).into()
+fn add(msg: String, auth: bool) -> AddServiceResult {
+    fn add_impl(msg: String, auth: bool) -> Result<u64> {
+        is_authenticated(auth, 2)?;
+        add_message(msg)
+    }
+
+    add_impl(msg, auth).into()
 }
 
 #[fce]
@@ -48,4 +55,48 @@ fn get_all() -> GetMessagesServiceResult {
 #[fce]
 fn get_last(last: u64) -> GetMessagesServiceResult {
     get_messages_with_limit(last).into()
+}
+
+#[fce]
+pub struct EmptyResult {
+    pub ret_code: i32,
+    pub err_msg: String,
+}
+
+#[fce]
+pub fn set_tetraplet(peer_id: String, service_id: String, fn_name: String, path: String) -> EmptyResult {
+    fn set_impl(peer_id: String, service_id: String, fn_name: String, path: String) -> Result<()> {
+        is_owner()?;
+        Ok(store_tetraplet(peer_id, service_id, fn_name, path))
+    }
+
+    set_impl(peer_id, service_id, fn_name, path).into()
+}
+
+pub fn is_owner() -> Result<()> {
+    use crate::errors::HistoryError::Unauthorized;
+    use boolinator::Boolinator;
+
+    let call_parameters: CallParameters = fluence::get_call_parameters();
+    let init_peer_id = call_parameters.init_peer_id;
+
+    (init_peer_id == call_parameters.service_creator_peer_id).ok_or_else(|| Unauthorized("This operation could be processed only by owner.".to_string()))
+}
+
+pub fn is_authenticated(auth: bool, index: u64) -> Result<()> {
+    use crate::errors::HistoryError::Unauthorized;
+    use boolinator::Boolinator;
+
+    match get_tetraplet() {
+        None => Err(Unauthorized("Set tetraplet before usage".to_string())),
+        Some(t) => {
+            let call_parameters: CallParameters = fluence::get_call_parameters();
+            let index = u64_to_usize(index)?;
+            let st = &call_parameters.tetraplets[index][0];
+
+            (st.peer_pk == t.peer_pk && st.function_name == t.fn_name
+                && st.service_id == t.service_id &&
+                st.json_path == t.json_path && auth).ok_or_else(|| Unauthorized("Tetraplet did not pass the check.".to_string()))
+        }
+    }
 }

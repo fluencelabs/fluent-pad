@@ -15,7 +15,7 @@
  */
 
 use crate::message::Message;
-use crate::service_api::AddServiceResult;
+use crate::service_api::{AddServiceResult, EmptyResult};
 use crate::service_api::GetMessagesServiceResult;
 use crate::Result;
 
@@ -26,6 +26,7 @@ use std::error::Error;
 pub enum HistoryError {
     InternalError(String),
     InvalidArgument(String),
+    Unauthorized(String),
 }
 
 impl Error for HistoryError {}
@@ -35,6 +36,7 @@ impl std::fmt::Display for HistoryError {
         match self {
             Self::InternalError(err_msg) => writeln!(f, "{}", err_msg),
             Self::InvalidArgument(err_msg) => writeln!(f, "{}", err_msg),
+            Self::Unauthorized(err_msg) => writeln!(f, "{}", err_msg),
         }
     }
 }
@@ -47,6 +49,7 @@ impl From<std::convert::Infallible> for HistoryError {
 
 fn to_error_core(err: &HistoryError) -> i32 {
     match err {
+        HistoryError::Unauthorized(_) => 1,
         HistoryError::InternalError(_) => 2,
         HistoryError::InvalidArgument(_) => 3,
     }
@@ -64,6 +67,21 @@ impl From<Result<u64>> for AddServiceResult {
                 ret_code: to_error_core(&err),
                 err_msg: format!("{}", err),
                 msg_id: u64::max_value(),
+            },
+        }
+    }
+}
+
+impl From<Result<()>> for EmptyResult {
+    fn from(result: Result<()>) -> Self {
+        match result {
+            Ok(_) => Self {
+                ret_code: crate::service_api::SUCCESS_CODE,
+                err_msg: String::new(),
+            },
+            Err(err) => Self {
+                ret_code: to_error_core(&err),
+                err_msg: format!("{}", err),
             },
         }
     }

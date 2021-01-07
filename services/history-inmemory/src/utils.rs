@@ -16,7 +16,7 @@
 
 use crate::Result;
 
-pub(super) fn u64_to_usize(value: u64) -> Result<usize> {
+pub fn u64_to_usize(value: u64) -> Result<usize> {
     use crate::errors::HistoryError::InvalidArgument;
     use std::convert::TryFrom;
 

@@ -18,6 +18,7 @@ mod errors;
 mod message;
 mod service_api;
 mod storage_api;
+mod utils;
 
 use fluence::WasmLoggerBuilder;
 use storage_api::init;
