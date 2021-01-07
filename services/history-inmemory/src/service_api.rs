@@ -17,7 +17,7 @@
 use crate::message::Message;
 use crate::storage_api::*;
 
-use fluence::{fce, CallParameters};
+use fluence::{fce, CallParameters, SecurityTetraplet};
 use crate::Result;
 use crate::utils::u64_to_usize;
 
@@ -61,6 +61,12 @@ fn get_last(last: u64) -> GetMessagesServiceResult {
 pub struct EmptyResult {
     pub ret_code: i32,
     pub err_msg: String,
+}
+
+#[fce]
+pub fn get_current_tetraplet(auth: bool) -> Vec<Vec<SecurityTetraplet>> {
+    let call_parameters: CallParameters = fluence::get_call_parameters();
+    call_parameters.tetraplets
 }
 
 #[fce]
