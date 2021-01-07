@@ -18,6 +18,7 @@ use crate::storage_api::*;
 use crate::user::User;
 use crate::Result;
 use fluence::{fce, CallParameters};
+use crate::errors::UserListError;
 
 pub const SUCCESS_CODE: i32 = 0;
 
@@ -47,7 +48,7 @@ pub struct EmptyServiceResult {
 #[fce]
 fn join(user: User) -> EmptyServiceResult {
     fn add_impl(user: User) -> Result<()> {
-        is_authenticated()?;
+        check_auth()?;
         add_user(user)
     }
 
@@ -57,7 +58,7 @@ fn join(user: User) -> EmptyServiceResult {
 #[fce]
 fn delete(peer_id: String) -> EmptyServiceResult {
     fn delete_impl(peer_id: String) -> Result<()> {
-        is_authenticated()?;
+        check_auth()?;
 
         delete_user(peer_id)
     }
@@ -77,7 +78,15 @@ fn is_exists(user_name: String) -> ExistsServiceResult {
     user_exists(user_name).into()
 }
 
-fn is_authenticated() -> Result<()> {
+#[fce]
+fn is_authenticated() -> bool {
+    match check_auth() {
+        Ok(_) => true,
+        Err(_) => false
+    }
+}
+
+fn check_auth() -> Result<()> {
     use crate::errors::UserListError::UserNotExist;
     use boolinator::Boolinator;
 
