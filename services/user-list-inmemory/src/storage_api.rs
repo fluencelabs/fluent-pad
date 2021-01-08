@@ -17,10 +17,9 @@
 use crate::user::User;
 use crate::Result;
 
-use once_cell::sync::{OnceCell};
+use once_cell::sync::OnceCell;
 use parking_lot::Mutex;
 use std::collections::HashMap;
-
 
 static INSTANCE: OnceCell<Mutex<HashMap<String, User>>> = OnceCell::new();
 
@@ -29,9 +28,7 @@ pub fn init() -> Result<()> {
 }
 
 fn get_data() -> &'static Mutex<HashMap<String, User>> {
-    INSTANCE.get_or_init(|| {
-        <_>::default()
-    })
+    INSTANCE.get_or_init(|| <_>::default())
 }
 
 pub fn user_exists(peer_id: String) -> Result<bool> {
@@ -51,7 +48,7 @@ pub fn get_user_by_peer_id(peer_id: String) -> Result<Vec<User>> {
 
     match data.get(&peer_id) {
         None => Ok(vec![]),
-        Some(user) => Ok(vec![user.clone()])
+        Some(user) => Ok(vec![user.clone()]),
     }
 }
 

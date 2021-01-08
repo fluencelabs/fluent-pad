@@ -17,9 +17,9 @@
 use crate::message::Message;
 use crate::storage_api::*;
 
-use fluence::{fce, CallParameters, SecurityTetraplet};
-use crate::Result;
 use crate::utils::u64_to_usize;
+use crate::Result;
+use fluence::{fce, CallParameters, SecurityTetraplet};
 
 pub const SUCCESS_CODE: i32 = 0;
 
@@ -70,7 +70,12 @@ pub fn get_current_tetraplet(auth: bool) -> Vec<Vec<SecurityTetraplet>> {
 }
 
 #[fce]
-pub fn set_tetraplet(peer_id: String, service_id: String, fn_name: String, path: String) -> EmptyResult {
+pub fn set_tetraplet(
+    peer_id: String,
+    service_id: String,
+    fn_name: String,
+    path: String,
+) -> EmptyResult {
     fn set_impl(peer_id: String, service_id: String, fn_name: String, path: String) -> Result<()> {
         is_owner()?;
         Ok(store_tetraplet(peer_id, service_id, fn_name, path))
@@ -86,7 +91,8 @@ pub fn is_owner() -> Result<()> {
     let call_parameters: CallParameters = fluence::get_call_parameters();
     let init_peer_id = call_parameters.init_peer_id;
 
-    (init_peer_id == call_parameters.service_creator_peer_id).ok_or_else(|| Unauthorized("This operation could be processed only by owner.".to_string()))
+    (init_peer_id == call_parameters.service_creator_peer_id)
+        .ok_or_else(|| Unauthorized("This operation could be processed only by owner.".to_string()))
 }
 
 pub fn is_authenticated(auth: bool, index: u64) -> Result<()> {
@@ -100,10 +106,17 @@ pub fn is_authenticated(auth: bool, index: u64) -> Result<()> {
             let index = u64_to_usize(index)?;
             let st = &call_parameters.tetraplets[index][0];
 
-            (st.peer_pk == t.peer_pk && st.function_name == t.fn_name
-                && st.service_id == t.service_id &&
-                st.json_path == t.json_path && auth)
-                .ok_or_else(|| Unauthorized(format!("Tetraplet did not pass the check. Expected: {:?}, actual: {:?}", t, st)))
+            (st.peer_pk == t.peer_pk
+                && st.function_name == t.fn_name
+                && st.service_id == t.service_id
+                && st.json_path == t.json_path
+                && auth)
+                .ok_or_else(|| {
+                    Unauthorized(format!(
+                        "Tetraplet did not pass the check. Expected: {:?}, actual: {:?}",
+                        t, st
+                    ))
+                })
         }
     }
 }

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-use crate::service_api::{EmptyServiceResult, AuthResult};
 use crate::service_api::ExistsServiceResult;
 use crate::service_api::GetUsersServiceResult;
+use crate::service_api::{AuthResult, EmptyServiceResult};
 use crate::user::User;
 use crate::Result;
 

@@ -17,9 +17,9 @@
 use crate::message::Message;
 use crate::Result;
 
-use once_cell::sync::{OnceCell};
+use crate::utils::{u64_to_usize, usize_to_u64};
+use once_cell::sync::OnceCell;
 use parking_lot::Mutex;
-use crate::utils::{usize_to_u64, u64_to_usize};
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Tetraplet {
@@ -32,7 +32,7 @@ pub struct Tetraplet {
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Data {
     messages: Vec<Message>,
-    tetraplet: Option<Tetraplet>
+    tetraplet: Option<Tetraplet>,
 }
 
 static INSTANCE: OnceCell<Mutex<Data>> = OnceCell::new();
@@ -42,9 +42,7 @@ pub fn init() -> Result<()> {
 }
 
 fn get_data() -> &'static Mutex<Data> {
-    INSTANCE.get_or_init(|| {
-        <_>::default()
-    })
+    INSTANCE.get_or_init(|| <_>::default())
 }
 
 pub fn add_message(msg: String) -> Result<u64> {
@@ -54,15 +52,21 @@ pub fn add_message(msg: String) -> Result<u64> {
 
     data.messages.push(Message { id, body: msg });
 
-    return Ok(id)
-
+    return Ok(id);
 }
 
 pub fn get_messages_with_limit(limit: u64) -> Result<Vec<Message>> {
     let data = get_data().lock();
     let limit = u64_to_usize(limit)?;
 
-    let msgs: Vec<Message> = data.messages.to_vec().iter().rev().take(limit).map(|msg| msg.clone()).collect();
+    let msgs: Vec<Message> = data
+        .messages
+        .to_vec()
+        .iter()
+        .rev()
+        .take(limit)
+        .map(|msg| msg.clone())
+        .collect();
 
     Ok(msgs)
 }

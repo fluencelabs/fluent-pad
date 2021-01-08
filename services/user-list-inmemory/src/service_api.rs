@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+use crate::errors::UserListError;
 use crate::storage_api::*;
 use crate::user::User;
 use crate::Result;
 use fluence::{fce, CallParameters};
-use crate::errors::UserListError;
 
 pub const SUCCESS_CODE: i32 = 0;
 
@@ -99,6 +99,12 @@ fn check_auth() -> Result<()> {
 
     let existed = get_user_by_peer_id(init_peer_id.clone())?.pop();
 
-    (init_peer_id == call_parameters.service_creator_peer_id || existed.is_some())
-        .ok_or_else(|| UserNotExist(format!("init_peer_id is {:?} and it is not existed or an owner. Owner: {:?}", &init_peer_id, &call_parameters.service_creator_peer_id)))
+    (init_peer_id == call_parameters.service_creator_peer_id || existed.is_some()).ok_or_else(
+        || {
+            UserNotExist(format!(
+                "init_peer_id is {:?} and it is not existed or an owner. Owner: {:?}",
+                &init_peer_id, &call_parameters.service_creator_peer_id
+            ))
+        },
+    )
 }

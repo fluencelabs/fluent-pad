@@ -15,8 +15,8 @@
  */
 
 use crate::message::Message;
-use crate::service_api::{AddServiceResult, EmptyResult};
 use crate::service_api::GetMessagesServiceResult;
+use crate::service_api::{AddServiceResult, EmptyResult};
 use crate::Result;
 
 use std::convert::From;
