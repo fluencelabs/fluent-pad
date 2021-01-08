@@ -1,0 +1,18 @@
+[package]
+name = "history"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+[[bin]]
+name = "history"
+path = "src/main.rs"
+
+[dependencies]
+fluence = { version = "0.2.16", features = ["logger"] }
+
+anyhow = "1.0.31"
+boolinator = "2.4.0"
+log = "0.4.8"
+once_cell = "1.4.1"
+parking_lot = "0.11.1"

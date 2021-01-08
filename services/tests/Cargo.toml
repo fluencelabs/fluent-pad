@@ -1,0 +1,15 @@
+[package]
+name = "services-test"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+[[bin]]
+name = "services_test"
+path = "src/main.rs"
+
+[dev-dependencies]
+fluence-app-service = "0.1.28"
+uuid = { version = "0.8.1", features = ["v4"] }
+serde = "1.0.117"
+serde_json = "1.0.59"
