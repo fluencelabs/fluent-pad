@@ -8,17 +8,12 @@ Fluent-pad is a collaborative code and text editor built with Fluence stack
 
 ## How to run
 
-To run app in the development mode use:
+**TBD**
 
-    npm start
-
-To run tests in the interactive watch mode use:
-
-    npm test
-
-To make a production build use:
-
-    npm run build
+- Build services
+- Deploy
+- Build client
+- Run
 
 # Fluence stack
 
