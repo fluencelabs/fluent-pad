@@ -14,20 +14,33 @@
  * limitations under the License.
  */
 
-mod errors;
-mod results;
-mod service_api;
-mod storage_api;
-mod user;
+use crate::user::User;
+use fluence::fce;
 
-use fluence::WasmLoggerBuilder;
-
-pub(crate) type Result<T> = std::result::Result<T, errors::UserListError>;
-
-pub fn main() {
-    // instantiate logger
-    WasmLoggerBuilder::new()
-        .with_log_level(log::Level::Info)
-        .build()
-        .unwrap();
+#[fce]
+pub struct GetUsersServiceResult {
+    pub ret_code: i32,
+    pub err_msg: String,
+    pub users: Vec<User>,
 }
+
+#[fce]
+pub struct EmptyServiceResult {
+    pub ret_code: i32,
+    pub err_msg: String,
+}
+
+#[fce]
+pub struct ExistsServiceResult {
+    pub ret_code: i32,
+    pub err_msg: String,
+    pub is_exists: bool,
+}
+
+#[fce]
+pub struct AuthResult {
+    pub ret_code: i32,
+    pub err_msg: String,
+    pub is_authenticated: bool,
+}
+

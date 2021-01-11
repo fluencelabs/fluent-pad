@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-use crate::service_api::ExistsServiceResult;
-use crate::service_api::GetUsersServiceResult;
-use crate::service_api::{AuthResult, EmptyServiceResult};
 use crate::user::User;
 use crate::Result;
 
 use std::convert::From;
 use std::error::Error;
+use crate::results::{EmptyServiceResult, AuthResult, GetUsersServiceResult, ExistsServiceResult};
 
 #[derive(Debug)]
 pub enum UserListError {
@@ -70,7 +68,7 @@ impl From<Result<()>> for EmptyServiceResult {
 impl From<Result<()>> for AuthResult {
     fn from(result: Result<()>) -> Self {
         match result {
-            Ok(users) => Self {
+            Ok(_) => Self {
                 ret_code: crate::service_api::SUCCESS_CODE,
                 err_msg: String::new(),
                 is_authenticated: true,

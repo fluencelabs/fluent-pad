@@ -23,10 +23,6 @@ use std::collections::HashMap;
 
 static INSTANCE: OnceCell<Mutex<HashMap<String, User>>> = OnceCell::new();
 
-pub fn init() -> Result<()> {
-    Ok(())
-}
-
 fn get_data() -> &'static Mutex<HashMap<String, User>> {
     INSTANCE.get_or_init(|| <_>::default())
 }

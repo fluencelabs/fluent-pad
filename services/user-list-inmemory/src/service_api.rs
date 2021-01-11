@@ -14,37 +14,27 @@
  * limitations under the License.
  */
 
-use crate::errors::UserListError;
 use crate::storage_api::*;
 use crate::user::User;
 use crate::Result;
 use fluence::{fce, CallParameters};
+use crate::results::{GetUsersServiceResult, ExistsServiceResult, AuthResult, EmptyServiceResult};
 
 pub const SUCCESS_CODE: i32 = 0;
 
-#[fce]
-pub struct GetUsersServiceResult {
-    pub ret_code: i32,
-    pub err_msg: String,
-    pub users: Vec<User>,
-}
-
+// get all users
 #[fce]
 fn get_users() -> GetUsersServiceResult {
     get_all_users().into()
 }
 
+// get user by peer_id
 #[fce]
 fn get_user(peer_id: String) -> GetUsersServiceResult {
     get_user_by_peer_id(peer_id).into()
 }
 
-#[fce]
-pub struct EmptyServiceResult {
-    pub ret_code: i32,
-    pub err_msg: String,
-}
-
+// add a user too the service
 #[fce]
 fn join(user: User) -> EmptyServiceResult {
     fn add_impl(user: User) -> Result<()> {
@@ -55,6 +45,7 @@ fn join(user: User) -> EmptyServiceResult {
     add_impl(user).into()
 }
 
+// delete a user from the service
 #[fce]
 fn delete(peer_id: String) -> EmptyServiceResult {
     fn delete_impl(peer_id: String) -> Result<()> {
@@ -66,30 +57,19 @@ fn delete(peer_id: String) -> EmptyServiceResult {
     delete_impl(peer_id).into()
 }
 
+// check if a user is exists in the service
 #[fce]
-pub struct ExistsServiceResult {
-    pub ret_code: i32,
-    pub err_msg: String,
-    pub is_exists: bool,
+fn is_exists(peer_id: String) -> ExistsServiceResult {
+    user_exists(peer_id).into()
 }
 
-#[fce]
-fn is_exists(user_name: String) -> ExistsServiceResult {
-    user_exists(user_name).into()
-}
-
-#[fce]
-pub struct AuthResult {
-    pub ret_code: i32,
-    pub err_msg: String,
-    pub is_authenticated: bool,
-}
-
+// check if a caller is authenticated in this service
 #[fce]
 fn is_authenticated() -> AuthResult {
     check_auth().into()
 }
 
+// return an error if request is not authenticated
 fn check_auth() -> Result<()> {
     use crate::errors::UserListError::UserNotExist;
     use boolinator::Boolinator;
