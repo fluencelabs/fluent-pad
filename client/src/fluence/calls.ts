@@ -14,7 +14,7 @@ export const joinRoom = async () => {
 
     const data = new Map();
 
-    return await fluenceClient.fetch<User[]>(script, data);
+    return await fluenceClient.fetch<User[]>(script, [], data);
 };
 
 export const leaveRoom = async () => {
@@ -25,5 +25,5 @@ export const leaveRoom = async () => {
 
     const data = new Map();
 
-    return await fluenceClient.fetch<void>(script, data);
+    return await fluenceClient.fetch<void>(script, [], data);
 };

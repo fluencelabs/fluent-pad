@@ -18,7 +18,7 @@ function App() {
     return (
         <div className="App">
             <header className="App-header">
-                <label>nickName</label>
+                <label>{nickName}</label>
                 <input
                     type="text"
                     onChange={(e) => {
