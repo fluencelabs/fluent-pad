@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+use crate::results::{AuthResult, EmptyServiceResult, ExistsServiceResult, GetUsersServiceResult};
 use crate::storage_api::*;
 use crate::user::User;
 use crate::Result;
 use fluence::{fce, CallParameters};
-use crate::results::{GetUsersServiceResult, ExistsServiceResult, AuthResult, EmptyServiceResult};
 
 pub const SUCCESS_CODE: i32 = 0;
 

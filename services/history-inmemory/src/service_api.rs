@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-use crate::message::Message;
 use crate::storage_api::*;
 
+use crate::results::{AddServiceResult, EmptyResult, GetMessagesServiceResult};
 use crate::utils::u64_to_usize;
 use crate::Result;
 use fluence::{fce, CallParameters, SecurityTetraplet};
 
 pub const SUCCESS_CODE: i32 = 0;
 
-#[fce]
-pub struct AddServiceResult {
-    pub ret_code: i32,
-    pub err_msg: String,
-    pub msg_id: u64,
-}
-
+// add a message if authenticated, return an error if not
 #[fce]
 fn add(msg: String, auth: bool) -> AddServiceResult {
     fn add_impl(msg: String, auth: bool) -> Result<u64> {
@@ -40,35 +34,19 @@ fn add(msg: String, auth: bool) -> AddServiceResult {
     add_impl(msg, auth).into()
 }
 
-#[fce]
-pub struct GetMessagesServiceResult {
-    pub ret_code: i32,
-    pub err_msg: String,
-    pub messages: Vec<Message>,
-}
-
+// get all messages
 #[fce]
 fn get_all() -> GetMessagesServiceResult {
     get_all_messages().into()
 }
 
+// get last message
 #[fce]
 fn get_last(last: u64) -> GetMessagesServiceResult {
     get_messages_with_limit(last).into()
 }
 
-#[fce]
-pub struct EmptyResult {
-    pub ret_code: i32,
-    pub err_msg: String,
-}
-
-#[fce]
-pub fn get_current_tetraplet(auth: bool) -> Vec<Vec<SecurityTetraplet>> {
-    let call_parameters: CallParameters = fluence::get_call_parameters();
-    call_parameters.tetraplets
-}
-
+// set tetraplet to check on the authentication process. Only the service owner could set it
 #[fce]
 pub fn set_tetraplet(
     peer_id: String,
@@ -84,6 +62,7 @@ pub fn set_tetraplet(
     set_impl(peer_id, service_id, fn_name, path).into()
 }
 
+// check if a calles is an owner of the service
 pub fn is_owner() -> Result<()> {
     use crate::errors::HistoryError::Unauthorized;
     use boolinator::Boolinator;
@@ -95,6 +74,7 @@ pub fn is_owner() -> Result<()> {
         .ok_or_else(|| Unauthorized("This operation could be processed only by owner.".to_string()))
 }
 
+// check if a caller is authenticated
 pub fn is_authenticated(auth: bool, index: u64) -> Result<()> {
     use crate::errors::HistoryError::Unauthorized;
     use boolinator::Boolinator;

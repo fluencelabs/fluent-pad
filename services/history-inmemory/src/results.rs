@@ -14,32 +14,25 @@
  * limitations under the License.
  */
 
-use crate::user::User;
+use crate::message::Message;
 use fluence::fce;
 
 #[fce]
-pub struct GetUsersServiceResult {
+pub struct AddServiceResult {
     pub ret_code: i32,
     pub err_msg: String,
-    pub users: Vec<User>,
+    pub msg_id: u64,
 }
 
 #[fce]
-pub struct EmptyServiceResult {
+pub struct GetMessagesServiceResult {
     pub ret_code: i32,
     pub err_msg: String,
+    pub messages: Vec<Message>,
 }
 
 #[fce]
-pub struct ExistsServiceResult {
+pub struct EmptyResult {
     pub ret_code: i32,
     pub err_msg: String,
-    pub is_exists: bool,
-}
-
-#[fce]
-pub struct AuthResult {
-    pub ret_code: i32,
-    pub err_msg: String,
-    pub is_authenticated: bool,
 }

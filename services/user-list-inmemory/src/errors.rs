@@ -17,9 +17,9 @@
 use crate::user::User;
 use crate::Result;
 
+use crate::results::{AuthResult, EmptyServiceResult, ExistsServiceResult, GetUsersServiceResult};
 use std::convert::From;
 use std::error::Error;
-use crate::results::{EmptyServiceResult, AuthResult, GetUsersServiceResult, ExistsServiceResult};
 
 #[derive(Debug)]
 pub enum UserListError {
