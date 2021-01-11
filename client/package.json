@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@fluencelabs/fluence": "^0.8.0-big-refactoring.1",
+    "@fluencelabs/fluence": "^0.8.0-big-refactoring.5",
     "@fluencelabs/fluence-network-environment": "^1.0.5",
     "@testing-library/jest-dom": "^5.11.6",
     "@testing-library/react": "^11.2.2",
