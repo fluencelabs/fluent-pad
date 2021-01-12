@@ -2,7 +2,7 @@ Use [proto-distributor](https://github.com/fluencelabs/proto-distributor) to upl
 
 ## Deploy and test
 Step-by-step: 
-
+- install `fce` if needed. [Documentation](https://fluence-labs.readme.io/docs/how-to-develop-a-module#setting-up)
 - build scripts and copy fresh artifacts to `artifacts` directory by a script:
 ```shell
 cd services
