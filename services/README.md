@@ -30,7 +30,7 @@ node -r esm . create_service -i history -s 7sHe8vxCo4BkdPNPdb8f2T8CJMgTmSvBTmeqt
 ```
 - last two command will return service ids, we need to store it somewhere
 ```shell
-# user-list a38a396a-2b3d-4ef5-8b8b-ed448670bcfe
+# user-list d4506f7d-be4a-4332-87b2-eb530f350861
 # history d9abbacf-6ee2-49e5-9683-536a5c931fa1
 ```
 Service ids changed per every service creation.
@@ -48,7 +48,7 @@ More about `aquamarine` you can find [here](https://fluence-labs.readme.io/docs/
 
 Command to send script:
 ```shell
-node -r esm . run_air -p path/to/script -d '{"userlist":"a38a396a-2b3d-4ef5-8b8b-ed448670bcfe","history":"d9abbacf-6ee2-49e5-9683-536a5c931fa1","user":{"peer_id":"12D3KooWSaSTAV7ftrN8f5UXkB9MYnFtdpAJpgUZbV7r2XpfVsF2","relay_id":"","name":"some_name"}}' -s 7sHe8vxCo4BkdPNPdb8f2T8CJMgTmSvBTmeqtH9QWrar
+node -r esm . run_air -p path/to/script -d '{"userlist":"d4506f7d-be4a-4332-87b2-eb530f350861","history":"d9abbacf-6ee2-49e5-9683-536a5c931fa1","user":{"peer_id":"12D3KooWSaSTAV7ftrN8f5UXkB9MYnFtdpAJpgUZbV7r2XpfVsF2","relay_id":"","name":"some_name"}}' -s 7sHe8vxCo4BkdPNPdb8f2T8CJMgTmSvBTmeqtH9QWrar
 ```
 - add a tetraplet by a creator to a history service. `12D3KooWBUJifCTgaxAUrcM9JysqCcS4CS8tiYH5hExbdWCAoNwb` is a peer id of a node where service deployed
 
@@ -64,7 +64,7 @@ Script:
 ```
 Command:
 ```shell
-ode -r esm . run_air -p /path/to/script -d '{"userlist":"a38a396a-2b3d-4ef5-8b8b-ed448670bcfe","history":"d9abbacf-6ee2-49e5-9683-536a5c931fa1", "json_path":"$.[\"is_authenticated\"]"}' -s 7sHe8vxCo4BkdPNPdb8f2T8CJMgTmSvBTmeqtH9QWrar
+ode -r esm . run_air -p /path/to/script -d '{"userlist":"d4506f7d-be4a-4332-87b2-eb530f350861","history":"d9abbacf-6ee2-49e5-9683-536a5c931fa1", "json_path":"$.[\"is_authenticated\"]"}' -s 7sHe8vxCo4BkdPNPdb8f2T8CJMgTmSvBTmeqtH9QWrar
 ```
 - A second user can auth and add messages after
 ```shell
@@ -80,6 +80,6 @@ ode -r esm . run_air -p /path/to/script -d '{"userlist":"a38a396a-2b3d-4ef5-8b8b
      )))
 ```
 ```shell
-node -r esm . run_air -p path/to-script -d '{"userlist":"a38a396a-2b3d-4ef5-8b8b-ed448670bcfe","history":"d9abbacf-6ee2-49e5-9683-536a5c931fa1", "json_path":"$.[\"is_authenticated\"]", "msg":"Hi there!"}' -s G2r9BEsuaBHaDyMxGb2Bxv61PpH6r8UjKT564CdeU4BD
+node -r esm . run_air -p path/to-script -d '{"userlist":"d4506f7d-be4a-4332-87b2-eb530f350861","history":"d9abbacf-6ee2-49e5-9683-536a5c931fa1", "json_path":"$.[\"is_authenticated\"]", "msg":"Hi there!"}' -s G2r9BEsuaBHaDyMxGb2Bxv61PpH6r8UjKT564CdeU4BD
 ```
 - also, we can get user list by `get_users` method and messages by `get_all` method
