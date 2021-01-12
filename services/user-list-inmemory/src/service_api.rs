@@ -38,7 +38,8 @@ fn get_user(peer_id: String) -> GetUsersServiceResult {
 #[fce]
 fn join(user: User) -> EmptyServiceResult {
     fn add_impl(user: User) -> Result<()> {
-        check_auth()?;
+        // TODO uncomment to have an access to join method only for existing users
+        // check_auth()?;
         add_user(user)
     }
 
@@ -47,7 +48,7 @@ fn join(user: User) -> EmptyServiceResult {
 
 // delete a user from the service
 #[fce]
-fn delete(peer_id: String) -> EmptyServiceResult {
+fn leave(peer_id: String) -> EmptyServiceResult {
     fn delete_impl(peer_id: String) -> Result<()> {
         check_auth()?;
 
