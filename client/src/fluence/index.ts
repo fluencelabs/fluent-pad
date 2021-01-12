@@ -1,5 +1,8 @@
 import { FluenceClient, peerIdToSeed, generatePeerId, seedToPeerId } from '@fluencelabs/fluence';
 import { dev } from '@fluencelabs/fluence-network-environment';
+import log from 'loglevel';
+
+log.setLevel('error');
 
 const privKeyStorageKey = 'privKey';
 
