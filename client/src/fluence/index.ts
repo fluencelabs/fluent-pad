@@ -1,10 +1,15 @@
 import { FluenceClient, peerIdToSeed, generatePeerId, seedToPeerId } from '@fluencelabs/fluence';
-import { faasNetHttps } from '@fluencelabs/fluence-network-environment';
+import { dev } from '@fluencelabs/fluence-network-environment';
 
 const privKeyStorageKey = 'privKey';
 
 // TODO:: security matters
 const getPrivKey = async () => {
+    // return '7sHe8vxCo4BkdPNPdb8f2T8CJMgTmSvBTmeqtH9QWrar';
+    const peerId = await generatePeerId();
+    const key = peerIdToSeed(peerId);
+    return key;
+
     if (localStorage.getItem(privKeyStorageKey) === null) {
         const peerId = await generatePeerId();
         const key = peerIdToSeed(peerId);
@@ -21,7 +26,7 @@ export const connect = async () => {
         return fluenceClient;
     }
 
-    const node = faasNetHttps[0];
+    const node = dev[0];
     const key = await getPrivKey();
     const peerId = await seedToPeerId(key);
     const c = new FluenceClient(peerId);
