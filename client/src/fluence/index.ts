@@ -4,22 +4,11 @@ import log from 'loglevel';
 
 log.setLevel('error');
 
-const privKeyStorageKey = 'privKey';
-
-// TODO:: security matters
 const getPrivKey = async () => {
     // return '7sHe8vxCo4BkdPNPdb8f2T8CJMgTmSvBTmeqtH9QWrar';
     const peerId = await generatePeerId();
     const key = peerIdToSeed(peerId);
     return key;
-
-    if (localStorage.getItem(privKeyStorageKey) === null) {
-        const peerId = await generatePeerId();
-        const key = peerIdToSeed(peerId);
-        localStorage.setItem(privKeyStorageKey, key);
-    }
-
-    return localStorage.getItem(privKeyStorageKey)!;
 };
 
 export let fluenceClient: FluenceClient;
