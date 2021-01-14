@@ -1,6 +1,4 @@
 import { FluenceClient } from '@fluencelabs/fluence';
-import { idText } from 'typescript';
-import { fluenceClient } from '.';
 import {
     fluentPadServiceId,
     historyNodePid,
@@ -25,7 +23,7 @@ export interface User {
     name: string;
 }
 
-export interface Message {
+export interface Entry {
     id: number;
     body: string;
 }
@@ -34,8 +32,8 @@ interface GetUsersResult extends ServiceResult {
     users: Array<User>;
 }
 
-interface GetMessagesResult extends ServiceResult {
-    messages: Message[];
+interface GetEntries extends ServiceResult {
+    entries: Entry[];
 }
 
 const throwIfError = (result: ServiceResult) => {
@@ -209,7 +207,7 @@ export const getHistory = async (client: FluenceClient) => {
     let getHistoryAir = `
     (seq
         (call userlistNode (userlist "is_authenticated") [] token)
-        (call historyNode (history "get_all") [token.$.is_authenticated] messages)
+        (call historyNode (history "get_all") [token.$.is_authenticated] entries)
     )
 `;
 
@@ -219,12 +217,12 @@ export const getHistory = async (client: FluenceClient) => {
     data.set('userlistNode', userListNodePid);
     data.set('historyNode', historyNodePid);
 
-    const [result] = await client.fetch<[GetMessagesResult]>(getHistoryAir, ['messages'], data);
+    const [result] = await client.fetch<[GetEntries]>(getHistoryAir, ['entries'], data);
     throwIfError(result);
-    return result.messages;
+    return result.entries;
 };
 
-export const addMessage = async (client: FluenceClient, messageBody: string) => {
+export const addEntry = async (client: FluenceClient, entry: string) => {
     const particle = new Particle(
         `
         (seq
@@ -234,12 +232,12 @@ export const addMessage = async (client: FluenceClient, messageBody: string) => 
                 (seq 
                     (call userlistNode (userlist "get_users") [] allUsers)
                     (seq
-                        (call node (history "add") [message token.$.["is_authenticated"]])
+                        (call node (history "add") [entry token.$.["is_authenticated"]])
                         (fold allUsers.$.users! u
                             (par
                                 (seq
                                     (call u.$.relay_id ("op" "identity") [])
-                                    (call u.$.peer_id (fluentPadServiceId notifyTextUpdate) [message token.$.["is_authenticated"]])
+                                    (call u.$.peer_id (fluentPadServiceId notifyTextUpdate) [entry token.$.["is_authenticated"]])
                                 )
                                 (next u)
                             )
@@ -253,7 +251,7 @@ export const addMessage = async (client: FluenceClient, messageBody: string) => 
         {
             userlistNode: userListNodePid,
             historyNode: historyNodePid,
-            message: messageBody,
+            entry: entry,
             userlist: userListServiceId,
             history: historyServiceId,
             myRelay: client.relayPeerID.toB58String(),

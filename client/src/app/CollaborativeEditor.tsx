@@ -42,24 +42,24 @@ const getUpdatedDocFromText = (oldDoc: TextDoc | null, newText: string) => {
     return newDoc;
 };
 
-const parseState = (message: calls.Message) => {
+const parseState = (entry: calls.Entry) => {
     try {
-        const obj = JSON.parse(message.body);
+        const obj = JSON.parse(entry.body);
         if (obj.fluentPadState) {
             return Automerge.load(obj.fluentPadState) as TextDoc;
         }
 
         return null;
     } catch (e) {
-        console.log('couldnt parse state format: ' + message.body);
+        console.log('couldnt parse state format: ' + entry.body);
         return null;
     }
 };
 
-const applyStates = (startingDoc: TextDoc | null, messages: calls.Message[]) => {
+const applyStates = (startingDoc: TextDoc | null, entries: calls.Entry[]) => {
     let res = startingDoc;
-    for (let m of messages) {
-        const state = parseState(m) as TextDoc;
+    for (let entry of entries) {
+        const state = parseState(entry) as TextDoc;
         if (state) {
             if (!res) {
                 res = state;
@@ -107,12 +107,12 @@ export const CollaborativeEditor = () => {
 
         // don't block
         setImmediate(async () => {
-            const message = {
+            const entry = {
                 fluentPadState: Automerge.save(newDoc),
             };
-            const messageStr = JSON.stringify(message);
+            const entryStr = JSON.stringify(entry);
 
-            await calls.addMessage(client, messageStr);
+            await calls.addEntry(client, entryStr);
         });
     };
 

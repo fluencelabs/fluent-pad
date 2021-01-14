@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { connect } from 'src/fluence';
 
 import './App.scss';
-import { FluenceClientContext, useFluenceClient } from './FluenceClientContext';
+import { FluenceClientContext } from './FluenceClientContext';
 import { UserList } from './UserList';
 import * as calls from 'src/fluence/calls';
 import { CollaborativeEditor } from './CollaborativeEditor';
@@ -70,7 +70,7 @@ const App = () => {
 
                 <div className="wrapper">
                     <div>{isInRoom && client && <CollaborativeEditor />}</div>
-                    {/* <div>{isInRoom && client && <UserList selfName={nickName} />}</div> */}
+                    <div>{isInRoom && client && <UserList selfName={nickName} />}</div>
                 </div>
             </div>
         </FluenceClientContext.Provider>
