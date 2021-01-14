@@ -4,6 +4,7 @@ import {
     fluentPadServiceId,
     historyServiceId,
     notifyOnlineFnName,
+    notifyTextUpdateFnName,
     notifyUserAddedFnName,
     notifyUserRemovedFnName,
     servicesNodePid,
@@ -202,22 +203,7 @@ export const leaveRoom = async (client: FluenceClient) => {
     await sendParticle(client, particle);
 };
 
-export const removeUser = async (userPeerId: string) => {
-    let removeUserAir = `
-        (call node (userlist "leave") [userPeerId] callResult)
-    `;
-
-    const data = new Map();
-    data.set('userPeerId', userPeerId);
-    data.set('userlist', userListServiceId);
-    data.set('node', servicesNodePid);
-
-    const [result] = await fluenceClient.fetch<[ServiceResult]>(removeUserAir, ['callResult'], data);
-    throwIfError(result);
-    return result;
-};
-
-export const getHistory = async () => {
+export const getHistory = async (client: FluenceClient) => {
     let getHistoryAir = `
     (seq
         (call node (userlist "is_authenticated") [] token)
@@ -230,73 +216,47 @@ export const getHistory = async () => {
     data.set('history', historyServiceId);
     data.set('node', servicesNodePid);
 
-    const [result] = await fluenceClient.fetch<[GetMessagesResult]>(getHistoryAir, ['messages'], data);
+    const [result] = await client.fetch<[GetMessagesResult]>(getHistoryAir, ['messages'], data);
     throwIfError(result);
     return result.messages;
 };
 
-export const getCurrentUsers = async () => {
-    let getUsersAir = `
-        (call node (userlist "get_users") [] currentUsers)
-    `;
+export const addMessage = async (client: FluenceClient, messageBody: string) => {
+    const particle = new Particle(
+        `
+        (seq
+            (call myRelay ("op" "identity") [])
+            (seq 
+                (call node (userlist "is_authenticated") [] token)
+                (seq
+                    (call node (history "add") [message token.$.["is_authenticated"]])
+                    (seq
+                        (call node (userlist "get_users") [] allUsers)
+                        (fold allUsers.$.users! u
+                            (par
+                                (seq
+                                    (call u.$.relay_id ("op" "identity") [])
+                                    (call u.$.peer_id (fluentPadServiceId notifyTextUpdate) [message token.$.["is_authenticated"]])
+                                )
+                                (next u)
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        `,
+        {
+            node: servicesNodePid,
+            message: messageBody,
+            userlist: userListServiceId,
+            history: historyServiceId,
+            myRelay: client.relayPeerID.toB58String(),
+            myPeerId: client.selfPeerId.toB58String(),
+            fluentPadServiceId: fluentPadServiceId,
+            notifyTextUpdate: notifyTextUpdateFnName,
+        },
+    );
 
-    const data = new Map();
-    data.set('userlist', userListServiceId);
-    data.set('node', servicesNodePid);
-
-    const [result] = await fluenceClient.fetch<[GetUsersResult]>(getUsersAir, ['currentUsers'], data);
-    throwIfError(result);
-    return result.users;
-};
-
-export const addMessage = async (messageBody: string) => {
-    let addMessageAir = `
-    (seq
-        (call node (userlist "is_authenticated") [] token)
-        (call node (history "add") [message token.$.["is_authenticated"]] callResult)
-    )
-`;
-
-    const data = new Map();
-    data.set('message', messageBody);
-    data.set('userlist', userListServiceId);
-    data.set('history', historyServiceId);
-    data.set('node', servicesNodePid);
-
-    const [result] = await fluenceClient.fetch<[ServiceResult]>(addMessageAir, ['callResult'], data);
-    if (result.ret_code !== 0) {
-        throw new Error(result.err_msg);
-    }
-    return result;
-};
-
-export const notifyPeer = async <T>(peerId: string, peerRelayId: string, channel: string, event: string, data?: T) => {
-    let addMessageAir = `
-    (seq
-        (call peerRelayId ("op" "identity") [])
-        (call peerId (channel event) [${data ? 'data' : ''}])
-    )
-`;
-
-    const particleData = new Map();
-    particleData.set('peerId', peerId);
-    particleData.set('peerRelayId', peerRelayId);
-    particleData.set('channel', channel);
-    particleData.set('event', event);
-    if (data) {
-        particleData.set('data', data);
-    }
-
-    await fluenceClient.fireAndForget(addMessageAir, particleData);
-};
-
-export const notifyPeers = async <T>(
-    peers: Array<{ peer_id: string; relay_id: string; name: string }>,
-    channel: string,
-    event: string,
-    data?: T,
-) => {
-    for (let p of peers) {
-        notifyPeer(p.peer_id, p.relay_id, channel, event, data);
-    }
+    await sendParticle(client, particle);
 };

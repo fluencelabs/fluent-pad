@@ -6,6 +6,7 @@ import './App.scss';
 import { FluenceClientContext, useFluenceClient } from './FluenceClientContext';
 import { UserList } from './UserList';
 import * as calls from 'src/fluence/calls';
+import { CollaborativeEditor } from './CollaborativeEditor';
 
 const App = () => {
     const [client, setClient] = useState<FluenceClient | null>(null);
@@ -67,7 +68,10 @@ const App = () => {
                     </div>
                 </div>
 
-                <div>{isInRoom && client && <UserList selfName={nickName} />}</div>
+                <div className="wrapper">
+                    <div>{isInRoom && client && <CollaborativeEditor />}</div>
+                    {/* <div>{isInRoom && client && <UserList selfName={nickName} />}</div> */}
+                </div>
             </div>
         </FluenceClientContext.Provider>
     );
