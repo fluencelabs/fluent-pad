@@ -1,4 +1,4 @@
-import { createClient, FluenceClient } from '@fluencelabs/fluence';
+import { createClient, FluenceClient, subscribeToEvent } from '@fluencelabs/fluence';
 import { dev } from '@fluencelabs/fluence-network-environment';
 import React, { useEffect, useState } from 'react';
 
@@ -69,8 +69,8 @@ const App = () => {
                 </div>
 
                 <div className="wrapper">
-                    {/* <div>{isInRoom && client && <CollaborativeEditor />}</div> */}
-                    <div>{isInRoom && client && <UserList selfName={nickName} />}</div>
+                    <div>{isInRoom && client && <CollaborativeEditor />}</div>
+                    {/* <div>{isInRoom && client && <UserList selfName={nickName} />}</div> */}
                 </div>
             </div>
         </FluenceClientContext.Provider>

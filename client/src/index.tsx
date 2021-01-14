@@ -4,7 +4,8 @@ import './index.scss';
 import App from './app/App';
 import log from 'loglevel';
 
-log.setLevel(2);
+// log.setLevel('trace');
+log.setLevel('error');
 
 ReactDOM.render(
     <React.StrictMode>

@@ -42,16 +42,16 @@ const getUpdatedDocFromText = (oldDoc: TextDoc | null, newText: string) => {
     return newDoc;
 };
 
-const parseState = (entry: calls.Entry) => {
+const parseState = (entry: string) => {
     try {
-        const obj = JSON.parse(entry.body);
+        const obj = JSON.parse(entry);
         if (obj.fluentPadState) {
             return Automerge.load(obj.fluentPadState) as TextDoc;
         }
 
         return null;
     } catch (e) {
-        console.log('couldnt parse state format: ' + entry.body);
+        console.log('couldnt parse state format: ' + entry);
         return null;
     }
 };
@@ -59,7 +59,7 @@ const parseState = (entry: calls.Entry) => {
 const applyStates = (startingDoc: TextDoc | null, entries: calls.Entry[]) => {
     let res = startingDoc;
     for (let entry of entries) {
-        const state = parseState(entry) as TextDoc;
+        const state = parseState(entry.body) as TextDoc;
         if (state) {
             if (!res) {
                 res = state;
@@ -67,6 +67,12 @@ const applyStates = (startingDoc: TextDoc | null, entries: calls.Entry[]) => {
                 res = Automerge.merge(res, state);
             }
         }
+    }
+
+    if (res === null) {
+        res = Automerge.from({
+            value: new Automerge.Text(),
+        });
     }
 
     return res;
@@ -78,8 +84,12 @@ export const CollaborativeEditor = () => {
 
     useEffect(() => {
         const unsub1 = subscribeToEvent(client, fluentPadServiceId, notifyTextUpdateFnName, (args, tetraplets) => {
-            console.log(args, tetraplets);
-            // TODO
+            const [stateStr, isAuthorized] = args;
+            const state = parseState(stateStr);
+            if (state && text) {
+                const newDoc = Automerge.merge(text, state);
+                setText(newDoc);
+            }
         });
 
         // don't block

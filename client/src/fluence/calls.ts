@@ -257,7 +257,7 @@ export const addEntry = async (client: FluenceClient, entry: string) => {
                 (seq 
                     (call userlistNode (userlist "get_users") [] allUsers)
                     (seq
-                        (call node (history "add") [entry token.$.["is_authenticated"]])
+                        (call historyNode (history "add") [entry token.$.["is_authenticated"]])
                         (fold allUsers.$.users! u
                             (par
                                 (seq
@@ -284,6 +284,7 @@ export const addEntry = async (client: FluenceClient, entry: string) => {
             fluentPadServiceId: fluentPadServiceId,
             notifyTextUpdate: notifyTextUpdateFnName,
         },
+        99999999,
     );
 
     await sendParticle(client, particle);
