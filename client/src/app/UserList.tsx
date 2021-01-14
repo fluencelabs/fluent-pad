@@ -5,9 +5,9 @@ import {
     notifyUserAddedFnName,
     notifyUserRemovedFnName,
 } from 'src/fluence/constants';
-import { subscribeToEvent } from 'src/fluence/exApi';
 import { useFluenceClient } from './FluenceClientContext';
 import * as calls from 'src/fluence/calls';
+import { subscribeToEvent } from '@fluencelabs/fluence';
 
 interface User {
     id: string;
@@ -26,7 +26,7 @@ const turnUserAsOfflineCandidate = (u: User): User => {
 
 type PeerId = string;
 
-const refreshTimeoutMs = 7000;
+const refreshTimeoutMs = 2000;
 
 export const UserList = (props: { selfName: string }) => {
     const client = useFluenceClient()!;
@@ -111,20 +111,15 @@ export const UserList = (props: { selfName: string }) => {
         .map((x) => x[1])
         .sort((a, b) => a.name.localeCompare(b.name));
 
-    const onlineUsers = usersArray.filter((x) => x.isOnline);
-    const offlineUsers = usersArray.filter((x) => !x.isOnline);
-
     return (
         <div>
             <ul>
-                {onlineUsers.map((x) => (
+                {usersArray.map((x) => (
                     <li key={x.id}>
-                        {x.name} ({x.id} <span style={{ color: 'green' }}>(online)</span>)
-                    </li>
-                ))}
-                {offlineUsers.map((x) => (
-                    <li key={x.id}>
-                        {x.name} ({x.id} <span style={{ color: 'red' }}>(offline)</span>)
+                        {x.name}{' '}
+                        <span style={{ color: x.isOnline ? 'green' : 'red' }}>
+                            ({x.isOnline ? 'online' : 'offline'})
+                        </span>
                     </li>
                 ))}
             </ul>

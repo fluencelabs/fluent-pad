@@ -1,4 +1,4 @@
-import { FluenceClient } from '@fluencelabs/fluence';
+import { FluenceClient, Particle, sendParticle } from '@fluencelabs/fluence';
 import {
     fluentPadServiceId,
     historyNodePid,
@@ -10,7 +10,6 @@ import {
     userListNodePid,
     userListServiceId,
 } from './constants';
-import { Particle, sendParticle } from './exApi';
 
 export interface ServiceResult {
     ret_code: number;

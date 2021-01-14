@@ -2,9 +2,9 @@ import * as Automerge from 'automerge';
 import DiffMatchPatch from 'diff-match-patch';
 import { useEffect, useState } from 'react';
 import { fluentPadServiceId, notifyTextUpdateFnName } from 'src/fluence/constants';
-import { subscribeToEvent } from 'src/fluence/exApi';
 import { useFluenceClient } from './FluenceClientContext';
 import * as calls from 'src/fluence/calls';
+import { subscribeToEvent } from '@fluencelabs/fluence';
 
 interface TextDoc {
     value: Automerge.Text;

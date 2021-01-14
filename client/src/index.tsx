@@ -1,11 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.scss';
-import App1 from './app/App1';
+import App from './app/App';
+import log from 'loglevel';
+
+log.setLevel(2);
 
 ReactDOM.render(
     <React.StrictMode>
-        <App1 />
+        <App />
     </React.StrictMode>,
     document.getElementById('root'),
 );

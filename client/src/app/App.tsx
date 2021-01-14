@@ -1,6 +1,6 @@
-import { FluenceClient } from '@fluencelabs/fluence';
+import { createClient, FluenceClient } from '@fluencelabs/fluence';
+import { dev } from '@fluencelabs/fluence-network-environment';
 import React, { useEffect, useState } from 'react';
-import { connect } from 'src/fluence';
 
 import './App.scss';
 import { FluenceClientContext } from './FluenceClientContext';
@@ -15,7 +15,7 @@ const App = () => {
 
     useEffect(() => {
         const fn = async () => {
-            const c = await connect();
+            const c = await createClient(dev[0]);
             setClient(c);
         };
         fn();
@@ -69,7 +69,7 @@ const App = () => {
                 </div>
 
                 <div className="wrapper">
-                    <div>{isInRoom && client && <CollaborativeEditor />}</div>
+                    {/* <div>{isInRoom && client && <CollaborativeEditor />}</div> */}
                     <div>{isInRoom && client && <UserList selfName={nickName} />}</div>
                 </div>
             </div>
