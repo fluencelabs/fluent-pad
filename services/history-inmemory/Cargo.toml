@@ -9,7 +9,7 @@ name = "history"
 path = "src/main.rs"
 
 [dependencies]
-fluence = { version = "0.2.16", features = ["logger"] }
+fluence = { version = "0.2.18", features = ["logger"] }
 
 anyhow = "1.0.31"
 boolinator = "2.4.0"

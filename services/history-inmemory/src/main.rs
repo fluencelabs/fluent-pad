@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-mod entry;
+mod history_entry;
 mod errors;
 mod results;
 mod service_api;

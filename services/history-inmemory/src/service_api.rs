@@ -16,7 +16,7 @@
 
 use crate::storage_api::*;
 
-use crate::entry::Entry;
+use crate::history_entry::HistoryEntry;
 use crate::results::{AddServiceResult, EmptyResult, GetEntriesServiceResult};
 use crate::utils::u64_to_usize;
 use crate::Result;
@@ -38,7 +38,7 @@ fn add(entry: String, auth: bool) -> AddServiceResult {
 // get all entries
 #[fce]
 fn get_all(auth: bool) -> GetEntriesServiceResult {
-    fn get_all_impl(auth: bool) -> Result<Vec<Entry>> {
+    fn get_all_impl(auth: bool) -> Result<Vec<HistoryEntry>> {
         is_authenticated(auth, 0)?;
         get_all_entries()
     }
@@ -48,7 +48,7 @@ fn get_all(auth: bool) -> GetEntriesServiceResult {
 // get last entry
 #[fce]
 fn get_last(last: u64, auth: bool) -> GetEntriesServiceResult {
-    fn get_last_impl(last: u64, auth: bool) -> Result<Vec<Entry>> {
+    fn get_last_impl(last: u64, auth: bool) -> Result<Vec<HistoryEntry>> {
         is_authenticated(auth, 1)?;
         get_entries_with_limit(last)
     }

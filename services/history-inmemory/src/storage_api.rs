@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::entry::Entry;
+use crate::history_entry::HistoryEntry;
 use crate::Result;
 
 use crate::utils::{u64_to_usize, usize_to_u64};
@@ -31,7 +31,7 @@ pub struct Tetraplet {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Data {
-    entries: Vec<Entry>,
+    entries: Vec<HistoryEntry>,
     tetraplet: Option<Tetraplet>,
 }
 
@@ -46,16 +46,16 @@ pub fn add_entry(entry: String) -> Result<u64> {
 
     let id = usize_to_u64(data.entries.len())?;
 
-    data.entries.push(Entry { id, body: entry });
+    data.entries.push(HistoryEntry { id, body: entry });
 
     return Ok(id);
 }
 
-pub fn get_entries_with_limit(limit: u64) -> Result<Vec<Entry>> {
+pub fn get_entries_with_limit(limit: u64) -> Result<Vec<HistoryEntry>> {
     let data = get_data().lock();
     let limit = u64_to_usize(limit)?;
 
-    let entries: Vec<Entry> = data
+    let entries: Vec<HistoryEntry> = data
         .entries
         .to_vec()
         .iter()
@@ -67,7 +67,7 @@ pub fn get_entries_with_limit(limit: u64) -> Result<Vec<Entry>> {
     Ok(entries)
 }
 
-pub fn get_all_entries() -> Result<Vec<Entry>> {
+pub fn get_all_entries() -> Result<Vec<HistoryEntry>> {
     let data = get_data().lock();
 
     Ok(data.entries.to_vec())

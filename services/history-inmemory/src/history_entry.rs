@@ -18,7 +18,7 @@ use fluence::fce;
 
 #[fce]
 #[derive(Clone, Debug, Default, Eq, PartialEq, Hash)]
-pub struct Entry {
+pub struct HistoryEntry {
     pub id: u64,
     pub body: String,
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::entry::Entry;
+use crate::history_entry::HistoryEntry;
 use crate::Result;
 
 use crate::results::{AddServiceResult, EmptyResult, GetEntriesServiceResult};
@@ -86,8 +86,8 @@ impl From<Result<()>> for EmptyResult {
     }
 }
 
-impl From<Result<Vec<Entry>>> for GetEntriesServiceResult {
-    fn from(result: Result<Vec<Entry>>) -> Self {
+impl From<Result<Vec<HistoryEntry>>> for GetEntriesServiceResult {
+    fn from(result: Result<Vec<HistoryEntry>>) -> Self {
         match result {
             Ok(entries) => Self {
                 ret_code: crate::service_api::SUCCESS_CODE,

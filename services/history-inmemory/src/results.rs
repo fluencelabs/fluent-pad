@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::entry::Entry;
+use crate::history_entry::HistoryEntry;
 use fluence::fce;
 
 #[fce]
@@ -28,7 +28,7 @@ pub struct AddServiceResult {
 pub struct GetEntriesServiceResult {
     pub ret_code: i32,
     pub err_msg: String,
-    pub entries: Vec<Entry>,
+    pub entries: Vec<HistoryEntry>,
 }
 
 #[fce]
