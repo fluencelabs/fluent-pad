@@ -35,7 +35,7 @@ const App = () => {
             return;
         }
 
-        await calls.leaveRoom(client);
+        await calls.leave(client);
         setIsInRoom(false);
     };
 

@@ -169,7 +169,7 @@ export const join = async (client: FluenceClient, nickName: string) => {
     return result.users;
 };
 
-export const leaveRoom = async (client: FluenceClient) => {
+export const leave = async (client: FluenceClient) => {
     const particle = new Particle(
         `
         (seq
