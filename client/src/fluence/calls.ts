@@ -1,4 +1,4 @@
-import { FluenceClient, Particle, sendParticle } from '@fluencelabs/fluence';
+import { FluenceClient, Particle, sendParticle, sendParticleAsFetch } from '@fluencelabs/fluence';
 import {
     fluentPadServiceId,
     historyNodePid,
@@ -149,20 +149,22 @@ export const getUserList = async (client: FluenceClient) => {
 };
 
 export const join = async (client: FluenceClient, nickName: string) => {
-    let joinAir = `
+    const particle = new Particle(
+        `
         (call userlistNode (userlist "join") [user] result)
-    `;
+    `,
+        {
+            user: {
+                name: nickName,
+                peer_id: client.selfPeerId.toB58String(),
+                relay_id: client.relayPeerID.toB58String(),
+            },
+            userlist: userListServiceId,
+            userlistNode: userListNodePid,
+        },
+    );
 
-    const data = new Map();
-    data.set('user', {
-        name: nickName,
-        peer_id: client.selfPeerId.toB58String(),
-        relay_id: client.relayPeerID.toB58String(),
-    });
-    data.set('userlist', userListServiceId);
-    data.set('userlistNode', userListNodePid);
-
-    const [result] = await client.fetch<[GetUsersResult]>(joinAir, ['result'], data);
+    const [result] = await sendParticleAsFetch(client, particle, ['result']);
     throwIfError(result);
     return result.users;
 };
@@ -203,20 +205,22 @@ export const leaveRoom = async (client: FluenceClient) => {
 };
 
 export const getHistory = async (client: FluenceClient) => {
-    let getHistoryAir = `
+    const particle = new Particle(
+        `
     (seq
         (call userlistNode (userlist "is_authenticated") [] token)
-        (call historyNode (history "get_all") [token.$.is_authenticated] entries)
+        (call historyNode (history "get_all") [token.$.["is_authenticated"]] entries)
     )
-`;
+`,
+        {
+            userlist: userListServiceId,
+            history: historyServiceId,
+            userlistNode: userListNodePid,
+            historyNode: historyNodePid,
+        },
+    );
 
-    const data = new Map();
-    data.set('userlist', userListServiceId);
-    data.set('history', historyServiceId);
-    data.set('userlistNode', userListNodePid);
-    data.set('historyNode', historyNodePid);
-
-    const [result] = await client.fetch<[GetEntries]>(getHistoryAir, ['entries'], data);
+    const [result] = await sendParticleAsFetch(client, particle, ['entries']);
     throwIfError(result);
     return result.entries;
 };
