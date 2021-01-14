@@ -1,13 +1,15 @@
 import { FluenceClient } from '@fluencelabs/fluence';
+import { idText } from 'typescript';
 import { fluenceClient } from '.';
 import {
     fluentPadServiceId,
+    historyNodePid,
     historyServiceId,
     notifyOnlineFnName,
     notifyTextUpdateFnName,
     notifyUserAddedFnName,
     notifyUserRemovedFnName,
-    servicesNodePid,
+    userListNodePid,
     userListServiceId,
 } from './constants';
 import { Particle, sendParticle } from './exApi';
@@ -48,7 +50,7 @@ export const updateOnlineStatuses = async (client: FluenceClient) => {
         (seq
             (call myRelay ("op" "identity") [])
             (seq
-                (call node (userlist "get_users") [] allUsers)
+                (call userlistNode (userlist "get_users") [] allUsers)
                 (fold allUsers.$.users! u
                     (par
                         (seq
@@ -71,7 +73,7 @@ export const updateOnlineStatuses = async (client: FluenceClient) => {
         )
         `,
         {
-            node: servicesNodePid,
+            userlistNode: userListNodePid,
             userlist: userListServiceId,
             myRelay: client.relayPeerID.toB58String(),
             myPeerId: client.selfPeerId.toB58String(),
@@ -90,7 +92,7 @@ export const notifySelfAdded = (client: FluenceClient, name: string) => {
         (seq
             (call myRelay ("op" "identity") [])
             (seq
-                (call node (userlist "get_users") [] allUsers)
+                (call userlistNode (userlist "get_users") [] allUsers)
                 (fold allUsers.$.users! u
                     (par
                         (seq
@@ -104,7 +106,7 @@ export const notifySelfAdded = (client: FluenceClient, name: string) => {
         )
         `,
         {
-            node: servicesNodePid,
+            userlistNode: userListNodePid,
             userlist: userListServiceId,
             myRelay: client.relayPeerID.toB58String(),
             myPeerId: client.selfPeerId.toB58String(),
@@ -127,16 +129,16 @@ export const getUserList = async (client: FluenceClient) => {
         (seq
             (call myRelay ("op" "identity") [])
             (seq
-                (call node (userlist "get_users") [] allUsers)
+                (call userlistNode (userlist "get_users") [] allUsers)
                 (seq 
                     (call myRelay ("op" "identity") [])
-                    (call myPeerId (fluentPadServiceId notifyUserAdded) [allUsers.$.users!])    
+                    (call myPeerId (fluentPadServiceId notifyUserAdded) [allUsers.$.users!])
                 )
             )
         )
         `,
         {
-            node: servicesNodePid,
+            userlistNode: userListNodePid,
             userlist: userListServiceId,
             myRelay: client.relayPeerID.toB58String(),
             myPeerId: client.selfPeerId.toB58String(),
@@ -149,9 +151,9 @@ export const getUserList = async (client: FluenceClient) => {
     await sendParticle(client, particle);
 };
 
-export const joinRoom = async (client: FluenceClient, nickName: string) => {
-    let joinRoomAir = `
-        (call node (userlist "join") [user] result)
+export const join = async (client: FluenceClient, nickName: string) => {
+    let joinAir = `
+        (call userlistNode (userlist "join") [user] result)
     `;
 
     const data = new Map();
@@ -161,9 +163,9 @@ export const joinRoom = async (client: FluenceClient, nickName: string) => {
         relay_id: client.relayPeerID.toB58String(),
     });
     data.set('userlist', userListServiceId);
-    data.set('node', servicesNodePid);
+    data.set('userlistNode', userListNodePid);
 
-    const [result] = await client.fetch<[GetUsersResult]>(joinRoomAir, ['result'], data);
+    const [result] = await client.fetch<[GetUsersResult]>(joinAir, ['result'], data);
     throwIfError(result);
     return result.users;
 };
@@ -174,9 +176,9 @@ export const leaveRoom = async (client: FluenceClient) => {
         (seq
             (call myRelay ("op" "identity") [])
             (seq 
-                (call node (userlist "leave") [myPeerId])
+                (call userlistNode (userlist "leave") [myPeerId])
                 (seq
-                    (call node (userlist "get_users") [] allUsers)
+                    (call userlistNode (userlist "get_users") [] allUsers)
                     (fold allUsers.$.users! u
                         (par
                             (seq
@@ -191,7 +193,7 @@ export const leaveRoom = async (client: FluenceClient) => {
         )
         `,
         {
-            node: servicesNodePid,
+            userlistNode: userListNodePid,
             userlist: userListServiceId,
             myRelay: client.relayPeerID.toB58String(),
             myPeerId: client.selfPeerId.toB58String(),
@@ -206,15 +208,16 @@ export const leaveRoom = async (client: FluenceClient) => {
 export const getHistory = async (client: FluenceClient) => {
     let getHistoryAir = `
     (seq
-        (call node (userlist "is_authenticated") [] token)
-        (call node (history "get_all") [] messages)
+        (call userlistNode (userlist "is_authenticated") [] token)
+        (call historyNode (history "get_all") [token.$.is_authenticated] messages)
     )
 `;
 
     const data = new Map();
     data.set('userlist', userListServiceId);
     data.set('history', historyServiceId);
-    data.set('node', servicesNodePid);
+    data.set('userlistNode', userListNodePid);
+    data.set('historyNode', historyNodePid);
 
     const [result] = await client.fetch<[GetMessagesResult]>(getHistoryAir, ['messages'], data);
     throwIfError(result);
@@ -226,12 +229,12 @@ export const addMessage = async (client: FluenceClient, messageBody: string) => 
         `
         (seq
             (call myRelay ("op" "identity") [])
-            (seq 
-                (call node (userlist "is_authenticated") [] token)
-                (seq
-                    (call node (history "add") [message token.$.["is_authenticated"]])
+            (seq
+                (call userlistNode (userlist "is_authenticated") [] token)
+                (seq 
+                    (call userlistNode (userlist "get_users") [] allUsers)
                     (seq
-                        (call node (userlist "get_users") [] allUsers)
+                        (call node (history "add") [message token.$.["is_authenticated"]])
                         (fold allUsers.$.users! u
                             (par
                                 (seq
@@ -246,8 +249,10 @@ export const addMessage = async (client: FluenceClient, messageBody: string) => 
             )
         )
         `,
+
         {
-            node: servicesNodePid,
+            userlistNode: userListNodePid,
+            historyNode: historyNodePid,
             message: messageBody,
             userlist: userListServiceId,
             history: historyServiceId,

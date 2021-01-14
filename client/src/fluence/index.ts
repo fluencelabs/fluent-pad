@@ -30,6 +30,11 @@ export const connect = async (): Promise<FluenceClient> => {
         return args;
     });
 
+    registerServiceFunction(c, 'op', 'alert', (args, _) => {
+        alert(args);
+        return args;
+    });
+
     await c.connect(node.multiaddr);
     fluenceClient = c;
     return fluenceClient;

@@ -26,7 +26,7 @@ const App = () => {
             return;
         }
 
-        await calls.joinRoom(client, nickName);
+        await calls.join(client, nickName);
         setIsInRoom(true);
     };
 
