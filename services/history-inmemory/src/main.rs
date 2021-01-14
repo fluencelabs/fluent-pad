@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-mod errors;
 mod entry;
+mod errors;
 mod results;
 mod service_api;
 mod storage_api;
 mod utils;
 
 use fluence::WasmLoggerBuilder;
-use storage_api::init;
 
 pub(crate) type Result<T> = std::result::Result<T, errors::HistoryError>;
 
@@ -31,9 +30,4 @@ pub fn main() {
         .with_log_level(log::Level::Info)
         .build()
         .unwrap();
-
-    match init() {
-        Ok(_) => log::info!("db created"),
-        Err(e) => log::error!("sqlite db creation failed: {}", e),
-    }
 }

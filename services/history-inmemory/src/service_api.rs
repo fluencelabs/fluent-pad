@@ -16,11 +16,11 @@
 
 use crate::storage_api::*;
 
+use crate::entry::Entry;
 use crate::results::{AddServiceResult, EmptyResult, GetEntriesServiceResult};
 use crate::utils::u64_to_usize;
 use crate::Result;
-use fluence::{fce, CallParameters, SecurityTetraplet};
-use crate::entry::Entry;
+use fluence::{fce, CallParameters};
 
 pub const SUCCESS_CODE: i32 = 0;
 

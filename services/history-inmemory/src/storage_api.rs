@@ -37,10 +37,6 @@ pub struct Data {
 
 static INSTANCE: OnceCell<Mutex<Data>> = OnceCell::new();
 
-pub fn init() -> Result<()> {
-    Ok(())
-}
-
 fn get_data() -> &'static Mutex<Data> {
     INSTANCE.get_or_init(|| <_>::default())
 }
