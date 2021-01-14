@@ -1,4 +1,5 @@
 import { FluenceClient, Particle, sendParticle, sendParticleAsFetch } from '@fluencelabs/fluence';
+
 import {
     fluentPadServiceId,
     historyNodePid,
@@ -31,7 +32,7 @@ interface GetUsersResult extends ServiceResult {
     users: Array<User>;
 }
 
-interface GetEntries extends ServiceResult {
+interface GetEntriesResult extends ServiceResult {
     entries: Entry[];
 }
 
@@ -151,9 +152,20 @@ export const getUserList = async (client: FluenceClient) => {
 export const join = async (client: FluenceClient, nickName: string) => {
     const particle = new Particle(
         `
-        (call userlistNode (userlist "join") [user] result)
-    `,
+            (seq
+                (call myRelay ("op" "identity") [])
+                (seq
+                    (call userlistNode (userlist "join") [user] result)
+                    (seq
+                        (call myRelay ("op" "identity") [])
+                        (call myPeerId ("_callback" "join") [result])
+                    )
+                )
+            )
+        `,
         {
+            myRelay: client.relayPeerID.toB58String(),
+            myPeerId: client.selfPeerId.toB58String(),
             user: {
                 name: nickName,
                 peer_id: client.selfPeerId.toB58String(),
@@ -164,9 +176,8 @@ export const join = async (client: FluenceClient, nickName: string) => {
         },
     );
 
-    const [result] = await sendParticleAsFetch(client, particle, ['result']);
+    const [result] = await sendParticleAsFetch<[ServiceResult]>(client, particle, 'join');
     throwIfError(result);
-    return result.users;
 };
 
 export const leave = async (client: FluenceClient) => {
@@ -207,12 +218,23 @@ export const leave = async (client: FluenceClient) => {
 export const getHistory = async (client: FluenceClient) => {
     const particle = new Particle(
         `
-    (seq
-        (call userlistNode (userlist "is_authenticated") [] token)
-        (call historyNode (history "get_all") [token.$.["is_authenticated"]] entries)
-    )
-`,
+            (seq
+                (call myRelay ("op" "identity") [])
+                (seq
+                    (call userlistNode (userlist "is_authenticated") [] token)
+                    (seq
+                        (call historyNode (history "get_all") [token.$.["is_authenticated"]] entries)
+                        (seq
+                            (call myRelay ("op" "identity") [])
+                            (call myPeerId ("_callback" "get_history") [entries])
+                        )
+                    )
+                )
+            )
+        `,
         {
+            myRelay: client.relayPeerID.toB58String(),
+            myPeerId: client.selfPeerId.toB58String(),
             userlist: userListServiceId,
             history: historyServiceId,
             userlistNode: userListNodePid,
@@ -220,7 +242,7 @@ export const getHistory = async (client: FluenceClient) => {
         },
     );
 
-    const [result] = await sendParticleAsFetch(client, particle, ['entries']);
+    const [result] = await sendParticleAsFetch<[GetEntriesResult]>(client, particle, 'get_history');
     throwIfError(result);
     return result.entries;
 };
