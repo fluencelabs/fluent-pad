@@ -16,34 +16,43 @@
 
 use crate::storage_api::*;
 
-use crate::results::{AddServiceResult, EmptyResult, GetMessagesServiceResult};
+use crate::results::{AddServiceResult, EmptyResult, GetEntriesServiceResult};
 use crate::utils::u64_to_usize;
 use crate::Result;
 use fluence::{fce, CallParameters, SecurityTetraplet};
+use crate::entry::Entry;
 
 pub const SUCCESS_CODE: i32 = 0;
 
-// add a message if authenticated, return an error if not
+// add an entry if authenticated, return an error if not
 #[fce]
-fn add(msg: String, auth: bool) -> AddServiceResult {
-    fn add_impl(msg: String, auth: bool) -> Result<u64> {
+fn add(entry: String, auth: bool) -> AddServiceResult {
+    fn add_impl(entry: String, auth: bool) -> Result<u64> {
         is_authenticated(auth, 1)?;
-        add_message(msg)
+        add_entry(entry)
     }
 
-    add_impl(msg, auth).into()
+    add_impl(entry, auth).into()
 }
 
-// get all messages
+// get all entries
 #[fce]
-fn get_all() -> GetMessagesServiceResult {
-    get_all_messages().into()
+fn get_all(auth: bool) -> GetEntriesServiceResult {
+    fn get_all_impl(auth: bool) -> Result<Vec<Entry>> {
+        is_authenticated(auth, 0)?;
+        get_all_entries()
+    }
+    get_all_impl(auth).into()
 }
 
-// get last message
+// get last entry
 #[fce]
-fn get_last(last: u64) -> GetMessagesServiceResult {
-    get_messages_with_limit(last).into()
+fn get_last(last: u64, auth: bool) -> GetEntriesServiceResult {
+    fn get_last_impl(last: u64, auth: bool) -> Result<Vec<Entry>> {
+        is_authenticated(auth, 1)?;
+        get_entries_with_limit(last)
+    }
+    get_last_impl(last, auth).into()
 }
 
 // set tetraplet to check on the authentication process. Only the service owner could set it

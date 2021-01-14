@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use crate::message::Message;
+use crate::entry::Entry;
 use crate::Result;
 
-use crate::results::{AddServiceResult, EmptyResult, GetMessagesServiceResult};
+use crate::results::{AddServiceResult, EmptyResult, GetEntriesServiceResult};
 use std::convert::From;
 use std::error::Error;
 
@@ -57,15 +57,15 @@ fn to_error_core(err: &HistoryError) -> i32 {
 impl From<Result<u64>> for AddServiceResult {
     fn from(result: Result<u64>) -> Self {
         match result {
-            Ok(msg_id) => Self {
+            Ok(entry_id) => Self {
                 ret_code: crate::service_api::SUCCESS_CODE,
                 err_msg: String::new(),
-                msg_id: msg_id,
+                entry_id,
             },
             Err(err) => Self {
                 ret_code: to_error_core(&err),
                 err_msg: format!("{}", err),
-                msg_id: u64::max_value(),
+                entry_id: u64::max_value(),
             },
         }
     }
@@ -86,18 +86,18 @@ impl From<Result<()>> for EmptyResult {
     }
 }
 
-impl From<Result<Vec<Message>>> for GetMessagesServiceResult {
-    fn from(result: Result<Vec<Message>>) -> Self {
+impl From<Result<Vec<Entry>>> for GetEntriesServiceResult {
+    fn from(result: Result<Vec<Entry>>) -> Self {
         match result {
-            Ok(messages) => Self {
+            Ok(entries) => Self {
                 ret_code: crate::service_api::SUCCESS_CODE,
                 err_msg: String::new(),
-                messages,
+                entries,
             },
             Err(err) => Self {
                 ret_code: to_error_core(&err),
                 err_msg: format!("{}", err),
-                messages: vec![],
+                entries: vec![],
             },
         }
     }

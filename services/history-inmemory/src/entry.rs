@@ -18,7 +18,7 @@ use fluence::fce;
 
 #[fce]
 #[derive(Clone, Debug, Default, Eq, PartialEq, Hash)]
-pub struct Message {
+pub struct Entry {
     pub id: u64,
     pub body: String,
 }

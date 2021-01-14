@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::message::Message;
+use crate::entry::Entry;
 use crate::Result;
 
 use crate::utils::{u64_to_usize, usize_to_u64};
@@ -31,7 +31,7 @@ pub struct Tetraplet {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Data {
-    messages: Vec<Message>,
+    entries: Vec<Entry>,
     tetraplet: Option<Tetraplet>,
 }
 
@@ -45,36 +45,36 @@ fn get_data() -> &'static Mutex<Data> {
     INSTANCE.get_or_init(|| <_>::default())
 }
 
-pub fn add_message(msg: String) -> Result<u64> {
+pub fn add_entry(entry: String) -> Result<u64> {
     let mut data = get_data().lock();
 
-    let id = usize_to_u64(data.messages.len())?;
+    let id = usize_to_u64(data.entries.len())?;
 
-    data.messages.push(Message { id, body: msg });
+    data.entries.push(Entry { id, body: entry });
 
     return Ok(id);
 }
 
-pub fn get_messages_with_limit(limit: u64) -> Result<Vec<Message>> {
+pub fn get_entries_with_limit(limit: u64) -> Result<Vec<Entry>> {
     let data = get_data().lock();
     let limit = u64_to_usize(limit)?;
 
-    let msgs: Vec<Message> = data
-        .messages
+    let entries: Vec<Entry> = data
+        .entries
         .to_vec()
         .iter()
         .rev()
         .take(limit)
-        .map(|msg| msg.clone())
+        .map(|entry| entry.clone())
         .collect();
 
-    Ok(msgs)
+    Ok(entries)
 }
 
-pub fn get_all_messages() -> Result<Vec<Message>> {
+pub fn get_all_entries() -> Result<Vec<Entry>> {
     let data = get_data().lock();
 
-    Ok(data.messages.to_vec())
+    Ok(data.entries.to_vec())
 }
 
 pub fn store_tetraplet(peer_id: String, service_id: String, fn_name: String, path: String) {

@@ -15,7 +15,7 @@
  */
 
 mod errors;
-mod message;
+mod entry;
 mod results;
 mod service_api;
 mod storage_api;

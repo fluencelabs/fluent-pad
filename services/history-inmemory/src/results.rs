@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-use crate::message::Message;
+use crate::entry::Entry;
 use fluence::fce;
 
 #[fce]
 pub struct AddServiceResult {
     pub ret_code: i32,
     pub err_msg: String,
-    pub msg_id: u64,
+    pub entry_id: u64,
 }
 
 #[fce]
-pub struct GetMessagesServiceResult {
+pub struct GetEntriesServiceResult {
     pub ret_code: i32,
     pub err_msg: String,
-    pub messages: Vec<Message>,
+    pub entries: Vec<Entry>,
 }
 
 #[fce]
