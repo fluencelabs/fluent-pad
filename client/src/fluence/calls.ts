@@ -1,5 +1,14 @@
+import { FluenceClient } from '@fluencelabs/fluence';
 import { fluenceClient } from '.';
-import { historyServiceId, servicesNodePid, userListServiceId } from './constants';
+import {
+    fluentPadServiceId,
+    historyServiceId,
+    notifyOnlineFnName,
+    notifyUserAddedFnName,
+    servicesNodePid,
+    userListServiceId,
+} from './constants';
+import { Particle, sendParticle } from './exApi';
 
 export interface ServiceResult {
     ret_code: number;
@@ -29,6 +38,83 @@ const throwIfError = (result: ServiceResult) => {
     if (result.ret_code !== 0) {
         throw new Error(result.err_msg);
     }
+};
+
+const notifyOnlineStatusesAir = `
+    (fold allUsers.$.users! u
+        (par
+            (seq
+                (call u.$.relay_id ("op" "identity") [])
+                (seq
+                    (call u.$.peer_id ("op" "identity") [])
+                    (seq
+                        (call u.$.relay_id ("op" "identity") [])
+                        (seq
+                            (call myRelay ("op" "identity") [])
+                            (call myPeerId (fluentPadServiceId notifyOnline) [u.$.peer_id immediately])
+                        )
+                    )
+                )
+            )
+            (next u)
+        )
+    )
+`;
+
+export const updateOnlineStatuses = async (client: FluenceClient) => {
+    const particle = new Particle(
+        `
+        (seq
+            (call myRelay ("op" "identity") [])
+            (seq
+                (call node (userlist "get_users") [] allUsers)
+                ${notifyOnlineStatusesAir}
+            )
+        )
+        `,
+        {
+            node: servicesNodePid,
+            userlist: userListServiceId,
+            myRelay: client.relayPeerID.toB58String(),
+            myPeerId: client.selfPeerId.toB58String(),
+            fluentPadServiceId: fluentPadServiceId,
+            notifyOnline: notifyOnlineFnName,
+            immediately: false,
+        },
+    );
+
+    sendParticle(client, particle);
+};
+
+export const getInitialUserList = async (client: FluenceClient) => {
+    const particle = new Particle(
+        `
+        (seq
+            (call myRelay ("op" "identity") [])
+            (seq
+                (call node (userlist "get_users") [] allUsers)
+                (par
+                    (seq 
+                        (call myRelay ("op" "identity") [])
+                        (call myPeerId (fluentPadServiceId notifyUserAdded) [allUsers.$.users!])    
+                    )
+                    ${notifyOnlineStatusesAir}
+                )
+            )
+        )
+        `,
+        {
+            node: servicesNodePid,
+            userlist: userListServiceId,
+            myRelay: client.relayPeerID.toB58String(),
+            myPeerId: client.selfPeerId.toB58String(),
+            fluentPadServiceId: fluentPadServiceId,
+            notifyUserAdded: notifyUserAddedFnName,
+            immediately: true,
+        },
+    );
+
+    await sendParticle(client, particle);
 };
 
 export const joinRoom = async (nickName: string) => {

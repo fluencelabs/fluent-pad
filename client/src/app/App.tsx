@@ -60,6 +60,10 @@ const App = () => {
     const [nickName, setNickName] = useState('myNickName');
     const [users, setUsers] = useState<User[]>([]);
 
+    const addUserToList = (user: User) => {};
+
+    const removeUser = (user: User) => {};
+
     const [editorTextDoc, setEditorTextDoc] = useState(Automerge.from({ value: new Automerge.Text() }));
 
     const amHistory = Automerge.getHistory(editorTextDoc).map((x) => {
@@ -108,7 +112,7 @@ const App = () => {
     };
 
     const joinRoom = withErrorHandling(async () => {
-        await calls.joinRoom(nickName);
+        // await calls.joinRoom(nickName);
         const users = await calls.getCurrentUsers();
         setUsers(users);
         const currentUser: User = {
@@ -127,6 +131,11 @@ const App = () => {
 
     const leaveRoom = async () => {
         await calls.leaveRoom;
+        const currentUser: User = {
+            peer_id: fluenceClient.selfPeerId.toB58String(),
+            relay_id: fluenceClient.relayPeerID.toB58String(),
+            name: nickName,
+        };
         calls.notifyPeers(users, fluentPadServiceId, 'userLeft', currentUser);
         setIsInRoom(false);
     };
@@ -144,16 +153,14 @@ const App = () => {
             await connect();
             setIsConnected(true);
 
-            fluenceClient.registerEvent(fluentPadServiceId, 'userJoined');
-            fluenceClient.registerEvent(fluentPadServiceId, 'userLeft');
-            fluenceClient.registerEvent(fluentPadServiceId, 'textUpdated');
-
             fluenceClient.subscribe(fluentPadServiceId, (evt) => {
                 console.log('got notification: ', evt);
                 switch (evt.type) {
                     case 'userJoined':
+                        addUserToList(evt.args[0]);
                         break;
                     case 'userLeft':
+                        removeUser(evt.args[0]);
                         break;
                     case 'textUpdated':
                         break;
@@ -162,11 +169,7 @@ const App = () => {
         };
         fn();
 
-        return () => {
-            fluenceClient.unregisterEvent(fluentPadServiceId, 'userJoined');
-            fluenceClient.unregisterEvent(fluentPadServiceId, 'userLeft');
-            fluenceClient.unregisterEvent(fluentPadServiceId, 'textUpdated');
-        };
+        return () => {};
     }, []);
 
     return (
