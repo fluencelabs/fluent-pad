@@ -28,7 +28,7 @@ type PeerId = string;
 
 const refreshTimeoutMs = 7000;
 
-export const UserList = () => {
+export const UserList = (props: { selfName: string }) => {
     const client = useFluenceClient()!;
     const [users, setUsers] = useState<Map<PeerId, User>>(new Map());
 
@@ -45,7 +45,7 @@ export const UserList = () => {
             calls.updateOnlineStatuses(client);
         }, refreshTimeoutMs);
 
-        subscribeToEvent(client, fluentPadServiceId, notifyUserAddedFnName, (args, _) => {
+        const unsub1 = subscribeToEvent(client, fluentPadServiceId, notifyUserAddedFnName, (args, _) => {
             const users = args.flatMap((x) => x).flatMap((x) => x) as calls.User[];
             setUsers((prev) => {
                 const result = new Map(prev);
@@ -54,29 +54,31 @@ export const UserList = () => {
                         continue;
                     }
 
+                    const isCurrentUser = u.peer_id === client.selfPeerId.toB58String();
+
                     result.set(u.peer_id, {
                         name: u.name,
                         id: u.peer_id,
-                        isOnline: false,
-                        shouldBecomeOnline: false,
+                        isOnline: isCurrentUser,
+                        shouldBecomeOnline: isCurrentUser,
                     });
                 }
                 return result;
             });
         });
 
-        subscribeToEvent(client, fluentPadServiceId, notifyUserRemovedFnName, (args, _) => {
-            const users = args.flatMap((x) => x) as calls.User[];
+        const unsub2 = subscribeToEvent(client, fluentPadServiceId, notifyUserRemovedFnName, (args, _) => {
+            const users = args.flatMap((x) => x) as PeerId[];
             setUsers((prev) => {
                 const result = new Map(prev);
                 for (let u of users) {
-                    result.delete(u.peer_id);
+                    result.delete(u);
                 }
                 return result;
             });
         });
 
-        const unsub = subscribeToEvent(client, fluentPadServiceId, notifyOnlineFnName, (args, _) => {
+        const unsub3 = subscribeToEvent(client, fluentPadServiceId, notifyOnlineFnName, (args, _) => {
             const [[peerId], immediately] = args;
             setUsers((prev) => {
                 const result = new Map(prev);
@@ -94,11 +96,14 @@ export const UserList = () => {
         });
 
         // don't block
-        calls.getInitialUserList(client);
+        calls.getUserList(client);
+        calls.notifySelfAdded(client, props.selfName);
 
         return () => {
             clearTimeout(listRefreshTimer);
-            unsub();
+            unsub1();
+            unsub2();
+            unsub3();
         };
     }, []);
 

@@ -3,35 +3,38 @@ import React, { useEffect, useState } from 'react';
 import { connect } from 'src/fluence';
 
 import './App.scss';
-import { FluenceClientContext } from './FluenceClientContext';
+import { FluenceClientContext, useFluenceClient } from './FluenceClientContext';
 import { UserList } from './UserList';
 import * as calls from 'src/fluence/calls';
 
 const App = () => {
     const [client, setClient] = useState<FluenceClient | null>(null);
-    const [isConnected, setIsConnected] = useState<boolean>(false);
-    const [isInRoom, setIsInRoom] = useState(false);
+    const [isInRoom, setIsInRoom] = useState<boolean>(false);
     const [nickName, setNickName] = useState('myNickName');
 
     useEffect(() => {
         const fn = async () => {
             const c = await connect();
-            setIsConnected(true);
             setClient(c);
         };
-        // fn();
+        fn();
     }, []);
 
     const joinRoom = async () => {
-        const c = await connect();
-        setIsConnected(true);
-        setClient(c);
-        await calls.joinRoom(nickName);
+        if (!client) {
+            return;
+        }
+
+        await calls.joinRoom(client, nickName);
         setIsInRoom(true);
     };
 
     const leaveRoom = async () => {
-        await calls.leaveRoom();
+        if (!client) {
+            return;
+        }
+
+        await calls.leaveRoom(client);
         setIsInRoom(false);
     };
 
@@ -39,7 +42,7 @@ const App = () => {
         <FluenceClientContext.Provider value={client}>
             <div className="App">
                 <div>
-                    <div>Connection status: {isConnected ? 'connected' : 'disconnected'}</div>
+                    <div>Connection status: {client ? 'connected' : 'disconnected'}</div>
                     <div>
                         <label>Nickname: </label>
                         <input
@@ -53,7 +56,7 @@ const App = () => {
                         />
                     </div>
                     <div>
-                        <button disabled={isInRoom} onClick={joinRoom}>
+                        <button disabled={isInRoom || !client} onClick={joinRoom}>
                             Join Room
                         </button>
                     </div>
@@ -64,7 +67,7 @@ const App = () => {
                     </div>
                 </div>
 
-                <div>{isConnected && client && isInRoom && <UserList />}</div>
+                <div>{isInRoom && client && <UserList selfName={nickName} />}</div>
             </div>
         </FluenceClientContext.Provider>
     );
