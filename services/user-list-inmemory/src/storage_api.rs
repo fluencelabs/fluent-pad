@@ -63,3 +63,8 @@ pub fn delete_user(peer_id: String) -> Result<()> {
 
     Ok(())
 }
+
+pub fn debug_clear() {
+    let mut data = get_data().lock();
+    data.clear();
+}

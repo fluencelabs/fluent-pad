@@ -51,6 +51,11 @@ pub fn add_entry(entry: String) -> Result<u64> {
     return Ok(id);
 }
 
+pub fn debug_clear() {
+    let mut data = get_data().lock();
+    data.entries.clear();
+}
+
 pub fn get_entries_with_limit(limit: u64) -> Result<Vec<HistoryEntry>> {
     let data = get_data().lock();
     let limit = u64_to_usize(limit)?;

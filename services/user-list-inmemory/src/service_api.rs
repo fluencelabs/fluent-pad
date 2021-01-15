@@ -70,6 +70,16 @@ fn is_authenticated() -> AuthResult {
     check_auth().into()
 }
 
+// delete everything (useful for debug purposes)
+#[fce]
+pub fn clear() -> EmptyServiceResult {
+    fn clear_impl() -> Result<()> {
+        Ok(debug_clear())
+    }
+
+    clear_impl().into()
+}
+
 // return an error if request is not authenticated
 fn check_auth() -> Result<()> {
     use crate::errors::UserListError::UserNotExist;

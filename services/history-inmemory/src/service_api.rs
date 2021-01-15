@@ -71,6 +71,16 @@ pub fn set_tetraplet(
     set_impl(peer_id, service_id, fn_name, path).into()
 }
 
+// delete everything (useful for debug purposes)
+#[fce]
+pub fn clear() -> EmptyResult {
+    fn clear_impl() -> Result<()> {
+        Ok(debug_clear())
+    }
+
+    clear_impl().into()
+}
+
 // check if a calles is an owner of the service
 pub fn is_owner() -> Result<()> {
     use crate::errors::HistoryError::Unauthorized;
