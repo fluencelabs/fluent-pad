@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { fluentPadServiceId, notifyTextUpdateFnName } from 'src/fluence/constants';
 import { useFluenceClient } from './FluenceClientContext';
 import * as calls from 'src/fluence/calls';
-import { subscribeToEvent } from '@fluencelabs/fluence';
+import { FluenceClient, subscribeToEvent } from '@fluencelabs/fluence';
+import _ from 'lodash';
 
 interface TextDoc {
     value: Automerge.Text;
@@ -78,13 +79,26 @@ const applyStates = (startingDoc: TextDoc | null, entries: calls.Entry[]) => {
     return res;
 };
 
+const broadcastUpdates = _.debounce(async (client: FluenceClient, doc: TextDoc) => {
+    const entry = {
+        fluentPadState: Automerge.save(doc),
+    };
+    const entryStr = JSON.stringify(entry);
+
+    await calls.addEntry(client, entryStr);
+}, 200);
+
 export const CollaborativeEditor = () => {
     const client = useFluenceClient()!;
-    const [text, setText] = useState<TextDoc | null>(null);
+    const [text, setText] = useState<TextDoc | null>(Automerge.from({ value: new Automerge.Text() }));
 
     useEffect(() => {
         const unsub1 = subscribeToEvent(client, fluentPadServiceId, notifyTextUpdateFnName, (args, tetraplets) => {
-            const [stateStr, isAuthorized] = args;
+            const [authorPeerId, stateStr, isAuthorized] = args;
+            if (authorPeerId === client.selfPeerId.toB58String()) {
+                return;
+            }
+
             const state = parseState(stateStr);
             if (state && text) {
                 const newDoc = Automerge.merge(text, state);
@@ -116,25 +130,20 @@ export const CollaborativeEditor = () => {
         setText(newDoc);
 
         // don't block
-        setImmediate(async () => {
-            const entry = {
-                fluentPadState: Automerge.save(newDoc),
-            };
-            const entryStr = JSON.stringify(entry);
-
-            await calls.addEntry(client, entryStr);
-        });
+        setImmediate(broadcastUpdates, client, newDoc);
     };
 
     return (
         <div>
             <textarea value={textValue} disabled={!text} onChange={handleTextUpdate} />
-            Automerge changes:
-            <ul>
-                {amHistory.map((value, index) => (
-                    <li key={index}>{value}</li>
-                ))}
-            </ul>
+            <div>
+                Automerge changes:
+                <ul>
+                    {amHistory.map((value, index) => (
+                        <li key={index}>{value}</li>
+                    ))}
+                </ul>
+            </div>
         </div>
     );
 };

@@ -262,7 +262,7 @@ export const addEntry = async (client: FluenceClient, entry: string) => {
                             (par
                                 (seq
                                     (call u.$.relay_id ("op" "identity") [])
-                                    (call u.$.peer_id (fluentPadServiceId notifyTextUpdate) [entry token.$.["is_authenticated"]])
+                                    (call u.$.peer_id (fluentPadServiceId notifyTextUpdate) [myPeerId entry token.$.["is_authenticated"]])
                                 )
                                 (next u)
                             )
@@ -284,7 +284,29 @@ export const addEntry = async (client: FluenceClient, entry: string) => {
             fluentPadServiceId: fluentPadServiceId,
             notifyTextUpdate: notifyTextUpdateFnName,
         },
-        99999999,
+    );
+
+    await sendParticle(client, particle);
+};
+
+export const clean = async (client: FluenceClient) => {
+    const particle = new Particle(
+        `
+            (seq
+                (call myRelay ("op" "identity") [])
+                (seq
+                    (call userlistNode (userlist "clear") [])
+                    (call historyNode (history "clear") [])
+                )
+            )
+        `,
+        {
+            myRelay: client.relayPeerID.toB58String(),
+            userlist: userListServiceId,
+            history: historyServiceId,
+            userlistNode: userListNodePid,
+            historyNode: historyNodePid,
+        },
     );
 
     await sendParticle(client, particle);
