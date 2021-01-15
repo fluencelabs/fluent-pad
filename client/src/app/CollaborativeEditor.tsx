@@ -1,6 +1,6 @@
 import * as Automerge from 'automerge';
 import DiffMatchPatch from 'diff-match-patch';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { fluentPadServiceId, notifyTextUpdateFnName } from 'src/fluence/constants';
 import { useFluenceClient } from './FluenceClientContext';
 import * as calls from 'src/fluence/calls';
@@ -45,12 +45,7 @@ const getUpdatedDocFromText = (oldDoc: TextDoc | null, newText: string) => {
 
 const parseState = (entry: string) => {
     try {
-        const obj = JSON.parse(entry);
-        if (obj.fluentPadState) {
-            return Automerge.load(obj.fluentPadState) as TextDoc;
-        }
-
-        return null;
+        return JSON.parse(entry);
     } catch (e) {
         console.log('couldnt parse state format: ' + entry);
         return null;
@@ -90,9 +85,26 @@ const broadcastUpdates = _.debounce(async (client: FluenceClient, doc: TextDoc) 
 
 export const CollaborativeEditor = () => {
     const client = useFluenceClient()!;
-    const [text, setText] = useState<TextDoc | null>(Automerge.from({ value: new Automerge.Text() }));
+    const [text, setText] = useState('');
+    // const textAreaRef = useRef<HTMLTextAreaElement>(null);
+    const docSetRef = useRef(new Automerge.DocSet<TextDoc>());
+    const [amConnection, setAmConnection] = useState<any>();
 
     useEffect(() => {
+        const doc = Automerge.from({ value: new Automerge.Text() });
+        docSetRef.current.setDoc('doc', doc);
+        docSetRef.current.registerHandler((id, doc) => {
+            if (id === 'doc') {
+                setText(doc.value.toString());
+            }
+        });
+        const connection = new Automerge.Connection(docSetRef.current, (msg) => {
+            console.log('on update');
+            calls.addEntry(client, JSON.stringify(msg));
+        });
+        connection.open();
+        setAmConnection(connection);
+
         const unsub1 = subscribeToEvent(client, fluentPadServiceId, notifyTextUpdateFnName, (args, tetraplets) => {
             const [authorPeerId, stateStr, isAuthorized] = args;
             if (authorPeerId === client.selfPeerId.toB58String()) {
@@ -100,16 +112,23 @@ export const CollaborativeEditor = () => {
             }
 
             const state = parseState(stateStr);
-            if (state && text) {
-                const newDoc = Automerge.merge(text, state);
-                setText(newDoc);
+            console.log(state);
+            if (state) {
+                connection.receiveMsg(state);
             }
         });
 
         // don't block
         calls.getHistory(client).then((res) => {
-            const newDoc = applyStates(text, res);
-            setText(newDoc);
+            for (let e of res) {
+                try {
+                    const msg = JSON.parse(e.body);
+                    connection.receiveMsg(msg);
+                } catch (e) {
+                    console.log("history didn't work", e);
+                }
+            }
+            // setText(newDoc);
         });
 
         return () => {
@@ -117,31 +136,34 @@ export const CollaborativeEditor = () => {
         };
     }, []);
 
-    const amHistory = text
-        ? Automerge.getHistory(text).map((x) => {
-              return x.snapshot.value;
-          })
-        : [];
+    // const amHistory = text
+    //     ? Automerge.getHistory(text).map((x) => {
+    //           return x.snapshot.value;
+    //       })
+    //     : [];
 
-    const textValue = text ? text.value.toString() : '';
+    // const textValue = text ? text.value : '';
 
     const handleTextUpdate = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const newDoc = getUpdatedDocFromText(text, e.target.value)!;
-        setText(newDoc);
+        setText(e.target.value);
 
-        // don't block
-        setImmediate(broadcastUpdates, client, newDoc);
+        let doc = docSetRef.current.getDoc('doc');
+        if (doc) {
+            let res = getUpdatedDocFromText(doc, e.target.value);
+            console.log(res);
+            docSetRef.current.setDoc('doc', res!);
+        }
     };
 
     return (
         <div>
-            <textarea value={textValue} disabled={!text} onChange={handleTextUpdate} />
+            <textarea value={text} onChange={handleTextUpdate} />
             <div>
                 Automerge changes:
                 <ul>
-                    {amHistory.map((value, index) => (
+                    {/* {amHistory.map((value, index) => (
                         <li key={index}>{value}</li>
-                    ))}
+                    ))} */}
                 </ul>
             </div>
         </div>
