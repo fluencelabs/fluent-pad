@@ -6,7 +6,7 @@ import {
     notifyUserRemovedFnName,
 } from 'src/app/constants';
 import { useFluenceClient } from '../app/FluenceClientContext';
-import * as calls from 'src/app/api';
+import * as api from 'src/app/api';
 import { subscribeToEvent } from '@fluencelabs/fluence';
 
 type PeerId = string;
@@ -42,11 +42,11 @@ export const UserList = (props: { selfName: string }) => {
             });
 
             // don't block
-            calls.updateOnlineStatuses(client);
+            api.updateOnlineStatuses(client);
         }, refreshTimeoutMs);
 
         const unsub1 = subscribeToEvent(client, fluentPadServiceId, notifyUserAddedFnName, (args, _) => {
-            const users = args.flatMap((x) => x).flatMap((x) => x) as calls.User[];
+            const users = args.flatMap((x) => x).flatMap((x) => x) as api.User[];
             setUsers((prev) => {
                 const result = new Map(prev);
                 for (let u of users) {
@@ -96,8 +96,8 @@ export const UserList = (props: { selfName: string }) => {
         });
 
         // don't block
-        calls.getUserList(client);
-        calls.notifySelfAdded(client, props.selfName);
+        api.getUserList(client);
+        api.notifySelfAdded(client, props.selfName);
 
         return () => {
             clearTimeout(listRefreshTimer);

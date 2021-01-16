@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import './App.scss';
 import { FluenceClientContext } from '../app/FluenceClientContext';
 import { UserList } from './UserList';
-import * as calls from 'src/app/api';
+import * as api from 'src/app/api';
 import { CollaborativeEditor } from './CollaborativeEditor';
 import { relayNode } from 'src/app/constants';
 
@@ -27,7 +27,7 @@ const App = () => {
             return;
         }
 
-        await calls.join(client, nickName);
+        await api.join(client, nickName);
         setIsInRoom(true);
     };
 
@@ -36,7 +36,7 @@ const App = () => {
             return;
         }
 
-        await calls.leave(client);
+        await api.leave(client);
         setIsInRoom(false);
     };
 
@@ -53,7 +53,7 @@ const App = () => {
                     </div>
 
                     <div className="header-item">
-                        <button className="button" onClick={() => calls.clean(client!)}>
+                        <button className="button" onClick={() => api.clean(client!)}>
                             Clean
                         </button>
                     </div>
