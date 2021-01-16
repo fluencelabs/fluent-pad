@@ -23,17 +23,15 @@ export const CollaborativeEditor = () => {
     useEffect(() => {
         syncClient.syncDoc(initDoc());
         syncClient.handleDocUpdate = (doc) => {
-            console.log('syncClient.handleDocUpdate');
             setText(doc.text.toString());
         };
 
         syncClient.handleSendChanges = (changes: string) => {
-            console.log('syncClient.handleSendChanges');
             api.addEntry(client, changes);
         };
 
         const unsub = subscribeToEvent(client, fluentPadServiceId, notifyTextUpdateFnName, (args, tetraplets) => {
-            const [authorPeerId, changes, isAuthorized] = args;
+            const [authorPeerId, changes, isAuthorized] = args as [api.PeerId, string, boolean];
             if (authorPeerId === client.selfPeerId.toB58String()) {
                 return;
             }

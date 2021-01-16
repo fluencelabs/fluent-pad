@@ -42,6 +42,8 @@ const throwIfError = (result: ServiceResult) => {
     }
 };
 
+export type PeerId = string;
+
 export const updateOnlineStatuses = async (client: FluenceClient) => {
     const particle = new Particle(
         `
@@ -59,7 +61,7 @@ export const updateOnlineStatuses = async (client: FluenceClient) => {
                                     (call u.$.relay_id ("op" "identity") [])
                                     (seq
                                         (call myRelay ("op" "identity") [])
-                                        (call myPeerId (fluentPadServiceId notifyOnline) [u.$.peer_id immediately])
+                                        (call myPeerId (fluentPadServiceId notifyOnline) [u.$.peer_id])
                                     )
                                 )
                             )
@@ -77,7 +79,6 @@ export const updateOnlineStatuses = async (client: FluenceClient) => {
             myPeerId: client.selfPeerId.toB58String(),
             fluentPadServiceId: fluentPadServiceId,
             notifyOnline: notifyOnlineFnName,
-            immediately: false,
         },
     );
 
@@ -95,7 +96,7 @@ export const notifySelfAdded = (client: FluenceClient, name: string) => {
                     (par
                         (seq
                             (call u.$.relay_id ("op" "identity") [])
-                            (call u.$.peer_id (fluentPadServiceId notifyUserAdded) [myUser])
+                            (call u.$.peer_id (fluentPadServiceId notifyUserAdded) [myUser setOnline])
                         )
                         (next u)
                     )
@@ -110,11 +111,14 @@ export const notifySelfAdded = (client: FluenceClient, name: string) => {
             myPeerId: client.selfPeerId.toB58String(),
             fluentPadServiceId: fluentPadServiceId,
             notifyUserAdded: notifyUserAddedFnName,
-            myUser: {
-                name: name,
-                peer_id: client.selfPeerId.toB58String(),
-                relay_id: client.relayPeerID.toB58String(),
-            },
+            myUser: [
+                {
+                    name: name,
+                    peer_id: client.selfPeerId.toB58String(),
+                    relay_id: client.relayPeerID.toB58String(),
+                },
+            ],
+            setOnline: true,
         },
     );
 

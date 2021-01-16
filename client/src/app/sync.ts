@@ -61,7 +61,6 @@ export class SyncClient<T = TextDoc> {
 
     private doHandleDocUpdate(docId: string, doc: Doc<T>) {
         if (docId === SyncClient.globalDocId && this.handleDocUpdate) {
-            console.log(docId, doc);
             this.handleDocUpdate(doc);
         }
     }

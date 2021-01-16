@@ -200,12 +200,18 @@ body {
         text-transform: uppercase;
 
         background: none;
-        border: none;
+        border-top: none;
+        border-right: none;
+        border-left: none;
+        border-bottom: 1px solid $accent-color;
         text-decoration: none;
+
+        outline: none;
 
         &:hover,
         &:focus {
             color: $accent-color;
+            border-bottom: 2px solid $accent-color;
         }
     }
 }

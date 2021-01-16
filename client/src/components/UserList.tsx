@@ -8,8 +8,7 @@ import {
 import { useFluenceClient } from '../app/FluenceClientContext';
 import * as api from 'src/app/api';
 import { subscribeToEvent } from '@fluencelabs/fluence';
-
-type PeerId = string;
+import { PeerId } from 'src/app/api';
 
 interface User {
     id: PeerId;
@@ -46,7 +45,7 @@ export const UserList = (props: { selfName: string }) => {
         }, refreshTimeoutMs);
 
         const unsub1 = subscribeToEvent(client, fluentPadServiceId, notifyUserAddedFnName, (args, _) => {
-            const users = args.flatMap((x) => x).flatMap((x) => x) as api.User[];
+            const [users, setOnline] = args as [api.User[], boolean];
             setUsers((prev) => {
                 const result = new Map(prev);
                 for (let u of users) {
@@ -59,8 +58,8 @@ export const UserList = (props: { selfName: string }) => {
                     result.set(u.peer_id, {
                         name: u.name,
                         id: u.peer_id,
-                        isOnline: isCurrentUser,
-                        shouldBecomeOnline: isCurrentUser,
+                        isOnline: isCurrentUser || setOnline,
+                        shouldBecomeOnline: isCurrentUser || setOnline,
                     });
                 }
                 return result;
@@ -68,7 +67,7 @@ export const UserList = (props: { selfName: string }) => {
         });
 
         const unsub2 = subscribeToEvent(client, fluentPadServiceId, notifyUserRemovedFnName, (args, _) => {
-            const users = args.flatMap((x) => x) as PeerId[];
+            const [users] = args as [PeerId[]];
             setUsers((prev) => {
                 const result = new Map(prev);
                 for (let u of users) {
@@ -79,14 +78,14 @@ export const UserList = (props: { selfName: string }) => {
         });
 
         const unsub3 = subscribeToEvent(client, fluentPadServiceId, notifyOnlineFnName, (args, _) => {
-            const [[peerId], immediately] = args;
+            const [users] = args as [PeerId[]];
             setUsers((prev) => {
                 const result = new Map(prev);
 
-                const toSetOnline = result.get(peerId);
-                if (toSetOnline) {
-                    toSetOnline.shouldBecomeOnline = true;
-                    if (immediately) {
+                for (let u of users) {
+                    const toSetOnline = result.get(u);
+                    if (toSetOnline) {
+                        toSetOnline.shouldBecomeOnline = true;
                         toSetOnline.isOnline = true;
                     }
                 }
