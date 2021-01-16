@@ -12,3 +12,5 @@ export const historyServiceId = '7fb57031-1d3d-4391-9a9f-da40a6c4963d';
 
 export const userListNodePid = dev[2].peerId;
 export const historyNodePid = dev[2].peerId;
+
+export const relayNode = dev[0];

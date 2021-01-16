@@ -2,10 +2,10 @@ import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import { subscribeToEvent } from '@fluencelabs/fluence';
 
-import { fluentPadServiceId, notifyTextUpdateFnName } from 'src/fluence/constants';
-import { useFluenceClient } from './FluenceClientContext';
-import { getUpdatedDocFromText, initDoc, SyncClient } from './sync';
-import * as calls from 'src/fluence/calls';
+import { fluentPadServiceId, notifyTextUpdateFnName } from 'src/app/constants';
+import { useFluenceClient } from '../app/FluenceClientContext';
+import { getUpdatedDocFromText, initDoc, SyncClient } from '../app/sync';
+import * as calls from 'src/app/api';
 
 const broadcastUpdates = _.debounce((text: string, syncClient: SyncClient) => {
     let doc = syncClient.getDoc();

@@ -4,9 +4,9 @@ import {
     notifyOnlineFnName,
     notifyUserAddedFnName,
     notifyUserRemovedFnName,
-} from 'src/fluence/constants';
-import { useFluenceClient } from './FluenceClientContext';
-import * as calls from 'src/fluence/calls';
+} from 'src/app/constants';
+import { useFluenceClient } from '../app/FluenceClientContext';
+import * as calls from 'src/app/api';
 import { subscribeToEvent } from '@fluencelabs/fluence';
 
 interface User {

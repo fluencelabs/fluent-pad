@@ -1,12 +1,12 @@
 import { createClient, FluenceClient } from '@fluencelabs/fluence';
-import { dev } from '@fluencelabs/fluence-network-environment';
 import React, { useEffect, useState } from 'react';
 
 import './App.scss';
-import { FluenceClientContext } from './FluenceClientContext';
+import { FluenceClientContext } from '../app/FluenceClientContext';
 import { UserList } from './UserList';
-import * as calls from 'src/fluence/calls';
+import * as calls from 'src/app/api';
 import { CollaborativeEditor } from './CollaborativeEditor';
+import { relayNode } from 'src/app/constants';
 
 const App = () => {
     const [client, setClient] = useState<FluenceClient | null>(null);
@@ -15,7 +15,7 @@ const App = () => {
 
     useEffect(() => {
         const fn = async () => {
-            const c = await createClient(dev[0]);
+            const c = await createClient(relayNode);
 
             setClient(c);
         };
