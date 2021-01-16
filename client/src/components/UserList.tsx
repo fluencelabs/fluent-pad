@@ -9,8 +9,10 @@ import { useFluenceClient } from '../app/FluenceClientContext';
 import * as calls from 'src/app/api';
 import { subscribeToEvent } from '@fluencelabs/fluence';
 
+type PeerId = string;
+
 interface User {
-    id: string;
+    id: PeerId;
     name: string;
     isOnline: boolean;
     shouldBecomeOnline: boolean;
@@ -23,8 +25,6 @@ const turnUserAsOfflineCandidate = (u: User): User => {
         shouldBecomeOnline: false,
     };
 };
-
-type PeerId = string;
 
 const refreshTimeoutMs = 2000;
 
@@ -112,14 +112,12 @@ export const UserList = (props: { selfName: string }) => {
         .sort((a, b) => a.name.localeCompare(b.name));
 
     return (
-        <div>
+        <div className="userlist">
             <ul>
                 {usersArray.map((x) => (
                     <li key={x.id}>
-                        {x.name}{' '}
-                        <span style={{ color: x.isOnline ? 'green' : 'red' }}>
-                            ({x.isOnline ? 'online' : 'offline'})
-                        </span>
+                        <span className={x.id === client.selfPeerId.toB58String() ? 'bold' : ''}>{x.name}</span>
+                        <span className={x.isOnline ? 'green' : 'red'}> ({x.isOnline ? 'online' : 'offline'})</span>
                     </li>
                 ))}
             </ul>

@@ -42,39 +42,57 @@ const App = () => {
 
     return (
         <FluenceClientContext.Provider value={client}>
-            <div className="App">
-                <div>
-                    <div>Connection status: {client ? 'connected' : 'disconnected'}</div>
-                    <div>
-                        <label>Nickname: </label>
-                        <input
-                            type="text"
-                            value={nickName}
-                            disabled={isInRoom}
-                            onChange={(e) => {
-                                const name = e.target.value;
-                                setNickName(name);
-                            }}
-                        />
+            <div className="header-wrapper">
+                <div className="header">
+                    <div className="header-item">
+                        {isInRoom && (
+                            <button className="button" disabled={!isInRoom} onClick={leaveRoom}>
+                                Leave
+                            </button>
+                        )}
                     </div>
-                    <div>
-                        <button disabled={isInRoom || !client} onClick={joinRoom}>
-                            Join Room
+
+                    <div className="header-item">
+                        <button className="button" onClick={() => calls.clean(client!)}>
+                            Clean
                         </button>
                     </div>
-                    <div>
-                        <button disabled={!isInRoom} onClick={leaveRoom}>
-                            Leave Room
-                        </button>
-                    </div>
-                    <div>
-                        <button onClick={() => calls.clean(client!)}>Clean</button>
+
+                    <div className="header-item">
+                        Connection status: {client ? <span className="accent">connected</span> : 'disconnected'}
                     </div>
                 </div>
+            </div>
+            <div>
+                <div className="content">
+                    {!isInRoom && (
+                        <div className="welcome-form">
+                            <h1 className="form-caption">Welcome to FluentPad</h1>
+                            <input
+                                className="text-input"
+                                placeholder="Your name"
+                                type="text"
+                                value={nickName}
+                                disabled={isInRoom}
+                                onChange={(e) => {
+                                    const name = e.target.value;
+                                    setNickName(name);
+                                }}
+                            />
 
-                <div className="wrapper">
-                    <div>{isInRoom && client && <CollaborativeEditor />}</div>
-                    <div>{isInRoom && client && <UserList selfName={nickName} />}</div>
+                            <button className="join-button" disabled={isInRoom || !client} onClick={joinRoom}>
+                                Join
+                            </button>
+                        </div>
+                    )}
+
+                    {isInRoom && (
+                        <div className="room-wrapper">
+                            <h1 className="fluent-pad">FluentPad</h1>
+                            <UserList selfName={nickName} />
+                            <CollaborativeEditor />
+                        </div>
+                    )}
                 </div>
             </div>
         </FluenceClientContext.Provider>

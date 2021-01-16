@@ -64,9 +64,5 @@ export const CollaborativeEditor = () => {
         broadcastUpdates(newText, syncClient);
     };
 
-    return (
-        <div>
-            <textarea value={text} onChange={handleTextUpdate} />
-        </div>
-    );
+    return <textarea spellCheck={false} className="code-editor" value={text} onChange={handleTextUpdate} />;
 };
