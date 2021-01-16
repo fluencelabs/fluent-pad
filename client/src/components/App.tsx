@@ -60,7 +60,13 @@ const App = () => {
             <div>
                 <div className="content">
                     {!isInRoom && (
-                        <div className="welcome-form">
+                        <form
+                            className="welcome-form"
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                joinRoom();
+                            }}
+                        >
                             <h1 className="form-caption">Welcome to FluentPad</h1>
                             <input
                                 className="text-input"
@@ -74,14 +80,13 @@ const App = () => {
                                 }}
                             />
 
-                            <button
+                            <input
+                                type="submit"
                                 className="join-button"
                                 disabled={isInRoom || !client || !nickName}
-                                onClick={joinRoom}
-                            >
-                                Join
-                            </button>
-                        </div>
+                                value="Join"
+                            />
+                        </form>
                     )}
 
                     {isInRoom && (
