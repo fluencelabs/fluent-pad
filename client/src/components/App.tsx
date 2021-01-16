@@ -11,7 +11,7 @@ import { relayNode } from 'src/app/constants';
 const App = () => {
     const [client, setClient] = useState<FluenceClient | null>(null);
     const [isInRoom, setIsInRoom] = useState<boolean>(false);
-    const [nickName, setNickName] = useState('myNickName');
+    const [nickName, setNickName] = useState('');
 
     useEffect(() => {
         const fn = async () => {
@@ -80,7 +80,11 @@ const App = () => {
                                 }}
                             />
 
-                            <button className="join-button" disabled={isInRoom || !client} onClick={joinRoom}>
+                            <button
+                                className="join-button"
+                                disabled={isInRoom || !client || !nickName}
+                                onClick={joinRoom}
+                            >
                                 Join
                             </button>
                         </div>

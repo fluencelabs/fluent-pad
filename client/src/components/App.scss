@@ -1,7 +1,7 @@
 $bg-color1: white;
 $bg-color2: #f4f4f4;
 $font-color1: black;
-$font-color1-disabled: lightgray;
+$color-disabled: lightgray;
 
 $color1: black;
 $color2: rgb(214, 214, 214);
@@ -184,6 +184,10 @@ body {
         background-color: $accent-color;
         color: white;
         border: none;
+    }
+    &:disabled {
+        color: $color-disabled;
+        border-color: $color-disabled;
     }
 }
 
