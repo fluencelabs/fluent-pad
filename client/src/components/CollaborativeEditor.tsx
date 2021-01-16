@@ -17,11 +17,10 @@ const broadcastUpdates = _.debounce((text: string, syncClient: SyncClient) => {
 
 export const CollaborativeEditor = () => {
     const client = useFluenceClient()!;
-    const [text, setText] = useState('');
+    const [text, setText] = useState<string | null>(null);
     const [syncClient, setSyncClient] = useState(new SyncClient());
 
     useEffect(() => {
-        syncClient.syncDoc(initDoc());
         syncClient.handleDocUpdate = (doc) => {
             setText(doc.text.toString());
         };
@@ -48,6 +47,10 @@ export const CollaborativeEditor = () => {
             for (let e of res) {
                 syncClient.receiveChanges(e.body);
             }
+
+            if (syncClient.getDoc() === undefined) {
+                syncClient.syncDoc(initDoc());
+            }
         });
 
         return () => {
@@ -62,5 +65,13 @@ export const CollaborativeEditor = () => {
         broadcastUpdates(newText, syncClient);
     };
 
-    return <textarea spellCheck={false} className="code-editor" value={text} onChange={handleTextUpdate} />;
+    return (
+        <textarea
+            spellCheck={false}
+            className="code-editor"
+            disabled={text === null}
+            value={text ?? ''}
+            onChange={handleTextUpdate}
+        />
+    );
 };

@@ -120,6 +120,10 @@ body {
 
     border: none;
     outline: none;
+
+    &:disabled {
+        background-color: $color-disabled;
+    }
 }
 
 .text-input {
