@@ -53,12 +53,6 @@ const App = () => {
                     </div>
 
                     <div className="header-item">
-                        <button className="button" onClick={() => api.clean(client!)}>
-                            Clean
-                        </button>
-                    </div>
-
-                    <div className="header-item">
                         Connection status: {client ? <span className="accent">connected</span> : 'disconnected'}
                     </div>
                 </div>

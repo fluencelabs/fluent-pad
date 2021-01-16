@@ -288,26 +288,3 @@ export const addEntry = async (client: FluenceClient, entry: string) => {
 
     await sendParticle(client, particle);
 };
-
-export const clean = async (client: FluenceClient) => {
-    const particle = new Particle(
-        `
-            (seq
-                (call myRelay ("op" "identity") [])
-                (seq
-                    (call userlistNode (userlist "clear") [])
-                    (call historyNode (history "clear") [])
-                )
-            )
-        `,
-        {
-            myRelay: client.relayPeerID.toB58String(),
-            userlist: userListServiceId,
-            history: historyServiceId,
-            userlistNode: userListNodePid,
-            historyNode: historyNodePid,
-        },
-    );
-
-    await sendParticle(client, particle);
-};
