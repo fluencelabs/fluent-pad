@@ -2,13 +2,13 @@ import { FluenceClient, Particle, sendParticle, sendParticleAsFetch } from '@flu
 
 import {
     fluentPadServiceId,
-    historyNodePid,
+    historyNodePeerId,
     historyServiceId,
     notifyOnlineFnName,
     notifyTextUpdateFnName,
     notifyUserAddedFnName,
     notifyUserRemovedFnName,
-    userListNodePid,
+    userListNodePeerId,
     userListServiceId,
 } from './constants';
 
@@ -71,7 +71,7 @@ export const updateOnlineStatuses = async (client: FluenceClient) => {
         )
         `,
         {
-            userlistNode: userListNodePid,
+            userlistNode: userListNodePeerId,
             userlist: userListServiceId,
             myRelay: client.relayPeerId,
             myPeerId: client.selfPeerId,
@@ -103,7 +103,7 @@ export const notifySelfAdded = (client: FluenceClient, name: string) => {
         )
         `,
         {
-            userlistNode: userListNodePid,
+            userlistNode: userListNodePeerId,
             userlist: userListServiceId,
             myRelay: client.relayPeerId,
             myPeerId: client.selfPeerId,
@@ -138,7 +138,7 @@ export const getUserList = async (client: FluenceClient) => {
         )
         `,
         {
-            userlistNode: userListNodePid,
+            userlistNode: userListNodePeerId,
             userlist: userListServiceId,
             myRelay: client.relayPeerId,
             myPeerId: client.selfPeerId,
@@ -174,7 +174,7 @@ export const join = async (client: FluenceClient, nickName: string) => {
                 relay_id: client.relayPeerId,
             },
             userlist: userListServiceId,
-            userlistNode: userListNodePid,
+            userlistNode: userListNodePeerId,
         },
     );
 
@@ -205,7 +205,7 @@ export const leave = async (client: FluenceClient) => {
         )
         `,
         {
-            userlistNode: userListNodePid,
+            userlistNode: userListNodePeerId,
             userlist: userListServiceId,
             myRelay: client.relayPeerId,
             myPeerId: client.selfPeerId,
@@ -239,8 +239,8 @@ export const getHistory = async (client: FluenceClient) => {
             myPeerId: client.selfPeerId,
             userlist: userListServiceId,
             history: historyServiceId,
-            userlistNode: userListNodePid,
-            historyNode: historyNodePid,
+            userlistNode: userListNodePeerId,
+            historyNode: historyNodePeerId,
         },
     );
 
@@ -276,8 +276,8 @@ export const addEntry = async (client: FluenceClient, entry: string) => {
         `,
 
         {
-            userlistNode: userListNodePid,
-            historyNode: historyNodePid,
+            userlistNode: userListNodePeerId,
+            historyNode: historyNodePeerId,
             entry: entry,
             userlist: userListServiceId,
             history: historyServiceId,
