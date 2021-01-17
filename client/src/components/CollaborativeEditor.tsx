@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
-import { subscribeToEvent } from '@fluencelabs/fluence';
+import { PeerIdB58, subscribeToEvent } from '@fluencelabs/fluence';
 
 import { fluentPadServiceId, notifyTextUpdateFnName } from 'src/app/constants';
 import { useFluenceClient } from '../app/FluenceClientContext';
@@ -30,8 +30,8 @@ export const CollaborativeEditor = () => {
         };
 
         const unsub = subscribeToEvent(client, fluentPadServiceId, notifyTextUpdateFnName, (args, tetraplets) => {
-            const [authorPeerId, changes, isAuthorized] = args as [api.PeerId, string, boolean];
-            if (authorPeerId === client.selfPeerId.toB58String()) {
+            const [authorPeerId, changes, isAuthorized] = args as [PeerIdB58, string, boolean];
+            if (authorPeerId === client.selfPeerId) {
                 return;
             }
 

@@ -14,12 +14,9 @@ const App = () => {
     const [nickName, setNickName] = useState('');
 
     useEffect(() => {
-        const fn = async () => {
-            const c = await createClient(relayNode);
-
-            setClient(c);
-        };
-        fn();
+        createClient(relayNode)
+            .then((client) => setClient(client))
+            .catch((err) => console.log('Client initialization failed', err));
     }, []);
 
     const joinRoom = async () => {

@@ -42,8 +42,6 @@ const throwIfError = (result: ServiceResult) => {
     }
 };
 
-export type PeerId = string;
-
 export const updateOnlineStatuses = async (client: FluenceClient) => {
     const particle = new Particle(
         `
@@ -75,8 +73,8 @@ export const updateOnlineStatuses = async (client: FluenceClient) => {
         {
             userlistNode: userListNodePid,
             userlist: userListServiceId,
-            myRelay: client.relayPeerID.toB58String(),
-            myPeerId: client.selfPeerId.toB58String(),
+            myRelay: client.relayPeerId,
+            myPeerId: client.selfPeerId,
             fluentPadServiceId: fluentPadServiceId,
             notifyOnline: notifyOnlineFnName,
         },
@@ -107,15 +105,15 @@ export const notifySelfAdded = (client: FluenceClient, name: string) => {
         {
             userlistNode: userListNodePid,
             userlist: userListServiceId,
-            myRelay: client.relayPeerID.toB58String(),
-            myPeerId: client.selfPeerId.toB58String(),
+            myRelay: client.relayPeerId,
+            myPeerId: client.selfPeerId,
             fluentPadServiceId: fluentPadServiceId,
             notifyUserAdded: notifyUserAddedFnName,
             myUser: [
                 {
                     name: name,
-                    peer_id: client.selfPeerId.toB58String(),
-                    relay_id: client.relayPeerID.toB58String(),
+                    peer_id: client.selfPeerId,
+                    relay_id: client.relayPeerId,
                 },
             ],
             setOnline: true,
@@ -142,8 +140,8 @@ export const getUserList = async (client: FluenceClient) => {
         {
             userlistNode: userListNodePid,
             userlist: userListServiceId,
-            myRelay: client.relayPeerID.toB58String(),
-            myPeerId: client.selfPeerId.toB58String(),
+            myRelay: client.relayPeerId,
+            myPeerId: client.selfPeerId,
             fluentPadServiceId: fluentPadServiceId,
             notifyUserAdded: notifyUserAddedFnName,
             immediately: true,
@@ -168,12 +166,12 @@ export const join = async (client: FluenceClient, nickName: string) => {
             )
         `,
         {
-            myRelay: client.relayPeerID.toB58String(),
-            myPeerId: client.selfPeerId.toB58String(),
+            myRelay: client.relayPeerId,
+            myPeerId: client.selfPeerId,
             user: {
                 name: nickName,
-                peer_id: client.selfPeerId.toB58String(),
-                relay_id: client.relayPeerID.toB58String(),
+                peer_id: client.selfPeerId,
+                relay_id: client.relayPeerId,
             },
             userlist: userListServiceId,
             userlistNode: userListNodePid,
@@ -209,8 +207,8 @@ export const leave = async (client: FluenceClient) => {
         {
             userlistNode: userListNodePid,
             userlist: userListServiceId,
-            myRelay: client.relayPeerID.toB58String(),
-            myPeerId: client.selfPeerId.toB58String(),
+            myRelay: client.relayPeerId,
+            myPeerId: client.selfPeerId,
             fluentPadServiceId: fluentPadServiceId,
             notifyUserRemoved: notifyUserRemovedFnName,
         },
@@ -237,8 +235,8 @@ export const getHistory = async (client: FluenceClient) => {
             )
         `,
         {
-            myRelay: client.relayPeerID.toB58String(),
-            myPeerId: client.selfPeerId.toB58String(),
+            myRelay: client.relayPeerId,
+            myPeerId: client.selfPeerId,
             userlist: userListServiceId,
             history: historyServiceId,
             userlistNode: userListNodePid,
@@ -283,8 +281,8 @@ export const addEntry = async (client: FluenceClient, entry: string) => {
             entry: entry,
             userlist: userListServiceId,
             history: historyServiceId,
-            myRelay: client.relayPeerID.toB58String(),
-            myPeerId: client.selfPeerId.toB58String(),
+            myRelay: client.relayPeerId,
+            myPeerId: client.selfPeerId,
             fluentPadServiceId: fluentPadServiceId,
             notifyTextUpdate: notifyTextUpdateFnName,
         },

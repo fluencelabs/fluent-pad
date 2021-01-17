@@ -7,11 +7,10 @@ import {
 } from 'src/app/constants';
 import { useFluenceClient } from '../app/FluenceClientContext';
 import * as api from 'src/app/api';
-import { subscribeToEvent } from '@fluencelabs/fluence';
-import { PeerId } from 'src/app/api';
+import { PeerIdB58, subscribeToEvent } from '@fluencelabs/fluence';
 
 interface User {
-    id: PeerId;
+    id: PeerIdB58;
     name: string;
     isOnline: boolean;
     shouldBecomeOnline: boolean;
@@ -29,7 +28,7 @@ const refreshTimeoutMs = 2000;
 
 export const UserList = (props: { selfName: string }) => {
     const client = useFluenceClient()!;
-    const [users, setUsers] = useState<Map<PeerId, User>>(new Map());
+    const [users, setUsers] = useState<Map<PeerIdB58, User>>(new Map());
 
     useEffect(() => {
         const listRefreshTimer = setInterval(() => {
@@ -53,7 +52,7 @@ export const UserList = (props: { selfName: string }) => {
                         continue;
                     }
 
-                    const isCurrentUser = u.peer_id === client.selfPeerId.toB58String();
+                    const isCurrentUser = u.peer_id === client.selfPeerId;
 
                     result.set(u.peer_id, {
                         name: u.name,
@@ -67,22 +66,20 @@ export const UserList = (props: { selfName: string }) => {
         });
 
         const unsub2 = subscribeToEvent(client, fluentPadServiceId, notifyUserRemovedFnName, (args, _) => {
-            const [users] = args as [PeerId[]];
+            const [userLeft] = args as [PeerIdB58];
             setUsers((prev) => {
                 const result = new Map(prev);
-                for (let u of users) {
-                    result.delete(u);
-                }
+                result.delete(userLeft);
                 return result;
             });
         });
 
         const unsub3 = subscribeToEvent(client, fluentPadServiceId, notifyOnlineFnName, (args, _) => {
-            const [users] = args as [PeerId[]];
+            const [userOnline] = args as [PeerIdB58[]];
             setUsers((prev) => {
                 const result = new Map(prev);
 
-                for (let u of users) {
+                for (let u of userOnline) {
                     const toSetOnline = result.get(u);
                     if (toSetOnline) {
                         toSetOnline.shouldBecomeOnline = true;
@@ -115,7 +112,7 @@ export const UserList = (props: { selfName: string }) => {
             <ul>
                 {usersArray.map((x) => (
                     <li key={x.id}>
-                        <span className={x.id === client.selfPeerId.toB58String() ? 'bold' : ''}>{x.name}</span>
+                        <span className={x.id === client.selfPeerId ? 'bold' : ''}>{x.name}</span>
                         <span className={x.isOnline ? 'green' : 'red'}> ({x.isOnline ? 'online' : 'offline'})</span>
                     </li>
                 ))}
