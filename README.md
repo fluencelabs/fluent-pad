@@ -2,6 +2,10 @@
 
 Fluent-pad is a collaborative code and text editor built with Fluence stack
 
+
+
+![fluent-pad demo](doc/fluent-pad.png)
+
 ## Usage
 
 **TBD**
