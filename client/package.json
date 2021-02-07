@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@fluencelabs/fluence": "0.8.0-big-refactoring.15",
-    "@fluencelabs/fluence-network-environment": "^1.0.5",
-    "@testing-library/jest-dom": "^5.11.6",
-    "@testing-library/react": "^11.2.2",
-    "@testing-library/user-event": "^12.5.0",
+    "@fluencelabs/fluence": "^0.9.17",
+    "@fluencelabs/fluence-network-environment": "^1.0.8",
+    "@testing-library/jest-dom": "^5.11.9",
+    "@testing-library/react": "^11.2.5",
+    "@testing-library/user-event": "^12.6.3",
     "@types/jest": "^26.0.19",
-    "@types/node": "^12.19.9",
-    "@types/react": "^16.14.2",
+    "@types/node": "^12.19.16",
+    "@types/react": "^16.14.3",
     "@types/react-dom": "^16.9.10",
     "automerge": "^0.14.2",
     "diff-match-patch": "^1.0.5",
@@ -51,6 +51,6 @@
     ]
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.167"
+    "@types/lodash": "^4.14.168"
   }
 }
