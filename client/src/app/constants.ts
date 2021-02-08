@@ -7,8 +7,8 @@ export const notifyUserAddedFnName = 'notifyUserAdded';
 export const notifyUserRemovedFnName = 'notifyUserRemoved';
 export const notifyTextUpdateFnName = 'notifyTextUpdate';
 
-export const userListServiceId = '03edcc81-7777-4234-b048-36305d8d65e2';
-export const historyServiceId = '7fb57031-1d3d-4391-9a9f-da40a6c4963d';
+export const userListServiceId = 'b4c8b165-0cd2-4ced-817c-fbf2492a8d4d';
+export const historyServiceId = 'c4ea34b1-d659-4d94-bf5e-66bcd41bdde2';
 
 export const userListNodePeerId = dev[2].peerId;
 export const historyNodePeerId = dev[2].peerId;
