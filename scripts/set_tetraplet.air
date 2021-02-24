@@ -1,0 +1,10 @@
+(xor
+    (seq
+        (call relay ("op" "identity") [])
+        (seq
+            (call relay (history "set_tetraplet") [node userlist "is_authenticated" json_path] auth_result)
+            (call %init_peer_id% (returnService "run") [auth_result])
+        )
+    )
+    (call %init_peer_id% (returnService "run") [%last_error%])
+)

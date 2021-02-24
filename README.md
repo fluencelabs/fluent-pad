@@ -23,6 +23,8 @@ Fluent-pad is a collaborative code and text editor built with Fluence stack
 - Build client
 - Run
 
+And then change service ids in the [constants.ts](client/src/app/constants.ts) file
+
 # Fluence stack
 
 |         Layer         |                                                               Tech                                                                |              Scale               |               State               |                                                   Based on                                                    |
