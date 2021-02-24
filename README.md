@@ -23,6 +23,24 @@ Fluent-pad is a collaborative code and text editor built with Fluence stack
 - Build client
 - Run
 
+## How to deploy services
+```shell
+$ cd services
+$ ./build.sh
+$ cd artifacts
+$ fldist new_service --modules history.wasm:history.json --name pad-history
+...
+service id: 64ea579e-b863-4a42-b80c-e7b5ec1ab7fa
+service created successfully
+
+$ fldist new_service --modules user-list.wasm:user-list.json --name pad-user-list
+...
+service id: 91041afe-0c3c-451a-9003-6bb92a570aae
+service created successfully
+```
+
+And then change service ids in the [constants.ts](client/src/app/constants.ts) file
+
 # Fluence stack
 
 |         Layer         |                                                               Tech                                                                |              Scale               |               State               |                                                   Based on                                                    |
