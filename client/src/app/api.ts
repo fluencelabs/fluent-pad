@@ -52,14 +52,14 @@ export const updateOnlineStatuses = async (client: FluenceClient) => {
                 (fold allUsers.$.users! u
                     (par
                         (seq
-                            (call u.$.relay_id ("op" "identity") [])
+                            (call u.$.relay_id! ("op" "identity") [])
                             (seq
-                                (call u.$.peer_id ("op" "identity") [])
+                                (call u.$.peer_id! ("op" "identity") [])
                                 (seq
-                                    (call u.$.relay_id ("op" "identity") [])
+                                    (call u.$.relay_id! ("op" "identity") [])
                                     (seq
                                         (call myRelay ("op" "identity") [])
-                                        (call myPeerId (fluentPadServiceId notifyOnline) [u.$.peer_id])
+                                        (call myPeerId (fluentPadServiceId notifyOnline) [u.$.peer_id!])
                                     )
                                 )
                             )
@@ -93,8 +93,8 @@ export const notifySelfAdded = (client: FluenceClient, name: string) => {
                 (fold allUsers.$.users! u
                     (par
                         (seq
-                            (call u.$.relay_id ("op" "identity") [])
-                            (call u.$.peer_id (fluentPadServiceId notifyUserAdded) [myUser setOnline])
+                            (call u.$.relay_id! ("op" "identity") [])
+                            (call u.$.peer_id! (fluentPadServiceId notifyUserAdded) [myUser setOnline])
                         )
                         (next u)
                     )
@@ -194,8 +194,8 @@ export const leave = async (client: FluenceClient) => {
                     (fold allUsers.$.users! u
                         (par
                             (seq
-                                (call u.$.relay_id ("op" "identity") [])
-                                (call u.$.peer_id (fluentPadServiceId notifyUserRemoved) [myPeerId])
+                                (call u.$.relay_id! ("op" "identity") [])
+                                (call u.$.peer_id! (fluentPadServiceId notifyUserRemoved) [myPeerId])
                             )
                             (next u)
                         )
@@ -263,8 +263,8 @@ export const addEntry = async (client: FluenceClient, entry: string) => {
                         (fold allUsers.$.users! u
                             (par
                                 (seq
-                                    (call u.$.relay_id ("op" "identity") [])
-                                    (call u.$.peer_id (fluentPadServiceId notifyTextUpdate) [myPeerId entry token.$.["is_authenticated"]])
+                                    (call u.$.relay_id! ("op" "identity") [])
+                                    (call u.$.peer_id! (fluentPadServiceId notifyTextUpdate) [myPeerId entry token.$.["is_authenticated"]])
                                 )
                                 (next u)
                             )
