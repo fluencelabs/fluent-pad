@@ -41,7 +41,7 @@ We need to set tetraplet so `history` service knows which instance of `user-list
     (seq
         (call relay ("op" "identity") [])
         (seq
-            (call relay (history "set_tetraplet") [node userlist "is_authenticated" json_path] auth_result)
+            (call relay (history "set_tetraplet") [host userlist function json_path] auth_result)
             (call %init_peer_id% (returnService "run") [auth_result])
         )
     )
@@ -50,7 +50,15 @@ We need to set tetraplet so `history` service knows which instance of `user-list
 ```
 Command:
 ```shell
-fldist run_air -p scripts/set_tetraplet.air -d '{"node":"12D3KooWBUJifCTgaxAUrcM9JysqCcS4CS8tiYH5hExbdWCAoNwb", "userlist":"91041afe-0c3c-451a-9003-6bb92a570aae","history":"64ea579e-b863-4a42-b80c-e7b5ec1ab7fa", "json_path":"$.[\"is_authenticated\"]"}' -s Fs6nQaGEsM5EgnprUbUtoLYWhUC8o6QK1gseP9pfhzUm
+fldist run_air -p scripts/set_tetraplet.air \
+    -s Fs6nQaGEsM5EgnprUbUtoLYWhUC8o6QK1gseP9pfhzUm \
+    -d '{
+         "host":"12D3KooWBUJifCTgaxAUrcM9JysqCcS4CS8tiYH5hExbdWCAoNwb", 
+         "json_path":"$.[\"is_authenticated\"]",
+         "function": "is_authenticated",
+         "userlist":"91041afe-0c3c-451a-9003-6bb92a570aae",
+         "history":"64ea579e-b863-4a42-b80c-e7b5ec1ab7fa"
+        }'
 ```
 
 ## Test
