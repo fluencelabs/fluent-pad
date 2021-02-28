@@ -6,7 +6,7 @@ $color-disabled: lightgray;
 $color1: black;
 $color2: rgb(214, 214, 214);
 
-$accent-color: rgb(225, 30, 90);
+$accent-color: rgb(38, 95, 230);
 
 $header-height: 60px;
 $border-radius: 10px;
@@ -52,7 +52,7 @@ body {
 }
 
 .content {
-    width: 1200px;
+    width: 1000px;
     margin-left: auto;
     margin-right: auto;
 
@@ -93,8 +93,12 @@ body {
 }
 
 .userlist {
+    width: 100%;
+    overflow: scroll;
+    white-space: nowrap;
     margin-top: 10px;
-    height: 30px;
+    height: 40px;
+    scrollbar-width: none;
 
     & li {
         display: inline;
@@ -104,11 +108,10 @@ body {
 }
 
 .code-editor {
-    width: 100%;
-    min-height: 500px;
+    width: 98%;
+    min-height: 5rem;
 
     resize: none;
-    padding: 1em 0.5em 0.5em 0.5em;
 
     box-shadow: $shadow;
 
@@ -123,6 +126,21 @@ body {
 
     &:disabled {
         background-color: $color-disabled;
+    }
+}
+
+.add-code-section-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    button {
+        margin: 0.5rem;
+        padding: 0.5rem;
+        width: 3rem;
+        height: 3rem;
+        font-size: 1.5rem;
+        border-radius: 50%;
     }
 }
 
@@ -234,4 +252,9 @@ body {
 
 .bold {
     font-weight: bold;
+}
+
+.drawing-board {
+    border-color: $accent-color;
+    border-width: 2px;
 }
