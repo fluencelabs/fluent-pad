@@ -6,6 +6,7 @@ import { fluentPadServiceId, notifyTextUpdateFnName } from 'src/app/constants';
 import { useFluenceClient } from '../app/FluenceClientContext';
 import { getUpdatedDocFromText, initDoc, SyncClient } from '../app/sync';
 import * as api from 'src/app/api';
+import { withErrorHandlingAsync } from './util';
 
 const broadcastUpdates = _.debounce((text: string, syncClient: SyncClient) => {
     let doc = syncClient.getDoc();
@@ -26,7 +27,9 @@ export const CollaborativeEditor = () => {
         };
 
         syncClient.handleSendChanges = (changes: string) => {
-            api.addEntry(client, changes);
+            withErrorHandlingAsync(async () => {
+                await api.addEntry(client, changes);
+            });
         };
 
         const unsub = subscribeToEvent(client, fluentPadServiceId, notifyTextUpdateFnName, (args, tetraplets) => {
@@ -43,7 +46,8 @@ export const CollaborativeEditor = () => {
         syncClient.start();
 
         // don't block
-        api.getHistory(client).then((res) => {
+        withErrorHandlingAsync(async () => {
+            const res = await api.getHistory(client);
             for (let e of res) {
                 syncClient.receiveChanges(e.body);
             }

@@ -8,6 +8,7 @@ import {
 import { useFluenceClient } from '../app/FluenceClientContext';
 import * as api from 'src/app/api';
 import { PeerIdB58, subscribeToEvent } from '@fluencelabs/fluence';
+import { withErrorHandlingAsync } from './util';
 
 interface User {
     id: PeerIdB58;
@@ -40,7 +41,9 @@ export const UserList = (props: { selfName: string }) => {
             });
 
             // don't block
-            api.updateOnlineStatuses(client);
+            withErrorHandlingAsync(async () => {
+                await api.updateOnlineStatuses(client);
+            });
         }, refreshTimeoutMs);
 
         const unsub1 = subscribeToEvent(client, fluentPadServiceId, notifyUserAddedFnName, (args, _) => {
@@ -92,8 +95,10 @@ export const UserList = (props: { selfName: string }) => {
         });
 
         // don't block
-        api.getUserList(client);
-        api.notifySelfAdded(client, props.selfName);
+        withErrorHandlingAsync(async () => {
+            await api.getUserList(client);
+            await api.notifySelfAdded(client, props.selfName);
+        });
 
         return () => {
             clearTimeout(listRefreshTimer);

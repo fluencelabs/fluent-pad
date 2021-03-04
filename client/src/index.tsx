@@ -2,14 +2,18 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.scss';
 import App from './components/App';
-import log from 'loglevel';
+import { setLogLevel } from '@fluencelabs/fluence';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-// log.setLevel('trace');
-log.setLevel('error');
+setLogLevel('INFO');
 
 ReactDOM.render(
     <React.StrictMode>
-        <App />
+        <div>
+            <App />
+            <ToastContainer />
+        </div>
     </React.StrictMode>,
     document.getElementById('root'),
 );

@@ -2,11 +2,14 @@ import { createClient, FluenceClient } from '@fluencelabs/fluence';
 import React, { useEffect, useState } from 'react';
 
 import './App.scss';
+
 import { FluenceClientContext } from '../app/FluenceClientContext';
 import { UserList } from './UserList';
 import * as api from 'src/app/api';
 import { CollaborativeEditor } from './CollaborativeEditor';
 import { relayNode } from 'src/app/constants';
+import { withErrorHandlingAsync } from './util';
+import { toast } from 'react-toastify';
 
 const App = () => {
     const [client, setClient] = useState<FluenceClient | null>(null);
@@ -24,8 +27,10 @@ const App = () => {
             return;
         }
 
-        await api.join(client, nickName);
-        setIsInRoom(true);
+        await withErrorHandlingAsync(async () => {
+            await api.join(client, nickName);
+            setIsInRoom(true);
+        });
     };
 
     const leaveRoom = async () => {
@@ -33,8 +38,10 @@ const App = () => {
             return;
         }
 
-        await api.leave(client);
-        setIsInRoom(false);
+        await withErrorHandlingAsync(async () => {
+            await api.leave(client);
+            setIsInRoom(false);
+        });
     };
 
     return (
