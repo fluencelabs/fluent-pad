@@ -26,6 +26,9 @@ pub enum HistoryError {
     InternalError(String),
     InvalidArgument(String),
     Unauthorized(String),
+    IOError(String),
+    SerializeError(String),
+    DeserializeError(String),
 }
 
 impl Error for HistoryError {}
@@ -36,6 +39,9 @@ impl std::fmt::Display for HistoryError {
             Self::InternalError(err_msg) => writeln!(f, "{}", err_msg),
             Self::InvalidArgument(err_msg) => writeln!(f, "{}", err_msg),
             Self::Unauthorized(err_msg) => writeln!(f, "{}", err_msg),
+            Self::IOError(err_msg) => writeln!(f, "{}", err_msg),
+            Self::SerializeError(err_msg) => writeln!(f, "{}", err_msg),
+            Self::DeserializeError(err_msg) => writeln!(f, "{}", err_msg),
         }
     }
 }
@@ -51,6 +57,9 @@ fn to_error_core(err: &HistoryError) -> i32 {
         HistoryError::Unauthorized(_) => 1,
         HistoryError::InternalError(_) => 2,
         HistoryError::InvalidArgument(_) => 3,
+        HistoryError::IOError(_) => 4,
+        HistoryError::SerializeError(_) => 5,
+        HistoryError::DeserializeError(_) => 6,
     }
 }
 

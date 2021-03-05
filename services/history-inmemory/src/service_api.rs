@@ -65,7 +65,7 @@ pub fn set_tetraplet(
 ) -> EmptyResult {
     fn set_impl(peer_id: String, service_id: String, fn_name: String, path: String) -> Result<()> {
         is_owner()?;
-        Ok(store_tetraplet(peer_id, service_id, fn_name, path))
+        Ok(store_tetraplet(peer_id, service_id, fn_name, path)?)
     }
 
     set_impl(peer_id, service_id, fn_name, path).into()
@@ -88,7 +88,7 @@ pub fn is_authenticated(auth: bool, index: u64) -> Result<()> {
     use crate::errors::HistoryError::Unauthorized;
     use boolinator::Boolinator;
 
-    match get_tetraplet() {
+    match get_tetraplet()? {
         None => Err(Unauthorized("Set tetraplet before usage".to_string())),
         Some(t) => {
             let call_parameters: CallParameters = fluence::get_call_parameters();

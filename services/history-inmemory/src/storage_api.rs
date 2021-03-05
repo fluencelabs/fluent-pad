@@ -17,11 +17,15 @@
 use crate::history_entry::HistoryEntry;
 use crate::Result;
 
+use crate::errors::HistoryError;
 use crate::utils::{u64_to_usize, usize_to_u64};
 use once_cell::sync::OnceCell;
 use parking_lot::Mutex;
+use serde::{Deserialize, Serialize};
+use std::fs;
+use std::path::Path;
 
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Tetraplet {
     pub peer_pk: String,
     pub service_id: String,
@@ -36,6 +40,7 @@ pub struct Data {
 }
 
 static INSTANCE: OnceCell<Mutex<Data>> = OnceCell::new();
+const TETRAPLET_PATH: &str = "/history/tetraplet.txt";
 
 fn get_data() -> &'static Mutex<Data> {
     INSTANCE.get_or_init(|| <_>::default())
@@ -73,7 +78,12 @@ pub fn get_all_entries() -> Result<Vec<HistoryEntry>> {
     Ok(data.entries.to_vec())
 }
 
-pub fn store_tetraplet(peer_id: String, service_id: String, fn_name: String, path: String) {
+pub fn store_tetraplet(
+    peer_id: String,
+    service_id: String,
+    fn_name: String,
+    path: String,
+) -> Result<()> {
     let mut data = get_data().lock();
 
     let tetraplet = Tetraplet {
@@ -83,10 +93,36 @@ pub fn store_tetraplet(peer_id: String, service_id: String, fn_name: String, pat
         json_path: path,
     };
 
-    data.tetraplet = Some(tetraplet)
+    let tetraplet_str = serde_json::to_string(&tetraplet).map_err(|err| {
+        HistoryError::SerializeError(format!("Cannot serialize tetraplet to a file: {}", err))
+    })?;
+    fs::write(Path::new(TETRAPLET_PATH), tetraplet_str)
+        .map_err(|err| HistoryError::IOError(format!("Cannot write to a file: {}", err)))?;
+
+    data.tetraplet = Some(tetraplet);
+
+    Ok(())
 }
 
-pub fn get_tetraplet() -> Option<Tetraplet> {
+pub fn get_tetraplet() -> Result<Option<Tetraplet>> {
     let data = get_data().lock();
-    data.tetraplet.clone()
+    let t_op = data.tetraplet.clone();
+    if let None = t_op {
+        if Path::new(TETRAPLET_PATH).exists() {
+            let tetraplet = fs::read_to_string(TETRAPLET_PATH).map_err(|err| {
+                HistoryError::IOError(format!("Cannot read from a file: {}", err))
+            })?;
+            let tetraplet: Tetraplet = serde_json::from_str(&tetraplet).map_err(|err| {
+                HistoryError::DeserializeError(format!(
+                    "Cannot deserialize tetraplet from a file: {}",
+                    err
+                ))
+            })?;
+            Ok(Some(tetraplet))
+        } else {
+            Ok(None)
+        }
+    } else {
+        Ok(t_op)
+    }
 }

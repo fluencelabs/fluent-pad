@@ -4,3 +4,8 @@ modules_dir = "artifacts"
     name = "history"
     mem_pages_count = 100
     logger_enabled = true
+
+    [module.wasi]
+    preopened_files = ["./history"]
+    # this is where files will be stored
+    mapped_dirs = { "history" = "./history" }
