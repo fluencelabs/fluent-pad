@@ -2,12 +2,12 @@ import { FluenceClient, Particle, sendParticle, sendParticleAsFetch } from '@flu
 
 import {
     fluentPadServiceId,
-    notifyOnlineFnName,
     notifyTextUpdateFnName,
     notifyUserAddedFnName,
     notifyUserRemovedFnName,
     history,
     userList,
+    notifyOnlineFnName,
 } from './constants';
 
 export interface ServiceResult {
@@ -50,16 +50,10 @@ export const updateOnlineStatuses = async (client: FluenceClient) => {
                 (fold allUsers.$.users! u
                     (par
                         (seq
-                            (call u.$.relay_id! ("op" "identity") [])
+                            (call u.$.relay_id! ("peer" "is_connected") [u.$.peer_id!] isOnline)
                             (seq
-                                (call u.$.peer_id! ("op" "identity") [])
-                                (seq
-                                    (call u.$.relay_id! ("op" "identity") [])
-                                    (seq
-                                        (call myRelay ("op" "identity") [])
-                                        (call myPeerId (fluentPadServiceId notifyOnline) [u.$.peer_id!])
-                                    )
-                                )
+                                (call myRelay ("op" "identity") [])
+                                (call myPeerId (fluentPadServiceId notifyOnline) [u.$.peer_id! isOnline])
                             )
                         )
                         (next u)
@@ -92,7 +86,7 @@ export const notifySelfAdded = (client: FluenceClient, name: string) => {
                     (par
                         (seq
                             (call u.$.relay_id! ("op" "identity") [])
-                            (call u.$.peer_id! (fluentPadServiceId notifyUserAdded) [myUser setOnline])
+                            (call u.$.peer_id! (fluentPadServiceId notifyUserAdded) [myUser true])
                         )
                         (next u)
                     )
@@ -107,14 +101,11 @@ export const notifySelfAdded = (client: FluenceClient, name: string) => {
             myPeerId: client.selfPeerId,
             fluentPadServiceId: fluentPadServiceId,
             notifyUserAdded: notifyUserAddedFnName,
-            myUser: [
-                {
-                    name: name,
-                    peer_id: client.selfPeerId,
-                    relay_id: client.relayPeerId,
-                },
-            ],
-            setOnline: true,
+            myUser: {
+                name: name,
+                peer_id: client.selfPeerId,
+                relay_id: client.relayPeerId,
+            },
         },
     );
 
@@ -128,9 +119,20 @@ export const getUserList = async (client: FluenceClient) => {
             (call myRelay ("op" "identity") [])
             (seq
                 (call userlistNode (userlist "get_users") [] allUsers)
-                (seq 
-                    (call myRelay ("op" "identity") [])
-                    (call myPeerId (fluentPadServiceId notifyUserAdded) [allUsers.$.users!])
+                (fold allUsers.$.users! u
+                    (par
+                        (seq
+                            (call u.$.relay_id! ("op" "identity") [])
+                            (seq
+                                (call u.$.relay_id! ("peer" "is_connected") [u.$.peer_id!] isOnline)
+                                (seq 
+                                    (call myRelay ("op" "identity") [])
+                                    (call myPeerId (fluentPadServiceId notifyUserAdded) [u isOnline])
+                                )
+                            )
+                        )
+                        (next u)
+                    )
                 )
             )
         )
@@ -142,7 +144,6 @@ export const getUserList = async (client: FluenceClient) => {
             myPeerId: client.selfPeerId,
             fluentPadServiceId: fluentPadServiceId,
             notifyUserAdded: notifyUserAddedFnName,
-            immediately: true,
         },
     );
 

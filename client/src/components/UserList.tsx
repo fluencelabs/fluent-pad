@@ -14,16 +14,7 @@ interface User {
     id: PeerIdB58;
     name: string;
     isOnline: boolean;
-    shouldBecomeOnline: boolean;
 }
-
-const turnUserAsOfflineCandidate = (u: User): User => {
-    return {
-        ...u,
-        isOnline: u.shouldBecomeOnline,
-        shouldBecomeOnline: false,
-    };
-};
 
 const refreshTimeoutMs = 2000;
 
@@ -33,13 +24,6 @@ export const UserList = (props: { selfName: string }) => {
 
     useEffect(() => {
         const listRefreshTimer = setInterval(() => {
-            setUsers((prev) => {
-                const newUsers = Array.from(prev).map(
-                    ([key, user]) => [key, turnUserAsOfflineCandidate(user)] as const,
-                );
-                return new Map(newUsers);
-            });
-
             // don't block
             withErrorHandlingAsync(async () => {
                 await api.updateOnlineStatuses(client);
@@ -47,23 +31,21 @@ export const UserList = (props: { selfName: string }) => {
         }, refreshTimeoutMs);
 
         const unsub1 = subscribeToEvent(client, fluentPadServiceId, notifyUserAddedFnName, (args, _) => {
-            const [users, setOnline] = args as [api.User[], boolean];
+            const [user, isOnline] = args as [api.User, boolean];
+            console.log(user, isOnline);
             setUsers((prev) => {
+                const u = user;
                 const result = new Map(prev);
-                for (let u of users) {
-                    if (result.has(u.peer_id)) {
-                        continue;
-                    }
-
-                    const isCurrentUser = u.peer_id === client.selfPeerId;
-
-                    result.set(u.peer_id, {
-                        name: u.name,
-                        id: u.peer_id,
-                        isOnline: isCurrentUser || setOnline,
-                        shouldBecomeOnline: isCurrentUser || setOnline,
-                    });
+                if (result.has(u.peer_id)) {
+                    return result;
                 }
+
+                result.set(u.peer_id, {
+                    name: u.name,
+                    id: u.peer_id,
+                    isOnline: isOnline,
+                });
+
                 return result;
             });
         });
@@ -78,18 +60,13 @@ export const UserList = (props: { selfName: string }) => {
         });
 
         const unsub3 = subscribeToEvent(client, fluentPadServiceId, notifyOnlineFnName, (args, _) => {
-            const [userOnline] = args as [PeerIdB58[]];
+            const [user, onlineStatus] = args as [PeerIdB58, boolean];
             setUsers((prev) => {
                 const result = new Map(prev);
-
-                for (let u of userOnline) {
-                    const toSetOnline = result.get(u);
-                    if (toSetOnline) {
-                        toSetOnline.shouldBecomeOnline = true;
-                        toSetOnline.isOnline = true;
-                    }
+                const u = result.get(user);
+                if (u) {
+                    result.set(user, { ...u, isOnline: onlineStatus });
                 }
-
                 return result;
             });
         });
