@@ -1,0 +1,51 @@
+{
+    "services": {
+        "history": {
+            "dependencies": ["history_inmemory"],
+            "node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3",
+            "blueprint_id": "677b6d56c59476ba6cf406e34b81abe12463750d76f2831bd91e87fdb45879bd",
+            "id": "95e5c7b6-12c0-4092-88ca-86323a4b51a9"
+        },
+        "user_list": {
+            "dependencies": ["user_list_inmemory"],
+            "node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3",
+            "blueprint_id": "7ee141f05af3165bdfa5c9ee594be5a0238c36bfaaee6b6d1963ecccab13f820",
+            "id": "27efebab-ac0b-4d88-a175-c76a9c3125ae"
+        }
+    },
+    "modules": {
+        "history_inmemory": {
+            "file": "history.wasm",
+            "config": {
+                "preopened_files": ["/tmp"],
+                "mapped_dirs": {
+                    "history": "/tmp"
+                }
+            },
+            "hash": "984a6485bc93a0e5148da14e757d85a8ff4eb9e6ad8814df10cda16d33a4f375"
+        },
+        "user_list_inmemory": {
+            "file": "user_list.wasm",
+            "config": {},
+            "hash": "96a3180b21dfc5f194a923651820ec1aa6de3063169e265b791a61abd56e6bb8"
+        }
+    },
+    "scripts": {
+        "set_tetraplet": {
+            "file": "set_tetraplet.air",
+            "variables": {
+                "function": "is_authenticated",
+                "json_path": "$.[\"is_authenticated\"]"
+            },
+            "node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3"
+        }
+    },
+    "script_storage": {
+        "remove_disconnected": {
+            "file": "remove_disconnected.air",
+            "interval": 10,
+            "node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3",
+            "id": "f2dc0790-a26a-42e7-9b93-26fa49d0fea2"
+        }
+    }
+}
