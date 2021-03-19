@@ -16,7 +16,7 @@ interface User {
     isOnline: boolean;
 }
 
-const refreshTimeoutMs = 2000;
+const refreshOnlineStatusTimeoutMs = 2000;
 
 export const UserList = (props: { selfName: string }) => {
     const client = useFluenceClient()!;
@@ -28,7 +28,7 @@ export const UserList = (props: { selfName: string }) => {
             withErrorHandlingAsync(async () => {
                 await api.updateOnlineStatuses(client);
             });
-        }, refreshTimeoutMs);
+        }, refreshOnlineStatusTimeoutMs);
 
         const unsub1 = subscribeToEvent(client, fluentPadServiceId, notifyUserAddedFnName, (args, _) => {
             const [user, isOnline] = args as [api.User, boolean];
