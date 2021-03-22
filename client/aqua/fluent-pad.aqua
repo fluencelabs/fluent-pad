@@ -1,6 +1,9 @@
 service Peer("peer"):
 	is_connected: string -> bool
 
+service Op("op"):
+	identity: -> ()
+
 data ServiceInstance:
 	peer_id: string
 	service_id: string
@@ -61,7 +64,7 @@ service FluentPad("fluence/fluent-pad"):
 	notifyUserRemoved: string -> () -- user peerId,
 	notifyTextUpdate: string, string, bool -> () -- authorPeerId, changes, isAuthorized
 
-func join(user: User, app: App) -> EmptyServiceResult:
+func join(app: App, user: User) -> EmptyServiceResult:
 	on app.user_list.peer_id:
 		UserList app.user_list.service_id
 		res <- UserList.join(user)
@@ -73,29 +76,33 @@ func getUserList(app: App) -> []User:
 		allUsers <- UserList.get_users()
 	<- allUsers.users
 
-func notifySelfAdded(app: App, name: string):
+func notifySelfAdded(app: App, me: User):
 	allUsers <- getUserList(app)
 	for user <- allUsers:
-		par on user.relay_id:
-			on user.peer_id
-				FluentPad.notifyUserAdded(user.peer_id, true)
+		on user.relay_id:
+			Op.identity()
+		par on user.peer_id:
+			FluentPad.notifyUserAdded(me, true)
 
-func updateOnlineStatuses(updateStatus: bool -> (), callback: (string, bool) -> ()):
- 	allUsers <- getUserList(app)
+func updateOnlineStatuses(app: App, updateStatus: bool -> (), callback: string, bool -> ()):
+	allUsers <- getUserList(app)
 	for user <- allUsers:
-		par on user.relay_id:
+		on user.relay_id:
+			Op.identity()
+		par on user.peer_id:
 			isOnline <- Peer.is_connected(user.peer_id)
 			callback(user.peer_id, isOnline)
 
-func leave(currentUserName: string, app: App):
+func leave(app: App, currentUserName: string):
 	on app.user_list.peer_id:
 		UserList app.user_list.service_id
 		res <- UserList.leave(currentUserName)
-		allUsers <- getUserList(app)
- 		for user <- allUsers:
- 			par on user.relay_id:
-				on user.peer_id
-					FluentPad.notifyUserRemoved(currentUserName)
+	allUsers <- getUserList(app)
+	for user <- allUsers:
+		on user.relay_id:
+			Op.identity()
+		par on user.peer_id:
+			FluentPad.notifyUserRemoved(currentUserName)
 
 func auth(app: App) -> AuthResult:
 	on app.user_list.peer_id:

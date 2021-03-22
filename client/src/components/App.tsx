@@ -28,15 +28,11 @@ const App = () => {
         }
 
         await withErrorHandlingAsync(async () => {
-            await join(
-                client,
-                {
-                    peer_id: client.selfPeerId,
-                    relay_id: client.relayPeerId!,
-                    name: nickName,
-                },
-                fluentPadApp,
-            );
+            await join(client, fluentPadApp, {
+                peer_id: client.selfPeerId,
+                relay_id: client.relayPeerId!,
+                name: nickName,
+            });
             setIsInRoom(true);
         });
     };
@@ -47,7 +43,7 @@ const App = () => {
         }
 
         await withErrorHandlingAsync(async () => {
-            await leave(client, nickName, fluentPadApp);
+            await leave(client, fluentPadApp, nickName);
             setIsInRoom(false);
         });
     };
