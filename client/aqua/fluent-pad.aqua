@@ -24,7 +24,7 @@ data AuthResult:
 	err_msg: string
 	is_authenticated: bool
 
-service UserList("userlist_id"):
+service UserList:
 	is_authenticated: -> AuthResult
 	get_users: -> GetUsersServiceResult
 	join: User -> EmptyServiceResult
@@ -45,17 +45,17 @@ data GetEntriesServiceResult:
 	err_msg: string
 	entries: []HistoryEntry
 
-service History("history_id"):
-	get_all: string, bool -> AddServiceResult
+service History:
+	get_all: bool -> GetEntriesServiceResult
 	get_last: u64, bool -> GetEntriesServiceResult
-	add: bool -> GetEntriesServiceResult
+	add: string, bool -> AddServiceResult
 	set_tetraplet: string, string, string, string -> EmptyServiceResult
 
-func getUserList():
+func getUserList() -> []User:
 	on "userlist_node":
 		UserList "userlist_id"
 		allUsers <- UserList.get_users()
-	<- allUsers
+	<- allUsers.users
 
 -- func updateOnlineStatuses(updateStatus: bool -> ()):
 -- 	allUsers <- getUserList()
@@ -63,21 +63,21 @@ func getUserList():
 -- 			par on user.relay_id
 -- 				isOnline <- Peer.is_connected(user.peer_id)
 
-func join(user: User, user_list: PeerServicePair):
+func join(user: User, user_list: PeerServicePair) -> EmptyServiceResult:
 	on user_list.peer_id:
 		UserList user_list.service_id
 		res <- UserList.join(user)
 	<- res
 
-func auth(user_list: PeerServicePair):
+func auth(user_list: PeerServicePair) -> AuthResult:
 	on user_list.peer_id:
 		UserList user_list.service_id
 		res <- UserList.is_authenticated()
 	<- res
 
-func getHistory(user_list: PeerServicePair, history: PeerServicePair):
-	auth <- auth(user_list)
+func getHistory(user_list: PeerServicePair, history: PeerServicePair) -> GetEntriesServiceResult:
+	authRes <- auth(user_list)
 	on history.peer_id:
 		History history.service_id
-		res <- History.get_all()
+		res <- History.get_all(authRes.is_authenticated)
 	<- res
