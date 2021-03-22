@@ -1,11 +1,11 @@
 [package]
-name = "user-list"
+name = "user_list"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
 [[bin]]
-name = "user-list"
+name = "user_list"
 path = "src/main.rs"
 
 [dependencies]
