@@ -1,18 +1,21 @@
 import { FluenceClient, PeerIdB58 } from '@fluencelabs/fluence';
 import { RequestFlowBuilder } from '@fluencelabs/fluence/dist/api.unstable';
 
-export async function getUserList(
-    client: FluenceClient,
-): Promise<{ name: string; peer_id: string; relay_id: string }[]> {
+
+
+export async function getUserList(client: FluenceClient, app: {history:{peer_id:string;service_id:string};user_list:{peer_id:string;service_id:string}}): Promise<{name:string;peer_id:string;relay_id:string}[]> {
     let request;
-    const promise = new Promise<{ name: string; peer_id: string; relay_id: string }[]>((resolve, reject) => {
+    const promise = new Promise<{name:string;peer_id:string;relay_id:string}[]>((resolve, reject) => {
         request = new RequestFlowBuilder()
             .withRawScript(
                 `
 (seq
  (seq
-  (call %init_peer_id% ("getDataSrv" "relay") [] relay)
-  (call "userlist_node" ("userlist_id" "get_users") [] allUsers)
+  (seq
+   (call %init_peer_id% ("getDataSrv" "app") [] app0)
+   (call %init_peer_id% ("getDataSrv" "relay") [] relay)
+  )
+  (call app.$.user_list.peer_id (app.$.user_list.service_id "get_users") [] allUsers)
  )
  (seq
   (call relay ("op" "identity") [])
@@ -26,15 +29,14 @@ export async function getUserList(
                 h.on('getDataSrv', 'relay', () => {
                     return client.relayPeerId;
                 });
-                h.on('getRelayService', 'hasReleay', () => {
-                    // Not Used
+                h.on('getRelayService', 'hasReleay', () => {// Not Used
                     return client.relayPeerId !== undefined;
                 });
-
+                h.on('getDataSrv', 'app', () => {return app;});
                 h.on('callbackSrv', 'response', (args) => {
-                    const [res] = args;
-                    resolve(res);
-                });
+  const [res] = args;
+  resolve(res);
+});
 
                 h.on('nameOfServiceWhereToSendXorError', 'errorProbably', (args) => {
                     // assuming error is the single argument
@@ -50,14 +52,12 @@ export async function getUserList(
     await client.initiateFlow(request);
     return promise;
 }
+      
 
-export async function join(
-    client: FluenceClient,
-    user: { name: string; peer_id: string; relay_id: string },
-    user_list: { peer_id: string; service_id: string },
-): Promise<{ err_msg: string; ret_code: number }> {
+
+export async function join(client: FluenceClient, user: {name:string;peer_id:string;relay_id:string}, app: {history:{peer_id:string;service_id:string};user_list:{peer_id:string;service_id:string}}): Promise<{err_msg:string;ret_code:number}> {
     let request;
-    const promise = new Promise<{ err_msg: string; ret_code: number }>((resolve, reject) => {
+    const promise = new Promise<{err_msg:string;ret_code:number}>((resolve, reject) => {
         request = new RequestFlowBuilder()
             .withRawScript(
                 `
@@ -66,11 +66,11 @@ export async function join(
   (seq
    (seq
     (call %init_peer_id% ("getDataSrv" "user") [] user0)
-    (call %init_peer_id% ("getDataSrv" "user_list") [] user_list1)
+    (call %init_peer_id% ("getDataSrv" "app") [] app1)
    )
    (call %init_peer_id% ("getDataSrv" "relay") [] relay)
   )
-  (call user_list.$.peer_id (user_list.$.service_id "join") [user0] res)
+  (call app.$.user_list.peer_id (app.$.user_list.service_id "join") [user0] res)
  )
  (seq
   (call relay ("op" "identity") [])
@@ -84,20 +84,15 @@ export async function join(
                 h.on('getDataSrv', 'relay', () => {
                     return client.relayPeerId;
                 });
-                h.on('getRelayService', 'hasReleay', () => {
-                    // Not Used
+                h.on('getRelayService', 'hasReleay', () => {// Not Used
                     return client.relayPeerId !== undefined;
                 });
-                h.on('getDataSrv', 'user', () => {
-                    return user;
-                });
-                h.on('getDataSrv', 'user_list', () => {
-                    return user_list;
-                });
+                h.on('getDataSrv', 'user', () => {return user;});
+h.on('getDataSrv', 'app', () => {return app;});
                 h.on('callbackSrv', 'response', (args) => {
-                    const [res] = args;
-                    resolve(res);
-                });
+  const [res] = args;
+  resolve(res);
+});
 
                 h.on('nameOfServiceWhereToSendXorError', 'errorProbably', (args) => {
                     // assuming error is the single argument
@@ -113,23 +108,71 @@ export async function join(
     await client.initiateFlow(request);
     return promise;
 }
+      
 
-export async function auth(
-    client: FluenceClient,
-    user_list: { peer_id: string; service_id: string },
-): Promise<{ err_msg: string; is_authenticated: boolean; ret_code: number }> {
+
+export async function leave(client: FluenceClient, user: string, app: {history:{peer_id:string;service_id:string};user_list:{peer_id:string;service_id:string}}): Promise<void> {
     let request;
-    const promise = new Promise<{ err_msg: string; is_authenticated: boolean; ret_code: number }>((resolve, reject) => {
+    const promise = new Promise<void>((resolve, reject) => {
         request = new RequestFlowBuilder()
             .withRawScript(
                 `
 (seq
  (seq
   (seq
-   (call %init_peer_id% ("getDataSrv" "user_list") [] user_list0)
+   (call %init_peer_id% ("getDataSrv" "user") [] user0)
+   (call %init_peer_id% ("getDataSrv" "app") [] app1)
+  )
+  (call %init_peer_id% ("getDataSrv" "relay") [] relay)
+ )
+ (seq
+  (call app.$.user_list.peer_id (app.$.user_list.service_id "leave") [user0] res)
+  (call app.$.user_list.peer_id (app.$.user_list.service_id "get_users") [] allUsers)
+ )
+)
+
+            `,
+            )
+            .configHandler((h) => {
+                h.on('getDataSrv', 'relay', () => {
+                    return client.relayPeerId;
+                });
+                h.on('getRelayService', 'hasReleay', () => {// Not Used
+                    return client.relayPeerId !== undefined;
+                });
+                h.on('getDataSrv', 'user', () => {return user;});
+h.on('getDataSrv', 'app', () => {return app;});
+                
+                h.on('nameOfServiceWhereToSendXorError', 'errorProbably', (args) => {
+                    // assuming error is the single argument
+                    const [err] = args;
+                    reject(err);
+                });
+            })
+            .handleTimeout(() => {
+                reject('message for timeout');
+            })
+            .build();
+    });
+    await client.initiateFlow(request);
+    return promise;
+}
+      
+
+
+export async function auth(client: FluenceClient, app: {history:{peer_id:string;service_id:string};user_list:{peer_id:string;service_id:string}}): Promise<{err_msg:string;is_authenticated:bool;ret_code:number}> {
+    let request;
+    const promise = new Promise<{err_msg:string;is_authenticated:bool;ret_code:number}>((resolve, reject) => {
+        request = new RequestFlowBuilder()
+            .withRawScript(
+                `
+(seq
+ (seq
+  (seq
+   (call %init_peer_id% ("getDataSrv" "app") [] app0)
    (call %init_peer_id% ("getDataSrv" "relay") [] relay)
   )
-  (call user_list.$.peer_id (user_list.$.service_id "is_authenticated") [] res)
+  (call app.$.user_list.peer_id (app.$.user_list.service_id "is_authenticated") [] res)
  )
  (seq
   (call relay ("op" "identity") [])
@@ -143,17 +186,14 @@ export async function auth(
                 h.on('getDataSrv', 'relay', () => {
                     return client.relayPeerId;
                 });
-                h.on('getRelayService', 'hasReleay', () => {
-                    // Not Used
+                h.on('getRelayService', 'hasReleay', () => {// Not Used
                     return client.relayPeerId !== undefined;
                 });
-                h.on('getDataSrv', 'user_list', () => {
-                    return user_list;
-                });
+                h.on('getDataSrv', 'app', () => {return app;});
                 h.on('callbackSrv', 'response', (args) => {
-                    const [res] = args;
-                    resolve(res);
-                });
+  const [res] = args;
+  resolve(res);
+});
 
                 h.on('nameOfServiceWhereToSendXorError', 'errorProbably', (args) => {
                     // assuming error is the single argument
@@ -169,53 +209,70 @@ export async function auth(
     await client.initiateFlow(request);
     return promise;
 }
+      
 
-export async function getHistory(
-    client: FluenceClient,
-    user_list: { peer_id: string; service_id: string },
-    history: { peer_id: string; service_id: string },
-): Promise<{ entries: { body: string; id: number }[]; err_msg: string; ret_code: number }> {
+
+export async function getHistory(client: FluenceClient, app: {history:{peer_id:string;service_id:string};user_list:{peer_id:string;service_id:string}}): Promise<{entries:{body:string;id:number}[];err_msg:string;ret_code:number}> {
     let request;
-    const promise = new Promise<{ entries: { body: string; id: number }[]; err_msg: string; ret_code: number }>(
-        (resolve, reject) => {
-            request = new RequestFlowBuilder()
-                .withRawScript(
-                    `
+    const promise = new Promise<{entries:{body:string;id:number}[];err_msg:string;ret_code:number}>((resolve, reject) => {
+        request = new RequestFlowBuilder()
+            .withRawScript(
+                `
 (seq
  (seq
   (seq
-   (seq
-    (call %init_peer_id% ("getDataSrv" "user_list") [] user_list0)
-    (call %init_peer_id% ("getDataSrv" "history") [] history1)
-   )
+   (call %init_peer_id% ("getDataSrv" "app") [] app0)
    (call %init_peer_id% ("getDataSrv" "relay") [] relay)
   )
   (seq
-   (call user_list.$.peer_id (user_list.$.service_id "is_authenticated") [] res)
-   (call history.$.peer_id (history.$.service_id "get_all") [res.$.is_authenticated] res11)
+   (call app.$.user_list.peer_id (app.$.user_list.service_id "is_authenticated") [] res)
+   (call app.$.history.peer_id (app.$.history.service_id "get_all") [res.$.is_authenticated] res9)
   )
  )
  (seq
   (call relay ("op" "identity") [])
-  (call %init_peer_id% ("callbackSrv" "response") [res11])
+  (call %init_peer_id% ("callbackSrv" "response") [res9])
  )
 )
 
             `,
-                )
-                .configHandler((h) => {
-                    h.on('getDataSrv', 'relay', () => {
+            )
+            .configHandler((h) => {
+                h.on('getDataSrv', 'relay', () => {
+                    return client.relayPeerId;
+                });
+                h.on('getRelayService', 'hasReleay', () => {// Not Used
+                    return client.relayPeerId !== undefined;
+                });
+                h.on('getDataSrv', 'app', () => {return app;});
+                h.on('callbackSrv', 'response', (args) => {
+  const [res] = args;
+  resolve(res);
+});
+
+                h.on('nameOfServiceWhereToSendXorError', 'errorProbably', (args) => {
+                    // assuming error is the single argument
+                    const [err] = args;
+                    reject(err);
+                });
+            })
+            .handleTimeout(() => {
+                reject('message for timeout');
+            })
+            .build();
+    });
+    await client.initiateFlow(request);
+    return promise;
+}
+      elay', () => {
                         return client.relayPeerId;
                     });
                     h.on('getRelayService', 'hasReleay', () => {
                         // Not Used
                         return client.relayPeerId !== undefined;
                     });
-                    h.on('getDataSrv', 'user_list', () => {
-                        return user_list;
-                    });
-                    h.on('getDataSrv', 'history', () => {
-                        return history;
+                    h.on('getDataSrv', 'app', () => {
+                        return app;
                     });
                     h.on('callbackSrv', 'response', (args) => {
                         const [res] = args;
@@ -228,6 +285,7 @@ export async function getHistory(
                         reject(err);
                     });
                 })
+                .handleScriptError(reject)
                 .handleTimeout(() => {
                     reject('message for timeout');
                 })

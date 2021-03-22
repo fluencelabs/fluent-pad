@@ -1,9 +1,13 @@
 service Peer("peer"):
 	is_connected: string -> bool
 
-data PeerServicePair:
+data ServiceInstance:
 	peer_id: string
 	service_id: string
+
+data App:
+  history: ServiceInstance
+  user_list: ServiceInstance
 
 data EmptyServiceResult:
 	ret_code: s32
@@ -51,33 +55,57 @@ service History:
 	add: string, bool -> AddServiceResult
 	set_tetraplet: string, string, string, string -> EmptyServiceResult
 
-func getUserList() -> []User:
-	on "userlist_node":
-		UserList "userlist_id"
-		allUsers <- UserList.get_users()
-	<- allUsers.users
+service FluentPad("fluence/fluent-pad"):
+	notifyOnline: string, bool -> () -- user peerId, onlineStatus
+	notifyUserAdded: User, bool -> () -- user peerId, onlineStatus
+	notifyUserRemoved: string -> () -- user peerId,
+	notifyTextUpdate: string, string, bool -> () -- authorPeerId, changes, isAuthorized
 
--- func updateOnlineStatuses(updateStatus: bool -> ()):
--- 	allUsers <- getUserList()
--- 		for user <- allUsers
--- 			par on user.relay_id
--- 				isOnline <- Peer.is_connected(user.peer_id)
-
-func join(user: User, user_list: PeerServicePair) -> EmptyServiceResult:
-	on user_list.peer_id:
-		UserList user_list.service_id
+func join(user: User, app: App) -> EmptyServiceResult:
+	on app.user_list.peer_id:
+		UserList app.user_list.service_id
 		res <- UserList.join(user)
 	<- res
 
-func auth(user_list: PeerServicePair) -> AuthResult:
-	on user_list.peer_id:
-		UserList user_list.service_id
+func getUserList(app: App) -> []User:
+	on app.user_list.peer_id:
+		UserList app.user_list.service_id
+		allUsers <- UserList.get_users()
+	<- allUsers.users
+
+func notifySelfAdded(app: App, name: string):
+	allUsers <- getUserList(app)
+	for user <- allUsers:
+		par on user.relay_id:
+			on user.peer_id
+				FluentPad.notifyUserAdded(user.peer_id, true)
+
+func updateOnlineStatuses(updateStatus: bool -> (), callback: (string, bool) -> ()):
+ 	allUsers <- getUserList(app)
+	for user <- allUsers:
+		par on user.relay_id:
+			isOnline <- Peer.is_connected(user.peer_id)
+			callback(user.peer_id, isOnline)
+
+func leave(currentUserName: string, app: App):
+	on app.user_list.peer_id:
+		UserList app.user_list.service_id
+		res <- UserList.leave(currentUserName)
+		allUsers <- getUserList(app)
+ 		for user <- allUsers:
+ 			par on user.relay_id:
+				on user.peer_id
+					FluentPad.notifyUserRemoved(currentUserName)
+
+func auth(app: App) -> AuthResult:
+	on app.user_list.peer_id:
+		UserList app.user_list.service_id
 		res <- UserList.is_authenticated()
 	<- res
 
-func getHistory(user_list: PeerServicePair, history: PeerServicePair) -> GetEntriesServiceResult:
-	authRes <- auth(user_list)
-	on history.peer_id:
-		History history.service_id
+func getHistory(app: App) -> GetEntriesServiceResult:
+	authRes <- auth(app)
+	on app.history.peer_id:
+		History app.history.service_id
 		res <- History.get_all(authRes.is_authenticated)
 	<- res

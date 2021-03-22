@@ -5,11 +5,11 @@ import './App.scss';
 
 import { FluenceClientContext } from '../app/FluenceClientContext';
 import { UserList } from './UserList';
-import * as api from 'src/app/api';
 import { CollaborativeEditor } from './CollaborativeEditor';
-import { relayNode } from 'src/app/constants';
+import { fluentPadApp, relayNode } from 'src/app/constants';
 import { withErrorHandlingAsync } from './util';
 import { toast } from 'react-toastify';
+import { join, leave } from 'src/aqua/fluent-pad.aqua';
 
 const App = () => {
     const [client, setClient] = useState<FluenceClient | null>(null);
@@ -28,7 +28,15 @@ const App = () => {
         }
 
         await withErrorHandlingAsync(async () => {
-            await api.join(client, nickName);
+            await join(
+                client,
+                {
+                    peer_id: client.selfPeerId,
+                    relay_id: client.relayPeerId!,
+                    name: nickName,
+                },
+                fluentPadApp,
+            );
             setIsInRoom(true);
         });
     };
@@ -39,7 +47,7 @@ const App = () => {
         }
 
         await withErrorHandlingAsync(async () => {
-            await api.leave(client);
+            await leave(client, nickName, fluentPadApp);
             setIsInRoom(false);
         });
     };

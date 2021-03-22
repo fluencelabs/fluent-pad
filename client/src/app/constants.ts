@@ -1,4 +1,4 @@
-import app from 'src/app.json';
+import config from 'src/app.json';
 import { testNet } from '@fluencelabs/fluence-network-environment';
 
 export const fluentPadServiceId = 'fluence/fluent-pad';
@@ -9,13 +9,18 @@ export const notifyUserRemovedFnName = 'notifyUserRemoved';
 export const notifyTextUpdateFnName = 'notifyTextUpdate';
 
 export const userList = {
-    node: app.services.user_list.node,
-    id: app.services.user_list.id,
+    peer_id: config.services.user_list.node,
+    service_id: config.services.user_list.id,
 };
 
 export const history = {
-    node: app.services.history.node,
-    id: app.services.history.id,
+    peer_id: config.services.user_list.node,
+    service_id: config.services.user_list.id,
+};
+
+export const fluentPadApp = {
+    user_list: userList,
+    history: history,
 };
 
 export const relayNode = testNet[0];
