@@ -2,11 +2,11 @@ import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import { PeerIdB58, subscribeToEvent } from '@fluencelabs/fluence';
 
-import { fluentPadApp, fluentPadServiceId, notifyTextUpdateFnName } from 'src/app/constants';
+import { fluentPadServiceId, notifyTextUpdateFnName } from 'src/app/constants';
 import { useFluenceClient } from '../app/FluenceClientContext';
 import { getUpdatedDocFromText, initDoc, SyncClient } from '../app/sync';
 import { withErrorHandlingAsync } from './util';
-import { addEntry, getHistory } from 'src/aqua/fluent-pad.aqua';
+import { addEntry, getHistory } from 'src/aqua/fluent-pad';
 
 const broadcastUpdates = _.debounce((text: string, syncClient: SyncClient) => {
     let doc = syncClient.getDoc();
@@ -28,7 +28,7 @@ export const CollaborativeEditor = () => {
 
         syncClient.handleSendChanges = (changes: string) => {
             withErrorHandlingAsync(async () => {
-                await addEntry(client, fluentPadApp, changes, client.selfPeerId);
+                await addEntry(client, changes, client.selfPeerId);
             });
         };
 
@@ -47,7 +47,7 @@ export const CollaborativeEditor = () => {
 
         // don't block
         withErrorHandlingAsync(async () => {
-            const res = await getHistory(client, fluentPadApp);
+            const res = await getHistory(client);
             for (let e of res.entries) {
                 syncClient.receiveChanges(e.body);
             }

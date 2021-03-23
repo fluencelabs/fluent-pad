@@ -3,7 +3,6 @@ import { RequestFlowBuilder } from '@fluencelabs/fluence/dist/api.unstable';
 
 export async function join(
     client: FluenceClient,
-    app: { history: { peer_id: string; service_id: string }; user_list: { peer_id: string; service_id: string } },
     user: { name: string; peer_id: string; relay_id: string },
 ): Promise<{ err_msg: string; ret_code: number }> {
     let request;
@@ -14,16 +13,22 @@ export async function join(
 (seq
  (seq
   (seq
-   (seq
-    (call %init_peer_id% ("getDataSrv" "app") [] app0)
-    (call %init_peer_id% ("getDataSrv" "user") [] user1)
-   )
+   (call %init_peer_id% ("getDataSrv" "user") [] user)
    (call %init_peer_id% ("getDataSrv" "relay") [] relay)
   )
-  (call app.$.user_list.peer_id! (app.$.user_list.service_id! "join") [user1] res)
+  (seq
+   (seq
+    (seq
+     (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+     (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay4)
+    )
+    (call relay4 ("op" "identity") [])
+   )
+   (call app.$.user_list.peer_id! (app.$.user_list.service_id! "join") [user] res)
+  )
  )
  (seq
-  (call relay ("op" "identity") [])
+  (call relay4 ("op" "identity") [])
   (call %init_peer_id% ("callbackSrv" "response") [res])
  )
 )
@@ -37,9 +42,6 @@ export async function join(
                 h.on('getRelayService', 'hasReleay', () => {
                     // Not Used
                     return client.relayPeerId !== undefined;
-                });
-                h.on('getDataSrv', 'app', () => {
-                    return app;
                 });
                 h.on('getDataSrv', 'user', () => {
                     return user;
@@ -67,7 +69,6 @@ export async function join(
 
 export async function getUserList(
     client: FluenceClient,
-    app: { history: { peer_id: string; service_id: string }; user_list: { peer_id: string; service_id: string } },
 ): Promise<{ name: string; peer_id: string; relay_id: string }[]> {
     let request;
     const promise = new Promise<{ name: string; peer_id: string; relay_id: string }[]>((resolve, reject) => {
@@ -76,14 +77,20 @@ export async function getUserList(
                 `
 (seq
  (seq
+  (call %init_peer_id% ("getDataSrv" "relay") [] relay)
   (seq
-   (call %init_peer_id% ("getDataSrv" "app") [] app0)
-   (call %init_peer_id% ("getDataSrv" "relay") [] relay)
+   (seq
+    (seq
+     (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+     (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay2)
+    )
+    (call relay2 ("op" "identity") [])
+   )
+   (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers)
   )
-  (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers)
  )
  (seq
-  (call relay ("op" "identity") [])
+  (call relay2 ("op" "identity") [])
   (call %init_peer_id% ("callbackSrv" "response") [allUsers.$.users!])
  )
 )
@@ -98,9 +105,7 @@ export async function getUserList(
                     // Not Used
                     return client.relayPeerId !== undefined;
                 });
-                h.on('getDataSrv', 'app', () => {
-                    return app;
-                });
+
                 h.on('callbackSrv', 'response', (args) => {
                     const [res] = args;
                     resolve(res);
@@ -124,7 +129,6 @@ export async function getUserList(
 
 export async function initAfterJoin(
     client: FluenceClient,
-    app: { history: { peer_id: string; service_id: string }; user_list: { peer_id: string; service_id: string } },
     me: { name: string; peer_id: string; relay_id: string },
 ): Promise<{ name: string; peer_id: string; relay_id: string }[]> {
     let request;
@@ -135,19 +139,25 @@ export async function initAfterJoin(
 (seq
  (seq
   (seq
-   (seq
-    (call %init_peer_id% ("getDataSrv" "app") [] app0)
-    (call %init_peer_id% ("getDataSrv" "me") [] me1)
-   )
+   (call %init_peer_id% ("getDataSrv" "me") [] me)
    (call %init_peer_id% ("getDataSrv" "relay") [] relay)
   )
   (seq
-   (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers)
+   (seq
+    (seq
+     (seq
+      (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+      (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay5)
+     )
+     (call relay5 ("op" "identity") [])
+    )
+    (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers)
+   )
    (fold allUsers.$.users! user
     (par
      (par
       (call user.$.relay_id! ("op" "identity") [])
-      (call user.$.peer_id! ("fluence/fluent-pad" "notifyUserAdded") [me1 true])
+      (call user.$.peer_id! ("fluence/fluent-pad" "notifyUserAdded") [me true])
      )
      (next user)
     )
@@ -169,9 +179,6 @@ export async function initAfterJoin(
                 h.on('getRelayService', 'hasReleay', () => {
                     // Not Used
                     return client.relayPeerId !== undefined;
-                });
-                h.on('getDataSrv', 'app', () => {
-                    return app;
                 });
                 h.on('getDataSrv', 'me', () => {
                     return me;
@@ -199,7 +206,6 @@ export async function initAfterJoin(
 
 export async function updateOnlineStatuses(
     client: FluenceClient,
-    app: { history: { peer_id: string; service_id: string }; user_list: { peer_id: string; service_id: string } },
     updateStatus: (arg0: string, arg1: boolean) => void,
 ): Promise<void> {
     let request;
@@ -208,12 +214,18 @@ export async function updateOnlineStatuses(
             .withRawScript(
                 `
 (seq
+ (call %init_peer_id% ("getDataSrv" "relay") [] relay)
  (seq
-  (call %init_peer_id% ("getDataSrv" "app") [] app0)
-  (call %init_peer_id% ("getDataSrv" "relay") [] relay)
- )
- (seq
-  (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers)
+  (seq
+   (seq
+    (seq
+     (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+     (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay3)
+    )
+    (call relay3 ("op" "identity") [])
+   )
+   (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers)
+  )
   (fold allUsers.$.users! user
    (par
     (par
@@ -239,9 +251,6 @@ export async function updateOnlineStatuses(
                     // Not Used
                     return client.relayPeerId !== undefined;
                 });
-                h.on('getDataSrv', 'app', () => {
-                    return app;
-                });
                 h.on('callbackSrv', 'updateStatus', (args) => {
                     return updateStatus(args[0], args[1]);
                 });
@@ -262,11 +271,7 @@ export async function updateOnlineStatuses(
     return promise;
 }
 
-export async function leave(
-    client: FluenceClient,
-    app: { history: { peer_id: string; service_id: string }; user_list: { peer_id: string; service_id: string } },
-    currentUserName: string,
-): Promise<void> {
+export async function leave(client: FluenceClient, currentUserName: string): Promise<void> {
     let request;
     const promise = new Promise<void>((resolve, reject) => {
         request = new RequestFlowBuilder()
@@ -274,22 +279,37 @@ export async function leave(
                 `
 (seq
  (seq
-  (seq
-   (call %init_peer_id% ("getDataSrv" "app") [] app0)
-   (call %init_peer_id% ("getDataSrv" "currentUserName") [] currentUserName1)
-  )
+  (call %init_peer_id% ("getDataSrv" "currentUserName") [] currentUserName)
   (call %init_peer_id% ("getDataSrv" "relay") [] relay)
  )
  (seq
   (seq
-   (call app.$.user_list.peer_id! (app.$.user_list.service_id! "leave") [currentUserName1] res)
-   (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers)
+   (seq
+    (seq
+     (seq
+      (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+      (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay4)
+     )
+     (call relay4 ("op" "identity") [])
+    )
+    (call app.$.user_list.peer_id! (app.$.user_list.service_id! "leave") [currentUserName] res)
+   )
+   (seq
+    (seq
+     (seq
+      (call %init_peer_id% ("fluence/get-config" "getApp") [] app15)
+      (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay16)
+     )
+     (call relay16 ("op" "identity") [])
+    )
+    (call app15.$.user_list.peer_id! (app15.$.user_list.service_id! "get_users") [] allUsers)
+   )
   )
   (fold allUsers.$.users! user
    (par
     (par
      (call user.$.relay_id! ("op" "identity") [])
-     (call user.$.peer_id! ("fluence/fluent-pad" "notifyUserRemoved") [currentUserName1])
+     (call user.$.peer_id! ("fluence/fluent-pad" "notifyUserRemoved") [currentUserName])
     )
     (next user)
    )
@@ -306,9 +326,6 @@ export async function leave(
                 h.on('getRelayService', 'hasReleay', () => {
                     // Not Used
                     return client.relayPeerId !== undefined;
-                });
-                h.on('getDataSrv', 'app', () => {
-                    return app;
                 });
                 h.on('getDataSrv', 'currentUserName', () => {
                     return currentUserName;
@@ -332,7 +349,6 @@ export async function leave(
 
 export async function auth(
     client: FluenceClient,
-    app: { history: { peer_id: string; service_id: string }; user_list: { peer_id: string; service_id: string } },
 ): Promise<{ err_msg: string; is_authenticated: boolean; ret_code: number }> {
     let request;
     const promise = new Promise<{ err_msg: string; is_authenticated: boolean; ret_code: number }>((resolve, reject) => {
@@ -341,14 +357,20 @@ export async function auth(
                 `
 (seq
  (seq
+  (call %init_peer_id% ("getDataSrv" "relay") [] relay)
   (seq
-   (call %init_peer_id% ("getDataSrv" "app") [] app0)
-   (call %init_peer_id% ("getDataSrv" "relay") [] relay)
+   (seq
+    (seq
+     (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+     (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay2)
+    )
+    (call relay2 ("op" "identity") [])
+   )
+   (call app.$.user_list.peer_id! (app.$.user_list.service_id! "is_authenticated") [] res)
   )
-  (call app.$.user_list.peer_id! (app.$.user_list.service_id! "is_authenticated") [] res)
  )
  (seq
-  (call relay ("op" "identity") [])
+  (call relay2 ("op" "identity") [])
   (call %init_peer_id% ("callbackSrv" "response") [res])
  )
 )
@@ -363,9 +385,7 @@ export async function auth(
                     // Not Used
                     return client.relayPeerId !== undefined;
                 });
-                h.on('getDataSrv', 'app', () => {
-                    return app;
-                });
+
                 h.on('callbackSrv', 'response', (args) => {
                     const [res] = args;
                     resolve(res);
@@ -389,7 +409,6 @@ export async function auth(
 
 export async function getHistory(
     client: FluenceClient,
-    app: { history: { peer_id: string; service_id: string }; user_list: { peer_id: string; service_id: string } },
 ): Promise<{ entries: { body: string; id: number }[]; err_msg: string; ret_code: number }> {
     let request;
     const promise = new Promise<{ entries: { body: string; id: number }[]; err_msg: string; ret_code: number }>(
@@ -399,18 +418,27 @@ export async function getHistory(
                     `
 (seq
  (seq
+  (call %init_peer_id% ("getDataSrv" "relay") [] relay)
   (seq
-   (call %init_peer_id% ("getDataSrv" "app") [] app0)
-   (call %init_peer_id% ("getDataSrv" "relay") [] relay)
-  )
-  (seq
-   (call app.$.user_list.peer_id! (app.$.user_list.service_id! "is_authenticated") [] res)
-   (call app.$.history.peer_id! (app.$.history.service_id! "get_all") [res.$.is_authenticated!] res9)
+   (seq
+    (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+    (seq
+     (seq
+      (seq
+       (call %init_peer_id% ("fluence/get-config" "getApp") [] app3)
+       (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay4)
+      )
+      (call relay4 ("op" "identity") [])
+     )
+     (call app3.$.user_list.peer_id! (app3.$.user_list.service_id! "is_authenticated") [] res)
+    )
+   )
+   (call app.$.history.peer_id! (app.$.history.service_id! "get_all") [res.$.is_authenticated!] res17)
   )
  )
  (seq
   (call relay ("op" "identity") [])
-  (call %init_peer_id% ("callbackSrv" "response") [res9])
+  (call %init_peer_id% ("callbackSrv" "response") [res17])
  )
 )
 
@@ -424,9 +452,7 @@ export async function getHistory(
                         // Not Used
                         return client.relayPeerId !== undefined;
                     });
-                    h.on('getDataSrv', 'app', () => {
-                        return app;
-                    });
+
                     h.on('callbackSrv', 'response', (args) => {
                         const [res] = args;
                         resolve(res);
@@ -451,7 +477,6 @@ export async function getHistory(
 
 export async function addEntry(
     client: FluenceClient,
-    app: { history: { peer_id: string; service_id: string }; user_list: { peer_id: string; service_id: string } },
     entry: string,
     selfPeerId: string,
 ): Promise<{ entry_id: number; err_msg: string; ret_code: number }> {
@@ -464,27 +489,45 @@ export async function addEntry(
  (seq
   (seq
    (seq
-    (seq
-     (call %init_peer_id% ("getDataSrv" "app") [] app0)
-     (call %init_peer_id% ("getDataSrv" "entry") [] entry1)
-    )
-    (call %init_peer_id% ("getDataSrv" "selfPeerId") [] selfPeerId3)
+    (call %init_peer_id% ("getDataSrv" "entry") [] entry)
+    (call %init_peer_id% ("getDataSrv" "selfPeerId") [] selfPeerId)
    )
    (call %init_peer_id% ("getDataSrv" "relay") [] relay)
   )
   (seq
    (seq
     (seq
-     (call app.$.user_list.peer_id! (app.$.user_list.service_id! "is_authenticated") [] res)
-     (call app.$.history.peer_id! (app.$.history.service_id! "add") [entry1 res.$.is_authenticated!] res13)
+     (seq
+      (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+      (seq
+       (seq
+        (seq
+         (call %init_peer_id% ("fluence/get-config" "getApp") [] app7)
+         (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay8)
+        )
+        (call relay8 ("op" "identity") [])
+       )
+       (call app7.$.user_list.peer_id! (app7.$.user_list.service_id! "is_authenticated") [] res)
+      )
+     )
+     (call app.$.history.peer_id! (app.$.history.service_id! "add") [entry res.$.is_authenticated!] res21)
     )
-    (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers)
+    (seq
+     (seq
+      (seq
+       (call %init_peer_id% ("fluence/get-config" "getApp") [] app25)
+       (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay26)
+      )
+      (call relay26 ("op" "identity") [])
+     )
+     (call app25.$.user_list.peer_id! (app25.$.user_list.service_id! "get_users") [] allUsers)
+    )
    )
    (fold allUsers.$.users! user
     (par
      (par
       (call user.$.relay_id! ("op" "identity") [])
-      (call user.$.peer_id! ("fluence/fluent-pad" "notifyTextUpdate") [entry1 selfPeerId3 res.$.is_authenticated!])
+      (call user.$.peer_id! ("fluence/fluent-pad" "notifyTextUpdate") [entry selfPeerId res.$.is_authenticated!])
      )
      (next user)
     )
@@ -493,7 +536,7 @@ export async function addEntry(
  )
  (seq
   (call relay ("op" "identity") [])
-  (call %init_peer_id% ("callbackSrv" "response") [res13])
+  (call %init_peer_id% ("callbackSrv" "response") [res21])
  )
 )
 
@@ -506,9 +549,6 @@ export async function addEntry(
                 h.on('getRelayService', 'hasReleay', () => {
                     // Not Used
                     return client.relayPeerId !== undefined;
-                });
-                h.on('getDataSrv', 'app', () => {
-                    return app;
                 });
                 h.on('getDataSrv', 'entry', () => {
                     return entry;

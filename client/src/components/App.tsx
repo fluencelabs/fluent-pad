@@ -8,7 +8,21 @@ import { UserList } from './UserList';
 import { CollaborativeEditor } from './CollaborativeEditor';
 import { fluentPadApp, relayNode } from 'src/app/constants';
 import { withErrorHandlingAsync } from './util';
-import { join, leave } from 'src/aqua/fluent-pad.aqua';
+import { join, leave } from 'src/aqua/fluent-pad';
+
+const createClientEx = async (relay) => {
+    const client = await createClient(relay);
+    client.aquaCallHandler.on('fluence/get-config', 'getApp', () => {
+        return fluentPadApp;
+    });
+    client.aquaCallHandler.on('fluence/get-config', 'get_init_peer_id', () => {
+        return client.selfPeerId;
+    });
+    client.aquaCallHandler.on('fluence/get-config', 'get_init_relay', () => {
+        return client.relayPeerId;
+    });
+    return client;
+};
 
 const App = () => {
     const [client, setClient] = useState<FluenceClient | null>(null);
@@ -16,7 +30,7 @@ const App = () => {
     const [nickName, setNickName] = useState('');
 
     useEffect(() => {
-        createClient(relayNode)
+        createClientEx(relayNode)
             .then((client) => setClient(client))
             .catch((err) => console.log('Client initialization failed', err));
     }, []);
@@ -27,7 +41,7 @@ const App = () => {
         }
 
         await withErrorHandlingAsync(async () => {
-            await join(client, fluentPadApp, {
+            await join(client, {
                 peer_id: client.selfPeerId,
                 relay_id: client.relayPeerId!,
                 name: nickName,
@@ -42,7 +56,7 @@ const App = () => {
         }
 
         await withErrorHandlingAsync(async () => {
-            await leave(client, fluentPadApp, nickName);
+            await leave(client, nickName);
             setIsInRoom(false);
         });
     };

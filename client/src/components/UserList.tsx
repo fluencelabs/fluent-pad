@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-    fluentPadApp,
     fluentPadServiceId,
     notifyOnlineFnName,
     notifyUserAddedFnName,
@@ -9,7 +8,7 @@ import {
 import { useFluenceClient } from '../app/FluenceClientContext';
 import { PeerIdB58, subscribeToEvent } from '@fluencelabs/fluence';
 import { withErrorHandlingAsync } from './util';
-import { initAfterJoin, updateOnlineStatuses } from 'src/aqua/fluent-pad.aqua';
+import { initAfterJoin, updateOnlineStatuses } from 'src/aqua/fluent-pad';
 
 interface User {
     id: PeerIdB58;
@@ -43,7 +42,7 @@ export const UserList = (props: { selfName: string }) => {
     useEffect(() => {
         const listRefreshTimer = setInterval(() => {
             withErrorHandlingAsync(async () => {
-                await updateOnlineStatuses(client, fluentPadApp, updateOnlineStatus);
+                await updateOnlineStatuses(client, updateOnlineStatus);
             });
         }, refreshOnlineStatusTimeoutMs);
 
@@ -83,7 +82,7 @@ export const UserList = (props: { selfName: string }) => {
 
         // don't block
         withErrorHandlingAsync(async () => {
-            await initAfterJoin(client, fluentPadApp, {
+            await initAfterJoin(client, {
                 name: props.selfName,
                 peer_id: client.selfPeerId,
                 relay_id: client.relayPeerId!,
