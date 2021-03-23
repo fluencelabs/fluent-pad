@@ -1,19 +1,26 @@
 import { useEffect, useState } from 'react';
 import {
+    fluentPadApp,
     fluentPadServiceId,
     notifyOnlineFnName,
     notifyUserAddedFnName,
     notifyUserRemovedFnName,
 } from 'src/app/constants';
 import { useFluenceClient } from '../app/FluenceClientContext';
-import * as api from 'src/app/api';
 import { PeerIdB58, subscribeToEvent } from '@fluencelabs/fluence';
 import { withErrorHandlingAsync } from './util';
+import { initAfterJoin, updateOnlineStatuses } from 'src/aqua/fluent-pad.aqua';
 
 interface User {
     id: PeerIdB58;
     name: string;
     isOnline: boolean;
+}
+
+interface ApiUser {
+    name: string;
+    peer_id: string;
+    relay_id: string;
 }
 
 const refreshOnlineStatusTimeoutMs = 2000;
@@ -22,16 +29,26 @@ export const UserList = (props: { selfName: string }) => {
     const client = useFluenceClient()!;
     const [users, setUsers] = useState<Map<PeerIdB58, User>>(new Map());
 
+    const updateOnlineStatus = (user, onlineStatus) => {
+        setUsers((prev) => {
+            const result = new Map(prev);
+            const u = result.get(user);
+            if (u) {
+                result.set(user, { ...u, isOnline: onlineStatus });
+            }
+            return result;
+        });
+    };
+
     useEffect(() => {
         const listRefreshTimer = setInterval(() => {
-            // don't block
             withErrorHandlingAsync(async () => {
-                await api.updateOnlineStatuses(client);
+                await updateOnlineStatuses(client, fluentPadApp, updateOnlineStatus);
             });
         }, refreshOnlineStatusTimeoutMs);
 
         const unsub1 = subscribeToEvent(client, fluentPadServiceId, notifyUserAddedFnName, (args, _) => {
-            const [user, isOnline] = args as [api.User, boolean];
+            const [user, isOnline] = args as [ApiUser, boolean];
             console.log(user, isOnline);
             setUsers((prev) => {
                 const u = user;
@@ -61,20 +78,16 @@ export const UserList = (props: { selfName: string }) => {
 
         const unsub3 = subscribeToEvent(client, fluentPadServiceId, notifyOnlineFnName, (args, _) => {
             const [user, onlineStatus] = args as [PeerIdB58, boolean];
-            setUsers((prev) => {
-                const result = new Map(prev);
-                const u = result.get(user);
-                if (u) {
-                    result.set(user, { ...u, isOnline: onlineStatus });
-                }
-                return result;
-            });
+            updateOnlineStatus(user, onlineStatus);
         });
 
         // don't block
         withErrorHandlingAsync(async () => {
-            await api.getUserList(client);
-            await api.notifySelfAdded(client, props.selfName);
+            await initAfterJoin(client, fluentPadApp, {
+                name: props.selfName,
+                peer_id: client.selfPeerId,
+                relay_id: client.relayPeerId!,
+            });
         });
 
         return () => {

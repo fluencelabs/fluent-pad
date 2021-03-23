@@ -9,8 +9,8 @@ data ServiceInstance:
 	service_id: string
 
 data App:
-  history: ServiceInstance
-  user_list: ServiceInstance
+	history: ServiceInstance
+	user_list: ServiceInstance
 
 data EmptyServiceResult:
 	ret_code: s32
@@ -76,22 +76,23 @@ func getUserList(app: App) -> []User:
 		allUsers <- UserList.get_users()
 	<- allUsers.users
 
-func notifySelfAdded(app: App, me: User):
+func initAfterJoin(app: App, me: User) -> []User:
 	allUsers <- getUserList(app)
 	for user <- allUsers:
 		on user.relay_id:
 			Op.identity()
 		par on user.peer_id:
 			FluentPad.notifyUserAdded(me, true)
+	<- allUsers
 
-func updateOnlineStatuses(app: App, updateStatus: bool -> (), callback: string, bool -> ()):
+func updateOnlineStatuses(app: App, updateStatus: string, bool -> ()):
 	allUsers <- getUserList(app)
 	for user <- allUsers:
 		on user.relay_id:
 			Op.identity()
 		par on user.peer_id:
 			isOnline <- Peer.is_connected(user.peer_id)
-			callback(user.peer_id, isOnline)
+			updateStatus(user.peer_id, isOnline)
 
 func leave(app: App, currentUserName: string):
 	on app.user_list.peer_id:
@@ -115,4 +116,17 @@ func getHistory(app: App) -> GetEntriesServiceResult:
 	on app.history.peer_id:
 		History app.history.service_id
 		res <- History.get_all(authRes.is_authenticated)
+	<- res
+
+func addEntry(app: App, entry: string, selfPeerId: string) -> AddServiceResult:
+	authRes <- auth(app)
+	on app.history.peer_id:
+		History app.history.service_id
+		res <- History.add(entry, authRes.is_authenticated)
+	allUsers <- getUserList(app)
+	for user <- allUsers:
+		on user.relay_id:
+			Op.identity()
+		par on user.peer_id:
+			FluentPad.notifyTextUpdate(entry, selfPeerId, authRes.is_authenticated)
 	<- res

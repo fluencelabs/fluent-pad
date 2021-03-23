@@ -8,7 +8,6 @@ import { UserList } from './UserList';
 import { CollaborativeEditor } from './CollaborativeEditor';
 import { fluentPadApp, relayNode } from 'src/app/constants';
 import { withErrorHandlingAsync } from './util';
-import { toast } from 'react-toastify';
 import { join, leave } from 'src/aqua/fluent-pad.aqua';
 
 const App = () => {
