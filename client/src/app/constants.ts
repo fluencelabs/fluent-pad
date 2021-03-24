@@ -14,8 +14,8 @@ export const userList = {
 };
 
 export const history = {
-    peer_id: config.services.user_list.node,
-    service_id: config.services.user_list.id,
+    peer_id: config.services.history.node,
+    service_id: config.services.history.id,
 };
 
 export const fluentPadApp = {
