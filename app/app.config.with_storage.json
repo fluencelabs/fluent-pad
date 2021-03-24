@@ -33,5 +33,10 @@
 		}
 	},
 	"script_storage": {
+		"remove_disconnected": {
+			"file": "remove_disconnected.air",
+			"interval": 10,
+			"node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3"
+		}
 	}
 }

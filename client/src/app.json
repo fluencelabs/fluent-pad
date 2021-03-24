@@ -6,7 +6,7 @@
             ],
             "node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3",
             "blueprint_id": "5df598924434974291d98c6d72e0922f2e8cbd7f7f291ca44f1b2f8e198f421b",
-            "id": "059e66ea-152d-4405-8542-622c722e659c"
+            "id": "2a21efb4-5a9c-4de6-9a91-4bc3c9bd48c3"
         },
         "user_list": {
             "dependencies": [
@@ -14,7 +14,7 @@
             ],
             "node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3",
             "blueprint_id": "d46fb511eb5a5dcea7b5a6777e04f95d48cbbe9fde040bd6bd69b4d9cd8fbb88",
-            "id": "bf6bc5ff-a611-4020-a42f-6162b080abd2"
+            "id": "a28ceb0f-0dce-4c16-9055-86dc1bb16d5b"
         }
     },
     "modules": {
@@ -51,7 +51,7 @@
             "file": "remove_disconnected.air",
             "interval": 10,
             "node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3",
-            "id": "dda8f400-a374-40e7-99f1-a8c5103a42d0"
+            "id": "044f5e40-11ad-4f32-8332-8ed1b3965195"
         }
     }
 }
