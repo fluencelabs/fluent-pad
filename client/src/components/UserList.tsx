@@ -22,7 +22,7 @@ interface ApiUser {
     relay_id: string;
 }
 
-const refreshOnlineStatusTimeoutMs = 2000;
+const refreshOnlineStatusTimeoutMs = 10000;
 
 export const UserList = (props: { selfName: string }) => {
     const client = useFluenceClient()!;
@@ -42,13 +42,12 @@ export const UserList = (props: { selfName: string }) => {
     useEffect(() => {
         const listRefreshTimer = setInterval(() => {
             withErrorHandlingAsync(async () => {
-                await updateOnlineStatuses(client, updateOnlineStatus);
+                await updateOnlineStatuses(client);
             });
         }, refreshOnlineStatusTimeoutMs);
 
         const unsub1 = subscribeToEvent(client, fluentPadServiceId, notifyUserAddedFnName, (args, _) => {
             const [user, isOnline] = args as [ApiUser, boolean];
-            console.log(user, isOnline);
             setUsers((prev) => {
                 const u = user;
                 const result = new Map(prev);
@@ -82,7 +81,7 @@ export const UserList = (props: { selfName: string }) => {
 
         // don't block
         withErrorHandlingAsync(async () => {
-            await initAfterJoin(client, {
+            const users = await initAfterJoin(client, {
                 name: props.selfName,
                 peer_id: client.selfPeerId,
                 relay_id: client.relayPeerId!,

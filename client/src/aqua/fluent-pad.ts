@@ -59,7 +59,7 @@ export async function join(
             })
             .handleScriptError(reject)
             .handleTimeout(() => {
-                reject('message for timeout');
+                reject('Request timed out');
             })
             .build();
     });
@@ -119,7 +119,7 @@ export async function getUserList(
             })
             .handleScriptError(reject)
             .handleTimeout(() => {
-                reject('message for timeout');
+                reject('Request timed out');
             })
             .build();
     });
@@ -145,19 +145,36 @@ export async function initAfterJoin(
   (seq
    (seq
     (seq
-     (seq
-      (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
-      (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay5)
-     )
-     (call relay5 ("op" "identity") [])
+     (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay3)
+     (call %init_peer_id% ("fluence/get-config" "get_init_peer_id") [] init_peer_id)
     )
-    (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers)
+    (seq
+     (seq
+      (seq
+       (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+       (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay8)
+      )
+      (call relay8 ("op" "identity") [])
+     )
+     (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers)
+    )
    )
    (fold allUsers.$.users! user
-    (par
-     (par
-      (call user.$.relay_id! ("op" "identity") [])
-      (call user.$.peer_id! ("fluence/fluent-pad" "notifyUserAdded") [me true])
+    (seq
+     (seq
+      (seq
+       (seq
+        (seq
+         (call user.$.relay_id! ("op" "identity") [])
+         (call user.$.relay_id! ("peer" "is_connected") [user.$.peer_id!] isOnline)
+        )
+        (match isOnline true
+         (call user.$.peer_id! ("fluence/fluent-pad" "notifyUserAdded") [me true])
+        )
+       )
+       (call relay3 ("op" "identity") [])
+      )
+      (call init_peer_id ("fluence/fluent-pad" "notifyUserAdded") [user isOnline])
      )
      (next user)
     )
@@ -165,7 +182,7 @@ export async function initAfterJoin(
   )
  )
  (seq
-  (call relay ("op" "identity") [])
+  (call relay3 ("op" "identity") [])
   (call %init_peer_id% ("callbackSrv" "response") [allUsers.$.users!])
  )
 )
@@ -196,7 +213,7 @@ export async function initAfterJoin(
             })
             .handleScriptError(reject)
             .handleTimeout(() => {
-                reject('message for timeout');
+                reject('Request timed out');
             })
             .build();
     });
@@ -204,40 +221,52 @@ export async function initAfterJoin(
     return promise;
 }
 
-export async function updateOnlineStatuses(
-    client: FluenceClient,
-    updateStatus: (arg0: string, arg1: boolean) => void,
-): Promise<void> {
+export async function updateOnlineStatuses(client: FluenceClient): Promise<boolean> {
     let request;
-    const promise = new Promise<void>((resolve, reject) => {
+    const promise = new Promise<boolean>((resolve, reject) => {
         request = new RequestFlowBuilder()
             .withRawScript(
                 `
 (seq
- (call %init_peer_id% ("getDataSrv" "relay") [] relay)
  (seq
+  (call %init_peer_id% ("getDataSrv" "relay") [] relay)
   (seq
    (seq
     (seq
-     (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
-     (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay3)
+     (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay1)
+     (call %init_peer_id% ("fluence/get-config" "get_init_peer_id") [] init_peer_id)
     )
-    (call relay3 ("op" "identity") [])
-   )
-   (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers)
-  )
-  (fold allUsers.$.users! user
-   (par
-    (par
-     (call user.$.relay_id! ("op" "identity") [])
+    (seq
      (seq
-      (call user.$.peer_id! ("peer" "is_connected") [user.$.peer_id!] isOnline)
-      (call %init_peer_id% (callbackSrv "updateStatus") [user.$.peer_id! isOnline])
+      (seq
+       (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+       (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay6)
+      )
+      (call relay6 ("op" "identity") [])
      )
+     (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers)
     )
-    (next user)
+   )
+   (fold allUsers.$.users! user
+    (seq
+     (seq
+      (seq
+       (seq
+        (call user.$.relay_id! ("op" "identity") [])
+        (call user.$.peer_id! ("peer" "is_connected") [user.$.peer_id!] isOnline)
+       )
+       (call relay1 ("op" "identity") [])
+      )
+      (call init_peer_id ("fluence/fluent-pad" "notifyOnline") [user.$.peer_id! isOnline])
+     )
+     (next user)
+    )
    )
   )
+ )
+ (seq
+  (call relay1 ("op" "identity") [])
+  (call %init_peer_id% ("callbackSrv" "response") [true])
  )
 )
 
@@ -251,8 +280,10 @@ export async function updateOnlineStatuses(
                     // Not Used
                     return client.relayPeerId !== undefined;
                 });
-                h.on('callbackSrv', 'updateStatus', (args) => {
-                    return updateStatus(args[0], args[1]);
+
+                h.on('callbackSrv', 'response', (args) => {
+                    const [res] = args;
+                    resolve(res);
                 });
 
                 h.on('nameOfServiceWhereToSendXorError', 'errorProbably', (args) => {
@@ -263,7 +294,7 @@ export async function updateOnlineStatuses(
             })
             .handleScriptError(reject)
             .handleTimeout(() => {
-                reject('message for timeout');
+                reject('Request timed out');
             })
             .build();
     });
@@ -271,49 +302,55 @@ export async function updateOnlineStatuses(
     return promise;
 }
 
-export async function leave(client: FluenceClient, currentUserName: string): Promise<void> {
+export async function leave(client: FluenceClient, currentUserName: string): Promise<boolean> {
     let request;
-    const promise = new Promise<void>((resolve, reject) => {
+    const promise = new Promise<boolean>((resolve, reject) => {
         request = new RequestFlowBuilder()
             .withRawScript(
                 `
 (seq
  (seq
-  (call %init_peer_id% ("getDataSrv" "currentUserName") [] currentUserName)
-  (call %init_peer_id% ("getDataSrv" "relay") [] relay)
- )
- (seq
+  (seq
+   (call %init_peer_id% ("getDataSrv" "currentUserName") [] currentUserName)
+   (call %init_peer_id% ("getDataSrv" "relay") [] relay)
+  )
   (seq
    (seq
     (seq
      (seq
-      (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
-      (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay4)
+      (seq
+       (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+       (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay4)
+      )
+      (call relay4 ("op" "identity") [])
      )
-     (call relay4 ("op" "identity") [])
+     (call app.$.user_list.peer_id! (app.$.user_list.service_id! "leave") [currentUserName] res)
     )
-    (call app.$.user_list.peer_id! (app.$.user_list.service_id! "leave") [currentUserName] res)
-   )
-   (seq
     (seq
      (seq
-      (call %init_peer_id% ("fluence/get-config" "getApp") [] app15)
-      (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay16)
+      (seq
+       (call %init_peer_id% ("fluence/get-config" "getApp") [] app15)
+       (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay16)
+      )
+      (call relay16 ("op" "identity") [])
      )
-     (call relay16 ("op" "identity") [])
+     (call app15.$.user_list.peer_id! (app15.$.user_list.service_id! "get_users") [] allUsers)
     )
-    (call app15.$.user_list.peer_id! (app15.$.user_list.service_id! "get_users") [] allUsers)
+   )
+   (fold allUsers.$.users! user
+    (seq
+     (seq
+      (call user.$.relay_id! ("op" "identity") [])
+      (call user.$.peer_id! ("fluence/fluent-pad" "notifyUserRemoved") [currentUserName])
+     )
+     (next user)
+    )
    )
   )
-  (fold allUsers.$.users! user
-   (par
-    (par
-     (call user.$.relay_id! ("op" "identity") [])
-     (call user.$.peer_id! ("fluence/fluent-pad" "notifyUserRemoved") [currentUserName])
-    )
-    (next user)
-   )
-  )
+ )
+ (seq
+  (call relay4 ("op" "identity") [])
+  (call %init_peer_id% ("callbackSrv" "response") [true])
  )
 )
 
@@ -330,6 +367,10 @@ export async function leave(client: FluenceClient, currentUserName: string): Pro
                 h.on('getDataSrv', 'currentUserName', () => {
                     return currentUserName;
                 });
+                h.on('callbackSrv', 'response', (args) => {
+                    const [res] = args;
+                    resolve(res);
+                });
 
                 h.on('nameOfServiceWhereToSendXorError', 'errorProbably', (args) => {
                     // assuming error is the single argument
@@ -339,7 +380,7 @@ export async function leave(client: FluenceClient, currentUserName: string): Pro
             })
             .handleScriptError(reject)
             .handleTimeout(() => {
-                reject('message for timeout');
+                reject('Request timed out');
             })
             .build();
     });
@@ -399,7 +440,7 @@ export async function auth(
             })
             .handleScriptError(reject)
             .handleTimeout(() => {
-                reject('message for timeout');
+                reject('Request timed out');
             })
             .build();
     });
@@ -466,7 +507,7 @@ export async function getHistory(
                 })
                 .handleScriptError(reject)
                 .handleTimeout(() => {
-                    reject('message for timeout');
+                    reject('Request timed out');
                 })
                 .build();
         },
@@ -524,8 +565,8 @@ export async function addEntry(
     )
    )
    (fold allUsers.$.users! user
-    (par
-     (par
+    (seq
+     (seq
       (call user.$.relay_id! ("op" "identity") [])
       (call user.$.peer_id! ("fluence/fluent-pad" "notifyTextUpdate") [entry selfPeerId res.$.is_authenticated!])
      )
@@ -569,7 +610,7 @@ export async function addEntry(
             })
             .handleScriptError(reject)
             .handleTimeout(() => {
-                reject('message for timeout');
+                reject('Request timed out');
             })
             .build();
     });
