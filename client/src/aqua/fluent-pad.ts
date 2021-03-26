@@ -18,17 +18,17 @@ export async function join(
   )
   (seq
    (seq
-    (seq
-     (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
-     (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay4)
-    )
-    (call relay4 ("op" "identity") [])
+    (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+    (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay0)
    )
-   (call app.$.user_list.peer_id! (app.$.user_list.service_id! "join") [user] res)
+   (seq
+    (call relay0 ("op" "identity") [])
+    (call app.$.user_list.peer_id! (app.$.user_list.service_id! "join") [user] res)
+   )
   )
  )
  (seq
-  (call relay4 ("op" "identity") [])
+  (call relay ("op" "identity") [])
   (call %init_peer_id% ("callbackSrv" "response") [res])
  )
 )
@@ -80,17 +80,17 @@ export async function getUserList(
   (call %init_peer_id% ("getDataSrv" "relay") [] relay)
   (seq
    (seq
-    (seq
-     (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
-     (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay2)
-    )
-    (call relay2 ("op" "identity") [])
+    (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+    (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay0)
    )
-   (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers)
+   (seq
+    (call relay0 ("op" "identity") [])
+    (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers)
+   )
   )
  )
  (seq
-  (call relay2 ("op" "identity") [])
+  (call relay ("op" "identity") [])
   (call %init_peer_id% ("callbackSrv" "response") [allUsers.$.users!])
  )
 )
@@ -145,36 +145,36 @@ export async function initAfterJoin(
   (seq
    (seq
     (seq
-     (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay3)
-     (call %init_peer_id% ("fluence/get-config" "get_init_peer_id") [] init_peer_id)
+     (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay0)
+     (call %init_peer_id% ("fluence/get-config" "get_init_peer_id") [] init_pid)
     )
     (seq
      (seq
-      (seq
-       (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
-       (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay8)
-      )
-      (call relay8 ("op" "identity") [])
+      (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+      (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay1)
      )
-     (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers)
+     (seq
+      (call relay1 ("op" "identity") [])
+      (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers0)
+     )
     )
    )
-   (fold allUsers.$.users! user
-    (seq
-     (seq
+   (fold allUsers0.$.users! user
+    (par
+     (par
       (seq
+       (call user.$.relay_id! ("op" "identity") [])
        (seq
-        (seq
-         (call user.$.relay_id! ("op" "identity") [])
-         (call user.$.relay_id! ("peer" "is_connected") [user.$.peer_id!] isOnline)
-        )
+        (call user.$.peer_id! ("peer" "is_connected") [user.$.peer_id!] isOnline)
         (match isOnline true
          (call user.$.peer_id! ("fluence/fluent-pad" "notifyUserAdded") [me true])
         )
        )
-       (call relay3 ("op" "identity") [])
       )
-      (call init_peer_id ("fluence/fluent-pad" "notifyUserAdded") [user isOnline])
+      (seq
+       (call relay0 ("op" "identity") [])
+       (call init_pid ("fluence/fluent-pad" "notifyUserAdded") [user isOnline])
+      )
      )
      (next user)
     )
@@ -182,8 +182,8 @@ export async function initAfterJoin(
   )
  )
  (seq
-  (call relay3 ("op" "identity") [])
-  (call %init_peer_id% ("callbackSrv" "response") [allUsers.$.users!])
+  (call relay ("op" "identity") [])
+  (call %init_peer_id% ("callbackSrv" "response") [allUsers0])
  )
 )
 
@@ -233,31 +233,31 @@ export async function updateOnlineStatuses(client: FluenceClient): Promise<boole
   (seq
    (seq
     (seq
-     (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay1)
-     (call %init_peer_id% ("fluence/get-config" "get_init_peer_id") [] init_peer_id)
+     (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay0)
+     (call %init_peer_id% ("fluence/get-config" "get_init_peer_id") [] init_pid)
     )
     (seq
      (seq
-      (seq
-       (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
-       (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay6)
-      )
-      (call relay6 ("op" "identity") [])
+      (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+      (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay1)
      )
-     (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers)
+     (seq
+      (call relay1 ("op" "identity") [])
+      (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers0)
+     )
     )
    )
-   (fold allUsers.$.users! user
-    (seq
+   (fold allUsers0.$.users! user
+    (par
      (seq
       (seq
-       (seq
-        (call user.$.relay_id! ("op" "identity") [])
-        (call user.$.peer_id! ("peer" "is_connected") [user.$.peer_id!] isOnline)
-       )
-       (call relay1 ("op" "identity") [])
+       (call user.$.relay_id! ("op" "identity") [])
+       (call user.$.peer_id! ("peer" "is_connected") [user.$.peer_id!] isOnline)
       )
-      (call init_peer_id ("fluence/fluent-pad" "notifyOnline") [user.$.peer_id! isOnline])
+      (seq
+       (call relay0 ("op" "identity") [])
+       (call init_pid ("fluence/fluent-pad" "notifyOnline") [user.$.peer_id! isOnline])
+      )
      )
      (next user)
     )
@@ -265,7 +265,7 @@ export async function updateOnlineStatuses(client: FluenceClient): Promise<boole
   )
  )
  (seq
-  (call relay1 ("op" "identity") [])
+  (call relay ("op" "identity") [])
   (call %init_peer_id% ("callbackSrv" "response") [true])
  )
 )
@@ -318,29 +318,29 @@ export async function leave(client: FluenceClient, currentUserName: string): Pro
    (seq
     (seq
      (seq
-      (seq
-       (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
-       (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay4)
-      )
-      (call relay4 ("op" "identity") [])
+      (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+      (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay0)
      )
-     (call app.$.user_list.peer_id! (app.$.user_list.service_id! "leave") [currentUserName] res)
+     (seq
+      (call relay0 ("op" "identity") [])
+      (call app.$.user_list.peer_id! (app.$.user_list.service_id! "leave") [currentUserName] res)
+     )
     )
     (seq
      (seq
-      (seq
-       (call %init_peer_id% ("fluence/get-config" "getApp") [] app15)
-       (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay16)
-      )
-      (call relay16 ("op" "identity") [])
+      (call %init_peer_id% ("fluence/get-config" "getApp") [] app0)
+      (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay1)
      )
-     (call app15.$.user_list.peer_id! (app15.$.user_list.service_id! "get_users") [] allUsers)
+     (seq
+      (call relay1 ("op" "identity") [])
+      (call app0.$.user_list.peer_id! (app0.$.user_list.service_id! "get_users") [] allUsers0)
+     )
     )
    )
-   (fold allUsers.$.users! user
-    (seq
+   (fold allUsers0.$.users! user
+    (par
      (seq
-      (call user.$.relay_id! ("op" "identity") [])
+      (call relay0 ("op" "identity") [])
       (call user.$.peer_id! ("fluence/fluent-pad" "notifyUserRemoved") [currentUserName])
      )
      (next user)
@@ -349,7 +349,7 @@ export async function leave(client: FluenceClient, currentUserName: string): Pro
   )
  )
  (seq
-  (call relay4 ("op" "identity") [])
+  (call relay ("op" "identity") [])
   (call %init_peer_id% ("callbackSrv" "response") [true])
  )
 )
@@ -401,17 +401,17 @@ export async function auth(
   (call %init_peer_id% ("getDataSrv" "relay") [] relay)
   (seq
    (seq
-    (seq
-     (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
-     (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay2)
-    )
-    (call relay2 ("op" "identity") [])
+    (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+    (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay0)
    )
-   (call app.$.user_list.peer_id! (app.$.user_list.service_id! "is_authenticated") [] res)
+   (seq
+    (call relay0 ("op" "identity") [])
+    (call app.$.user_list.peer_id! (app.$.user_list.service_id! "is_authenticated") [] res)
+   )
   )
  )
  (seq
-  (call relay2 ("op" "identity") [])
+  (call relay ("op" "identity") [])
   (call %init_peer_id% ("callbackSrv" "response") [res])
  )
 )
@@ -465,21 +465,21 @@ export async function getHistory(
     (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
     (seq
      (seq
-      (seq
-       (call %init_peer_id% ("fluence/get-config" "getApp") [] app3)
-       (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay4)
-      )
-      (call relay4 ("op" "identity") [])
+      (call %init_peer_id% ("fluence/get-config" "getApp") [] app0)
+      (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay0)
      )
-     (call app3.$.user_list.peer_id! (app3.$.user_list.service_id! "is_authenticated") [] res)
+     (seq
+      (call relay0 ("op" "identity") [])
+      (call app0.$.user_list.peer_id! (app0.$.user_list.service_id! "is_authenticated") [] res0)
+     )
     )
    )
-   (call app.$.history.peer_id! (app.$.history.service_id! "get_all") [res.$.is_authenticated!] res17)
+   (call app.$.history.peer_id! (app.$.history.service_id! "get_all") [res0.$.is_authenticated!] res)
   )
  )
  (seq
   (call relay ("op" "identity") [])
-  (call %init_peer_id% ("callbackSrv" "response") [res17])
+  (call %init_peer_id% ("callbackSrv" "response") [res])
  )
 )
 
@@ -542,33 +542,33 @@ export async function addEntry(
       (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
       (seq
        (seq
-        (seq
-         (call %init_peer_id% ("fluence/get-config" "getApp") [] app7)
-         (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay8)
-        )
-        (call relay8 ("op" "identity") [])
+        (call %init_peer_id% ("fluence/get-config" "getApp") [] app0)
+        (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay0)
        )
-       (call app7.$.user_list.peer_id! (app7.$.user_list.service_id! "is_authenticated") [] res)
+       (seq
+        (call relay0 ("op" "identity") [])
+        (call app0.$.user_list.peer_id! (app0.$.user_list.service_id! "is_authenticated") [] res0)
+       )
       )
      )
-     (call app.$.history.peer_id! (app.$.history.service_id! "add") [entry res.$.is_authenticated!] res21)
+     (call app.$.history.peer_id! (app.$.history.service_id! "add") [entry res0.$.is_authenticated!] res)
     )
     (seq
      (seq
-      (seq
-       (call %init_peer_id% ("fluence/get-config" "getApp") [] app25)
-       (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay26)
-      )
-      (call relay26 ("op" "identity") [])
+      (call %init_peer_id% ("fluence/get-config" "getApp") [] app1)
+      (call %init_peer_id% ("fluence/get-config" "get_init_relay") [] relay1)
      )
-     (call app25.$.user_list.peer_id! (app25.$.user_list.service_id! "get_users") [] allUsers)
+     (seq
+      (call relay1 ("op" "identity") [])
+      (call app1.$.user_list.peer_id! (app1.$.user_list.service_id! "get_users") [] allUsers0)
+     )
     )
    )
-   (fold allUsers.$.users! user
-    (seq
+   (fold allUsers0.$.users! user
+    (par
      (seq
       (call user.$.relay_id! ("op" "identity") [])
-      (call user.$.peer_id! ("fluence/fluent-pad" "notifyTextUpdate") [entry selfPeerId res.$.is_authenticated!])
+      (call user.$.peer_id! ("fluence/fluent-pad" "notifyTextUpdate") [entry selfPeerId res0.$.is_authenticated!])
      )
      (next user)
     )
@@ -577,7 +577,7 @@ export async function addEntry(
  )
  (seq
   (call relay ("op" "identity") [])
-  (call %init_peer_id% ("callbackSrv" "response") [res21])
+  (call %init_peer_id% ("callbackSrv" "response") [res])
  )
 )
 

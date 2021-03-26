@@ -72,9 +72,7 @@ service AppConfig("fluence/get-config"):
 func join(user: User) -> EmptyServiceResult:
 	app <- AppConfig.getApp()
 	relay <- AppConfig.get_init_relay()
-	on relay:
-		Op.identity()
-	on app.user_list.peer_id:
+	on app.user_list.peer_id via relay:
 		UserList app.user_list.service_id
 		res <- UserList.join(user)
 	<- res
@@ -82,67 +80,51 @@ func join(user: User) -> EmptyServiceResult:
 func getUserList() -> []User:
 	app <- AppConfig.getApp()
 	relay <- AppConfig.get_init_relay()
-	on relay:
-		Op.identity()
-	on app.user_list.peer_id:
+	on app.user_list.peer_id via relay:
 		UserList app.user_list.service_id
 		allUsers <- UserList.get_users()
 	<- allUsers.users
 
 func initAfterJoin(me: User) -> []User:
 	relay <- AppConfig.get_init_relay()
-	init_peer_id <- AppConfig.get_init_peer_id()
+	init_pid <- AppConfig.get_init_peer_id()
 	allUsers <- getUserList()
-	for user <- allUsers:
-		on user.relay_id:
-			Op.identity()
+	for user <- allUsers par:
+		on user.peer_id via user.relay_id:
 			isOnline <- Peer.is_connected(user.peer_id)
-		on user.peer_id:
 			if isOnline:
 				FluentPad.notifyUserAdded(me, true)
-		on relay:
-			Op.identity()
-		on init_peer_id:
+		par on init_pid via relay:
 			FluentPad.notifyUserAdded(user, isOnline)
 	<- allUsers
 
 func updateOnlineStatuses() -> bool:
 	relay <- AppConfig.get_init_relay()
-	init_peer_id <- AppConfig.get_init_peer_id()
+	init_pid <- AppConfig.get_init_peer_id()
 	allUsers <- getUserList()
-	for user <- allUsers:
-		on user.relay_id:
-			Op.identity()
-		on user.peer_id:
+	for user <- allUsers par:
+		on user.peer_id via user.relay_id:
 			isOnline <- Peer.is_connected(user.peer_id)
-		on relay:
-			Op.identity()
-		on init_peer_id:
+		on init_pid via relay:
 			FluentPad.notifyOnline(user.peer_id, isOnline)
 	<- true
 
 func leave(currentUserName: string) -> bool:
 	app <- AppConfig.getApp()
 	relay <- AppConfig.get_init_relay()
-	on relay:
-		Op.identity()
-	on app.user_list.peer_id:
+	on app.user_list.peer_id via relay:
 		UserList app.user_list.service_id
 		res <- UserList.leave(currentUserName)
 	allUsers <- getUserList()
-	for user <- allUsers:
-		on user.relay_id:
-			Op.identity()
-		on user.peer_id:
+	for user <- allUsers par:
+		on user.peer_id via relay:
 			FluentPad.notifyUserRemoved(currentUserName)
 	<- true
 
 func auth() -> AuthResult:
 	app <- AppConfig.getApp()
 	relay <- AppConfig.get_init_relay()
-	on relay:
-		Op.identity()
-	on app.user_list.peer_id:
+	on app.user_list.peer_id via relay:
 		UserList app.user_list.service_id
 		res <- UserList.is_authenticated()
 	<- res
@@ -162,9 +144,7 @@ func addEntry(entry: string, selfPeerId: string) -> AddServiceResult:
 		History app.history.service_id
 		res <- History.add(entry, authRes.is_authenticated)
 	allUsers <- getUserList()
-	for user <- allUsers:
-		on user.relay_id:
-			Op.identity()
-		on user.peer_id:
+	for user <- allUsers par:
+		on user.peer_id via user.relay_id:
 			FluentPad.notifyTextUpdate(entry, selfPeerId, authRes.is_authenticated)
 	<- res

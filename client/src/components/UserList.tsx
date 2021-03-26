@@ -81,7 +81,7 @@ export const UserList = (props: { selfName: string }) => {
 
         // don't block
         withErrorHandlingAsync(async () => {
-            const users = await initAfterJoin(client, {
+            await initAfterJoin(client, {
                 name: props.selfName,
                 peer_id: client.selfPeerId,
                 relay_id: client.relayPeerId!,

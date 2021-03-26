@@ -7,7 +7,7 @@ import { FluenceClientContext } from '../app/FluenceClientContext';
 import { UserList } from './UserList';
 import { CollaborativeEditor } from './CollaborativeEditor';
 import { fluentPadApp, relayNode } from 'src/app/constants';
-import { withErrorHandlingAsync } from './util';
+import { CheckResponse, withErrorHandlingAsync } from './util';
 import { join, leave } from 'src/aqua/fluent-pad';
 
 const createClientEx = async (relay) => {
@@ -41,12 +41,14 @@ const App = () => {
         }
 
         await withErrorHandlingAsync(async () => {
-            await join(client, {
+            const res = await join(client, {
                 peer_id: client.selfPeerId,
                 relay_id: client.relayPeerId!,
                 name: nickName,
             });
-            setIsInRoom(true);
+            if (CheckResponse(res)) {
+                setIsInRoom(true);
+            }
         });
     };
 
@@ -114,7 +116,7 @@ const App = () => {
                         <div className="room-wrapper">
                             <h1 className="fluent-pad">FluentPad</h1>
                             <UserList selfName={nickName} />
-                            <CollaborativeEditor />
+                            {/* <CollaborativeEditor /> */}
                         </div>
                     )}
                 </div>
