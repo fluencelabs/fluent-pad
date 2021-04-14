@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "dependencies": {
-        "@fluencelabs/fluence": "@fluencelabs/fluence@0.9.14-update-aqua.3",
+        "@fluencelabs/fluence": "^0.9.37",
         "@fluencelabs/fluence-network-environment": "1.0.8",
         "@testing-library/jest-dom": "^5.11.9",
         "@testing-library/react": "^11.2.5",
@@ -27,7 +27,8 @@
         "start": "react-scripts start",
         "build": "react-scripts build",
         "test": "react-scripts test",
-        "eject": "react-scripts eject"
+        "eject": "react-scripts eject",
+        "aqua": "aqua-cli -i ./aqua/ -o ./src/aqua/"
     },
     "eslintConfig": {
         "parser": "@typescript-eslint/parser",
@@ -52,6 +53,7 @@
         ]
     },
     "devDependencies": {
+        "@fluencelabs/aqua-cli": "^0.1.1-75",
         "@types/lodash": "^4.14.168"
     }
 }
