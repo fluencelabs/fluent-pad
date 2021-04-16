@@ -28,7 +28,7 @@
         "build": "react-scripts build",
         "test": "react-scripts test",
         "eject": "react-scripts eject",
-        "aqua": "aqua-cli -i ./aqua/ -o ./src/aqua/"
+        "compile-aqua": "aqua-cli -i ./aqua/ -o ./src/aqua/"
     },
     "eslintConfig": {
         "parser": "@typescript-eslint/parser",
@@ -53,7 +53,7 @@
         ]
     },
     "devDependencies": {
-        "@fluencelabs/aqua-cli": "^0.1.1-75",
+        "@fluencelabs/aqua-cli": "^0.1.1-77",
         "@types/lodash": "^4.14.168"
     }
 }

@@ -1,9 +1,6 @@
 service Peer("peer"):
 	is_connected: string -> bool
 
-service Op("op"):
-	identity: -> ()
-
 data ServiceInstance:
 	peer_id: string
 	service_id: string
@@ -71,31 +68,26 @@ service AppConfig("fluence/get-config"):
 
 func join(user: User) -> EmptyServiceResult:
 	app <- AppConfig.getApp()
-	relay <- AppConfig.get_init_relay()
-	on app.user_list.peer_id via relay:
+	on app.user_list.peer_id:
 		UserList app.user_list.service_id
 		res <- UserList.join(user)
 	<- res
 
 func getUserList() -> []User:
 	app <- AppConfig.getApp()
-	relay <- AppConfig.get_init_relay()
-	on app.user_list.peer_id via relay:
+	on app.user_list.peer_id:
 		UserList app.user_list.service_id
 		allUsers <- UserList.get_users()
 	<- allUsers.users
 
 func initAfterJoin(me: User) -> []User:
-	relay <- AppConfig.get_init_relay()
-	init_pid <- AppConfig.get_init_peer_id()
 	allUsers <- getUserList()
 	for user <- allUsers par:
 		on user.peer_id via user.relay_id:
 			isOnline <- Peer.is_connected(user.peer_id)
 			if isOnline:
 				FluentPad.notifyUserAdded(me, true)
-		par on init_pid via relay:
-			FluentPad.notifyUserAdded(user, isOnline)
+		par FluentPad.notifyUserAdded(user, isOnline)
 	<- allUsers
 
 func updateOnlineStatuses() -> bool:
