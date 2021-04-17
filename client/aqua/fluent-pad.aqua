@@ -85,38 +85,32 @@ func initAfterJoin(me: User) -> []User:
 	for user <- allUsers par:
 		on user.peer_id via user.relay_id:
 			isOnline <- Peer.is_connected(user.peer_id)
-			if isOnline:
-				FluentPad.notifyUserAdded(me, true)
+		if isOnline:
+			par FluentPad.notifyUserAdded(me, true)
 		par FluentPad.notifyUserAdded(user, isOnline)
 	<- allUsers
 
-func updateOnlineStatuses() -> bool:
-	relay <- AppConfig.get_init_relay()
-	init_pid <- AppConfig.get_init_peer_id()
+
+func updateOnlineStatuses():
 	allUsers <- getUserList()
 	for user <- allUsers par:
 		on user.peer_id via user.relay_id:
 			isOnline <- Peer.is_connected(user.peer_id)
-		on init_pid via relay:
-			FluentPad.notifyOnline(user.peer_id, isOnline)
-	<- true
+		FluentPad.notifyOnline(user.peer_id, isOnline)
 
-func leave(currentUserName: string) -> bool:
+func leave(currentUserName: string):
 	app <- AppConfig.getApp()
-	relay <- AppConfig.get_init_relay()
-	on app.user_list.peer_id via relay:
+	on app.user_list.peer_id:
 		UserList app.user_list.service_id
 		res <- UserList.leave(currentUserName)
 	allUsers <- getUserList()
 	for user <- allUsers par:
-		on user.peer_id via relay:
+		on user.peer_id:
 			FluentPad.notifyUserRemoved(currentUserName)
-	<- true
 
 func auth() -> AuthResult:
 	app <- AppConfig.getApp()
-	relay <- AppConfig.get_init_relay()
-	on app.user_list.peer_id via relay:
+	on app.user_list.peer_id:
 		UserList app.user_list.service_id
 		res <- UserList.is_authenticated()
 	<- res
