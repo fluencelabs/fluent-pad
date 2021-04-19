@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "dependencies": {
-        "@fluencelabs/fluence": "^0.9.37",
+        "@fluencelabs/fluence": "^0.9.40",
         "@fluencelabs/fluence-network-environment": "1.0.8",
         "@testing-library/jest-dom": "^5.11.9",
         "@testing-library/react": "^11.2.5",
@@ -53,7 +53,7 @@
         ]
     },
     "devDependencies": {
-        "@fluencelabs/aqua-cli": "^0.1.1-80",
+        "@fluencelabs/aqua-cli": "^0.1.1-81",
         "@types/lodash": "^4.14.168"
     }
 }

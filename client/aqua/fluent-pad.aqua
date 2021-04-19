@@ -83,11 +83,12 @@ func getUserList() -> []User:
 func initAfterJoin(me: User) -> []User:
 	allUsers <- getUserList()
 	for user <- allUsers par:
-		on user.peer_id via user.relay_id:
+		on user.relay_id:
 			isOnline <- Peer.is_connected(user.peer_id)
 		if isOnline:
-			par FluentPad.notifyUserAdded(me, true)
-		par FluentPad.notifyUserAdded(user, isOnline)
+			on user.peer_id via user.relay_id:
+				FluentPad.notifyUserAdded(me, true)
+		FluentPad.notifyUserAdded(user, isOnline)
 	<- allUsers
 
 

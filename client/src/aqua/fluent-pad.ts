@@ -156,32 +156,36 @@ export async function initAfterJoin(
       (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
       (seq
        (call relay ("op" "identity") [])
-       (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers0)
+       (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers)
       )
      )
      (call relay ("op" "identity") [])
     )
-    (fold allUsers0.$.users! user
+    (fold allUsers.$.users! user
      (par
       (seq
        (seq
         (seq
          (seq
-          (seq
-           (call relay ("op" "identity") [])
-           (call user.$.relay_id! ("op" "identity") [])
-          )
-          (call user.$.peer_id! ("peer" "is_connected") [user.$.peer_id!] isOnline)
+          (call relay ("op" "identity") [])
+          (call user.$.relay_id! ("peer" "is_connected") [user.$.peer_id!] isOnline)
          )
-         (call user.$.relay_id! ("op" "identity") [])
+         (call relay ("op" "identity") [])
         )
-        (call relay ("op" "identity") [])
+        (null)
+        ;(match isOnline true
+        ; (seq
+        ;  (seq
+        ;   (call relay ("op" "identity") [])
+        ;   (call user.$.relay_id! ("op" "identity") [])
+        ;  )
+        ;  (call user.$.peer_id! ("fluence/fluent-pad" "notifyUserAdded") [me true])
+        ; )
+        ;)
        )
-       (par
-        (match isOnline true
-         (call %init_peer_id% ("fluence/fluent-pad" "notifyUserAdded") [me true])
-        )
-        (call %init_peer_id% ("fluence/fluent-pad" "notifyUserAdded") [user isOnline])
+       (seq
+         (call relay ("op" "identity") [])
+         (call %init_peer_id% ("fluence/fluent-pad" "notifyUserAdded") [user isOnline])
        )
       )
       (next user)
@@ -243,12 +247,12 @@ export async function updateOnlineStatuses(client: FluenceClient): Promise<void>
      (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
      (seq
       (call relay ("op" "identity") [])
-      (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers0)
+      (call app.$.user_list.peer_id! (app.$.user_list.service_id! "get_users") [] allUsers)
      )
     )
     (call relay ("op" "identity") [])
    )
-   (fold allUsers0.$.users! user
+   (fold allUsers.$.users! user
     (par
      (seq
       (seq
@@ -330,13 +334,13 @@ export async function leave(client: FluenceClient, currentUserName: string): Pro
       (call %init_peer_id% ("fluence/get-config" "getApp") [] app0)
       (seq
        (call relay ("op" "identity") [])
-       (call app0.$.user_list.peer_id! (app0.$.user_list.service_id! "get_users") [] allUsers0)
+       (call app0.$.user_list.peer_id! (app0.$.user_list.service_id! "get_users") [] allUsers)
       )
      )
     )
     (call relay ("op" "identity") [])
    )
-   (fold allUsers0.$.users! user
+   (fold allUsers.$.users! user
     (par
      (seq
       (call relay ("op" "identity") [])
@@ -560,13 +564,13 @@ export async function addEntry(
        (call %init_peer_id% ("fluence/get-config" "getApp") [] app1)
        (seq
         (call relay ("op" "identity") [])
-        (call app1.$.user_list.peer_id! (app1.$.user_list.service_id! "get_users") [] allUsers0)
+        (call app1.$.user_list.peer_id! (app1.$.user_list.service_id! "get_users") [] allUsers)
        )
       )
      )
      (call relay ("op" "identity") [])
     )
-    (fold allUsers0.$.users! user
+    (fold allUsers.$.users! user
      (par
       (seq
        (seq

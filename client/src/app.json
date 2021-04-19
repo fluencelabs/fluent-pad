@@ -5,16 +5,22 @@
                 "history_inmemory"
             ],
             "node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3",
+            "hashDependencies": [
+                "hash:6ee648216089b876a34353f485f1bf19dd863b861f0d798a0ac0cb65cc3b4e2f"
+            ],
             "blueprint_id": "5df598924434974291d98c6d72e0922f2e8cbd7f7f291ca44f1b2f8e198f421b",
-            "id": "2d9c6689-71f8-425f-8a7e-529773031b48"
+            "id": "c41c7f18-51fc-4cdf-b0f2-81ebc3b2dfeb"
         },
         "user_list": {
             "dependencies": [
                 "user_list_inmemory"
             ],
             "node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3",
+            "hashDependencies": [
+                "hash:691ebcd74409bd931a9a68d0e0001f8d9d4b8482c8aaac3184e28c2a322e5a82"
+            ],
             "blueprint_id": "d46fb511eb5a5dcea7b5a6777e04f95d48cbbe9fde040bd6bd69b4d9cd8fbb88",
-            "id": "cecdf864-5bd0-469d-836a-25baae9db911"
+            "id": "b01e524d-0040-46c8-8a0f-b963c923b0f4"
         }
     },
     "modules": {
