@@ -339,7 +339,10 @@ export async function leave(client: FluenceClient, currentUserName: string): Pro
    (fold allUsers.$.users! user
     (par
      (seq
-      (call relay ("op" "identity") [])
+      (seq
+       (call relay ("op" "identity") [])
+       (call user.$.relay_id! ("op" "identity") [])
+      )
       (call user.$.peer_id! ("fluence/fluent-pad" "notifyUserRemoved") [currentUserName])
      )
      (next user)

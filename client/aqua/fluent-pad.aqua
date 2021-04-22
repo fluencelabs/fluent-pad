@@ -104,7 +104,7 @@ func leave(currentUserName: string):
         res <- UserList.leave(currentUserName)
     allUsers <- getUserList()
     for user <- allUsers par:
-        on user.peer_id:
+        on user.peer_id via user.relay_id:
             FluentPad.notifyUserRemoved(currentUserName)
 
 func auth() -> AuthResult:
