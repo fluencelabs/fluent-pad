@@ -15,12 +15,6 @@ const createClientEx = async (relay) => {
     client.aquaCallHandler.on('fluence/get-config', 'getApp', () => {
         return fluentPadApp;
     });
-    client.aquaCallHandler.on('fluence/get-config', 'get_init_peer_id', () => {
-        return client.selfPeerId;
-    });
-    client.aquaCallHandler.on('fluence/get-config', 'get_init_relay', () => {
-        return client.relayPeerId;
-    });
     return client;
 };
 
