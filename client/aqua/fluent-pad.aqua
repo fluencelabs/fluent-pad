@@ -125,7 +125,7 @@ func getHistory() -> GetEntriesServiceResult:
         res <- History.get_all(authRes.is_authenticated)
     <- res
 
-func addEntry(entry: string, selfPeerId: string) -> AddServiceResult:
+func addEntry(entry: string) -> AddServiceResult:
     app <- AppConfig.getApp()
     authRes <- auth()
     on app.history.peer_id:
@@ -134,5 +134,5 @@ func addEntry(entry: string, selfPeerId: string) -> AddServiceResult:
     allUsers <- getUserList()
     for user <- allUsers par:
         on user.peer_id via user.relay_id:
-            FluentPad.notifyTextUpdate(entry, selfPeerId, authRes.is_authenticated)
+            FluentPad.notifyTextUpdate(entry, entry, authRes.is_authenticated)
     <- res

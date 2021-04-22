@@ -116,7 +116,7 @@ const App = () => {
                         <div className="room-wrapper">
                             <h1 className="fluent-pad">FluentPad</h1>
                             <UserList selfName={nickName} />
-                            {/* <CollaborativeEditor /> */}
+                            <CollaborativeEditor />
                         </div>
                     )}
                 </div>
