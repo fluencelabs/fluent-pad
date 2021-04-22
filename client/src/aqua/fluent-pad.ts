@@ -311,7 +311,7 @@ export async function updateOnlineStatuses(client: FluenceClient): Promise<void>
     return Promise.race([promise, Promise.resolve()]);
 }
 
-export async function leave(client: FluenceClient, currentUserName: string): Promise<void> {
+export async function leave(client: FluenceClient): Promise<void> {
     let request;
     const promise = new Promise<void>((resolve, reject) => {
         request = new RequestFlowBuilder()
@@ -320,19 +320,19 @@ export async function leave(client: FluenceClient, currentUserName: string): Pro
                 `
 (xor
  (seq
-  (seq
-   (call %init_peer_id% ("getDataSrv" "relay") [] relay)
-   (call %init_peer_id% ("getDataSrv" "currentUserName") [] currentUserName)
-  )
+  (call %init_peer_id% ("getDataSrv" "relay") [] relay)
   (seq
    (seq
     (seq
      (seq
       (seq
-       (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+       (seq
+        (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
+        (call %init_peer_id% ("fluence/get-config" "get_init_peer_id") [] currentUserPeerId)
+       )
        (seq
         (call relay ("op" "identity") [])
-        (call app.$.user_list.peer_id! (app.$.user_list.service_id! "leave") [currentUserName] res)
+        (call app.$.user_list.peer_id! (app.$.user_list.service_id! "leave") [currentUserPeerId] res)
        )
       )
       (call relay ("op" "identity") [])
@@ -346,7 +346,7 @@ export async function leave(client: FluenceClient, currentUserName: string): Pro
      )
     )
     (call relay ("op" "identity") [])
-   )s
+   )
    (fold allUsers.$.users! user
     (par
      (seq
@@ -354,7 +354,7 @@ export async function leave(client: FluenceClient, currentUserName: string): Pro
        (call relay ("op" "identity") [])
        (call user.$.relay_id! ("op" "identity") [])
       )
-      (call user.$.peer_id! ("fluence/fluent-pad" "notifyUserRemoved") [currentUserName])
+      (call user.$.peer_id! ("fluence/fluent-pad" "notifyUserRemoved") [currentUserPeerId])
      )
      (next user)
     )
@@ -373,9 +373,6 @@ export async function leave(client: FluenceClient, currentUserName: string): Pro
                 h.on('getRelayService', 'hasReleay', () => {
                     // Not Used
                     return client.relayPeerId !== undefined;
-                });
-                h.on('getDataSrv', 'currentUserName', () => {
-                    return currentUserName;
                 });
 
                 h.onEvent('errorHandlingSrv', 'error', (args) => {

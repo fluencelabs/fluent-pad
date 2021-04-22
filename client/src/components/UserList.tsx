@@ -42,7 +42,7 @@ export const UserList = (props: { selfName: string }) => {
     useEffect(() => {
         const listRefreshTimer = setInterval(() => {
             withErrorHandlingAsync(async () => {
-                await updateOnlineStatuses(client);
+                // await updateOnlineStatuses(client);
             });
         }, refreshOnlineStatusTimeoutMs);
 

@@ -32,8 +32,8 @@ service UserList:
     is_authenticated: -> AuthResult
     get_users: -> GetUsersServiceResult
     join: User -> EmptyServiceResult
-    leave: string -> EmptyServiceResult
-    is_exists: string -> ()
+    leave: string -> EmptyServiceResult -- user peerId,
+    is_exists: string -> () -- user peerId,
 
 data AddServiceResult:
     ret_code: s32
@@ -63,6 +63,8 @@ service FluentPad("fluence/fluent-pad"):
 
 service AppConfig("fluence/get-config"):
     getApp: -> App
+    get_init_peer_id: -> string
+    get_init_relay: -> string
 
 func join(user: User) -> EmptyServiceResult:
     app <- AppConfig.getApp()
@@ -97,15 +99,16 @@ func updateOnlineStatuses():
             isOnline <- Peer.is_connected(user.peer_id)
         FluentPad.notifyOnline(user.peer_id, isOnline)
 
-func leave(currentUserName: string):
+func leave():
     app <- AppConfig.getApp()
+    currentUserPeerId <- AppConfig.get_init_peer_id()
     on app.user_list.peer_id:
         UserList app.user_list.service_id
-        res <- UserList.leave(currentUserName)
+        res <- UserList.leave(currentUserPeerId)
     allUsers <- getUserList()
     for user <- allUsers par:
         on user.peer_id via user.relay_id:
-            FluentPad.notifyUserRemoved(currentUserName)
+            FluentPad.notifyUserRemoved(currentUserPeerId)
 
 func auth() -> AuthResult:
     app <- AppConfig.getApp()
