@@ -165,36 +165,30 @@ export async function initAfterJoin(
      (call relay ("op" "identity") [])
     )
     (fold allUsers.$.users! user
-        (par
-            (seq
-                (seq
-                    (seq
-                        (call relay ("op" "identity") [])
-                        (call user.$.relay_id! ("peer" "is_connected") [user.$.peer_id!] isOnline)
-                    )
-                    (call relay ("op" "identity") [])
-                )
-                (par
-                    (xor
-                        (match isOnline true
-                            (seq
-                                (seq
-                                    (call relay ("op" "identity") [])
-                                    (call user.$.relay_id! ("op" "identity") [])
-                                )
-                                (call user.$.peer_id! ("fluence/fluent-pad" "notifyUserAdded") [me true])
-                            )
-                        )
-                        (null)
-                    )
-                    (seq
-                        (call relay ("op" "identity") [])
-                        (call %init_peer_id% ("fluence/fluent-pad" "notifyUserAdded") [user isOnline])
-                    )
-                )
-            )
-            (next user)
+     (par
+      (seq
+       (seq
+        (seq
+         (call relay ("op" "identity") [])
+         (call user.$.relay_id! ("peer" "is_connected") [user.$.peer_id!] isOnline)
         )
+        (call relay ("op" "identity") [])
+       )
+       (par
+        (match isOnline true
+         (seq
+          (seq
+           (call relay ("op" "identity") [])
+           (call user.$.relay_id! ("op" "identity") [])
+          )
+          (call user.$.peer_id! ("fluence/fluent-pad" "notifyUserAdded") [me true])
+         )
+        )
+        (call %init_peer_id% ("fluence/fluent-pad" "notifyUserAdded") [user isOnline])
+       )
+      )
+      (next user)
+     )
     )
    )
   )
@@ -550,14 +544,17 @@ export async function addEntry(
       (seq
        (seq
         (seq
-         (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
          (seq
-          (call %init_peer_id% ("fluence/get-config" "getApp") [] app0)
+          (call %init_peer_id% ("fluence/get-config" "getApp") [] app)
           (seq
-           (call relay ("op" "identity") [])
-           (call app0.$.user_list.peer_id! (app0.$.user_list.service_id! "is_authenticated") [] res0)
+           (call %init_peer_id% ("fluence/get-config" "getApp") [] app0)
+           (seq
+            (call relay ("op" "identity") [])
+            (call app0.$.user_list.peer_id! (app0.$.user_list.service_id! "is_authenticated") [] res0)
+           )
           )
          )
+         (call relay ("op" "identity") [])
         )
         (seq
          (call relay ("op" "identity") [])

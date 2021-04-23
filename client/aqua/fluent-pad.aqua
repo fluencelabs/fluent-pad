@@ -1,6 +1,9 @@
 service Peer("peer"):
     is_connected: string -> bool
 
+service Op("op"):
+    identity: -> ()
+
 data ServiceInstance:
     peer_id: string
     service_id: string
@@ -88,7 +91,7 @@ func initAfterJoin(me: User) -> []User:
         if isOnline:
             on user.peer_id via user.relay_id:
                 FluentPad.notifyUserAdded(me, true)
-        FluentPad.notifyUserAdded(user, isOnline)
+        par FluentPad.notifyUserAdded(user, isOnline)
     <- allUsers
 
 
