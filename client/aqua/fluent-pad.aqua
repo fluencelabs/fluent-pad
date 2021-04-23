@@ -91,6 +91,8 @@ func initAfterJoin(me: User) -> []User:
         if isOnline:
             on user.peer_id via user.relay_id:
                 FluentPad.notifyUserAdded(me, true)
+        else:
+            Op.identity()
         par FluentPad.notifyUserAdded(user, isOnline)
     <- allUsers
 
