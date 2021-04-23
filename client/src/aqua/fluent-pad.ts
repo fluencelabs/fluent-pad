@@ -175,7 +175,7 @@ export async function initAfterJoin(
                     (call relay ("op" "identity") [])
                 )
                 (par
-                    (xor
+                    ;(xor
                         (match isOnline true
                             (seq
                                 (seq
@@ -185,8 +185,8 @@ export async function initAfterJoin(
                                 (call user.$.peer_id! ("fluence/fluent-pad" "notifyUserAdded") [me true])
                             )
                         )
-                        (null)
-                    )
+                        ;(null)
+                    ;)
                     (seq
                         (call relay ("op" "identity") [])
                         (call %init_peer_id% ("fluence/fluent-pad" "notifyUserAdded") [user isOnline])
