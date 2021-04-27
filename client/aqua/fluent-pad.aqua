@@ -1,11 +1,7 @@
-service Peer("peer"):
-    is_connected: string -> bool
-
-service Op("op"):
-    identity: -> ()
+import "builtin.aqua"
 
 data ServiceInstance:
-    peer_id: string
+    peer_id: PeerId
     service_id: string
 
 data App:
@@ -17,8 +13,8 @@ data EmptyServiceResult:
     err_msg: string
 
 data User:
-    peer_id: string
-    relay_id: string
+    peer_id: PeerId
+    relay_id: PeerId
     name: string
 
 data GetUsersServiceResult:
@@ -62,12 +58,10 @@ service FluentPad("fluence/fluent-pad"):
     notifyOnline: string, bool -> () -- user peerId, onlineStatus
     notifyUserAdded: User, bool -> () -- user peerId, onlineStatus
     notifyUserRemoved: string -> () -- user peerId,
-    notifyTextUpdate: string, string, bool -> () -- authorPeerId, changes, isAuthorized
+    notifyTextUpdate: string, bool -> () -- authorPeerId, changes, isAuthorized
 
 service AppConfig("fluence/get-config"):
     getApp: -> App
-    get_init_peer_id: -> string
-    get_init_relay: -> string
 
 func join(user: User) -> EmptyServiceResult:
     app <- AppConfig.getApp()
@@ -106,14 +100,13 @@ func updateOnlineStatuses():
 
 func leave():
     app <- AppConfig.getApp()
-    currentUserPeerId <- AppConfig.get_init_peer_id()
     on app.user_list.peer_id:
         UserList app.user_list.service_id
-        res <- UserList.leave(currentUserPeerId)
+        res <- UserList.leave(%init_peer_id%)
     allUsers <- getUserList()
     for user <- allUsers par:
         on user.peer_id via user.relay_id:
-            FluentPad.notifyUserRemoved(currentUserPeerId)
+            FluentPad.notifyUserRemoved(%init_peer_id%)
 
 func auth() -> AuthResult:
     app <- AppConfig.getApp()
@@ -138,6 +131,7 @@ func addEntry(entry: string) -> AddServiceResult:
         res <- History.add(entry, authRes.is_authenticated)
     allUsers <- getUserList()
     for user <- allUsers par:
-        on user.peer_id via user.relay_id:
-            FluentPad.notifyTextUpdate(entry, entry, authRes.is_authenticated)
+        if user.peer_id != %init_peer_id%:
+            on user.peer_id via user.relay_id:
+                FluentPad.notifyTextUpdate(entry, authRes.is_authenticated)
     <- res

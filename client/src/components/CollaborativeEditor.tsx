@@ -38,10 +38,7 @@ export const CollaborativeEditor = () => {
         };
 
         const unsub = subscribeToEvent(client, fluentPadServiceId, notifyTextUpdateFnName, (args, tetraplets) => {
-            const [authorPeerId, changes, isAuthorized] = args as [PeerIdB58, string, boolean];
-            if (authorPeerId === client.selfPeerId) {
-                return;
-            }
+            const [changes, isAuthorized] = args as [string, boolean];
 
             if (changes) {
                 syncClient.receiveChanges(changes);
