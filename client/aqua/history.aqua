@@ -1,0 +1,23 @@
+data EmptyServiceResult:
+    ret_code: s32
+    err_msg: string
+
+data AddServiceResult:
+    ret_code: s32
+    err_msg: string
+    entry_id: u64
+
+data HistoryEntry:
+    id: u64
+    body: string
+
+data GetEntriesServiceResult:
+    ret_code: s32
+    err_msg: string
+    entries: []HistoryEntry
+
+service History:
+    get_all: bool -> GetEntriesServiceResult
+    get_last: u64, bool -> GetEntriesServiceResult
+    add: string, bool -> AddServiceResult
+    set_tetraplet: string, string, string, string -> EmptyServiceResult
