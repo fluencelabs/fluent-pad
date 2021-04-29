@@ -1,7 +1,7 @@
 import "builtin.aqua"
 import "fluent-pad.aqua"
 import "history.aqua"
-import "user-list.aqua"
+
 
 func join(user: User) -> EmptyServiceResult:
     app <- AppConfig.getApp()
