@@ -1,6 +1,4 @@
-data EmptyServiceResult:
-    ret_code: s32
-    err_msg: string
+import "common.aqua"
 
 data AddServiceResult:
     ret_code: s32

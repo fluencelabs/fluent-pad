@@ -8,7 +8,7 @@ import {
 import { useFluenceClient } from '../app/FluenceClientContext';
 import { PeerIdB58, subscribeToEvent } from '@fluencelabs/fluence';
 import { withErrorHandlingAsync } from './util';
-import { initAfterJoin, updateOnlineStatuses } from 'src/aqua/fluent-pad';
+import { initAfterJoin, updateOnlineStatuses } from 'src/aqua/app';
 
 interface User {
     id: PeerIdB58;

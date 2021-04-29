@@ -8,7 +8,7 @@ import { UserList } from './UserList';
 import { CollaborativeEditor } from './CollaborativeEditor';
 import { fluentPadApp, relayNode } from 'src/app/constants';
 import { CheckResponse, withErrorHandlingAsync } from './util';
-import { join, leave } from 'src/aqua/fluent-pad';
+import { join, leave } from 'src/aqua/app';
 
 const createClientEx = async (relay) => {
     const client = await createClient(relay);

@@ -8,48 +8,6 @@
 import { FluenceClient, PeerIdB58 } from '@fluencelabs/fluence';
 import { RequestFlowBuilder } from '@fluencelabs/fluence/dist/api.unstable';
 
-export async function id(client: FluenceClient): Promise<void> {
-    let request;
-    const promise = new Promise<void>((resolve, reject) => {
-        request = new RequestFlowBuilder()
-            .disableInjections()
-            .withRawScript(
-                `
-(xor
- (seq
-  (call %init_peer_id% ("getDataSrv" "relay") [] relay)
-  (call %init_peer_id% ("op" "identity") [])
- )
- (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error%])
-)
-
-            `,
-            )
-            .configHandler((h) => {
-                h.on('getDataSrv', 'relay', () => {
-                    return client.relayPeerId!;
-                });
-                h.on('getRelayService', 'hasReleay', () => {
-                    // Not Used
-                    return client.relayPeerId !== undefined;
-                });
-
-                h.onEvent('errorHandlingSrv', 'error', (args) => {
-                    // assuming error is the single argument
-                    const [err] = args;
-                    reject(err);
-                });
-            })
-            .handleScriptError(reject)
-            .handleTimeout(() => {
-                reject('Request timed out for id');
-            })
-            .build();
-    });
-    await client.initiateFlow(request);
-    return Promise.race([promise, Promise.resolve()]);
-}
-
 export async function join(
     client: FluenceClient,
     user: { name: string; peer_id: string; relay_id: string },
@@ -89,7 +47,7 @@ export async function join(
                 h.on('getDataSrv', 'relay', () => {
                     return client.relayPeerId!;
                 });
-                h.on('getRelayService', 'hasReleay', () => {
+                h.on('getRelayService', 'hasRelay', () => {
                     // Not Used
                     return client.relayPeerId !== undefined;
                 });
@@ -152,7 +110,7 @@ export async function getUserList(
                 h.on('getDataSrv', 'relay', () => {
                     return client.relayPeerId!;
                 });
-                h.on('getRelayService', 'hasReleay', () => {
+                h.on('getRelayService', 'hasRelay', () => {
                     // Not Used
                     return client.relayPeerId !== undefined;
                 });
@@ -248,7 +206,7 @@ export async function initAfterJoin(
                 h.on('getDataSrv', 'relay', () => {
                     return client.relayPeerId!;
                 });
-                h.on('getRelayService', 'hasReleay', () => {
+                h.on('getRelayService', 'hasRelay', () => {
                     // Not Used
                     return client.relayPeerId !== undefined;
                 });
@@ -329,7 +287,7 @@ export async function updateOnlineStatuses(client: FluenceClient): Promise<void>
                 h.on('getDataSrv', 'relay', () => {
                     return client.relayPeerId!;
                 });
-                h.on('getRelayService', 'hasReleay', () => {
+                h.on('getRelayService', 'hasRelay', () => {
                     // Not Used
                     return client.relayPeerId !== undefined;
                 });
@@ -406,7 +364,7 @@ export async function leave(client: FluenceClient): Promise<void> {
                 h.on('getDataSrv', 'relay', () => {
                     return client.relayPeerId!;
                 });
-                h.on('getRelayService', 'hasReleay', () => {
+                h.on('getRelayService', 'hasRelay', () => {
                     // Not Used
                     return client.relayPeerId !== undefined;
                 });
@@ -462,7 +420,7 @@ export async function auth(
                 h.on('getDataSrv', 'relay', () => {
                     return client.relayPeerId!;
                 });
-                h.on('getRelayService', 'hasReleay', () => {
+                h.on('getRelayService', 'hasRelay', () => {
                     // Not Used
                     return client.relayPeerId !== undefined;
                 });
@@ -536,7 +494,7 @@ export async function getHistory(
                     h.on('getDataSrv', 'relay', () => {
                         return client.relayPeerId!;
                     });
-                    h.on('getRelayService', 'hasReleay', () => {
+                    h.on('getRelayService', 'hasRelay', () => {
                         // Not Used
                         return client.relayPeerId !== undefined;
                     });
@@ -642,7 +600,7 @@ export async function addEntry(
                 h.on('getDataSrv', 'relay', () => {
                     return client.relayPeerId!;
                 });
-                h.on('getRelayService', 'hasReleay', () => {
+                h.on('getRelayService', 'hasRelay', () => {
                     // Not Used
                     return client.relayPeerId !== undefined;
                 });

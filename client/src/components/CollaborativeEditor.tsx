@@ -6,7 +6,7 @@ import { fluentPadServiceId, notifyTextUpdateFnName } from 'src/app/constants';
 import { useFluenceClient } from '../app/FluenceClientContext';
 import { getUpdatedDocFromText, initDoc, SyncClient } from '../app/sync';
 import { withErrorHandlingAsync } from './util';
-import { addEntry, getHistory } from 'src/aqua/fluent-pad';
+import { addEntry, getHistory } from 'src/aqua/app';
 
 const broadcastUpdates = _.debounce((text: string, syncClient: SyncClient) => {
     let doc = syncClient.getDoc();
