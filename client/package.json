@@ -54,6 +54,7 @@
     },
     "devDependencies": {
         "@fluencelabs/aqua-cli": "^0.1.1-94",
+        "@fluencelabs/aqua-lib": "0.1.1",
         "@types/lodash": "^4.14.168"
     }
 }

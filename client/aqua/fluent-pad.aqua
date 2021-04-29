@@ -1,4 +1,4 @@
-import "builtin.aqua"
+import "@fluencelabs/aqua-lib/builtin.aqua"
 import "user-list.aqua"
 
 data ServiceInstance:
