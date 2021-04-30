@@ -44,7 +44,7 @@ export class SyncClient<T = TextDoc> {
             const msg = JSON.parse(changes);
             this.connection.receiveMsg(msg);
         } catch (e) {
-            console.log('Couldnt receive message', changes);
+            console.error('Couldnt receive message', changes);
         }
     }
 

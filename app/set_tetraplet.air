@@ -1,0 +1,7 @@
+(seq
+    (call init_relay ("op" "identity") [])
+    (seq
+        (call history__node (history "set_tetraplet") [user_list__node user_list function json_path] auth_result)
+        (call %init_peer_id% (returnService "run") [auth_result])
+    )
+)

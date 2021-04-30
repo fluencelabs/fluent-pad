@@ -6,64 +6,61 @@ import {
     notifyUserRemovedFnName,
 } from 'src/app/constants';
 import { useFluenceClient } from '../app/FluenceClientContext';
-import * as api from 'src/app/api';
 import { PeerIdB58, subscribeToEvent } from '@fluencelabs/fluence';
 import { withErrorHandlingAsync } from './util';
+import { initAfterJoin, updateOnlineStatuses } from 'src/aqua/app';
 
 interface User {
     id: PeerIdB58;
     name: string;
     isOnline: boolean;
-    shouldBecomeOnline: boolean;
 }
 
-const turnUserAsOfflineCandidate = (u: User): User => {
-    return {
-        ...u,
-        isOnline: u.shouldBecomeOnline,
-        shouldBecomeOnline: false,
-    };
-};
+interface ApiUser {
+    name: string;
+    peer_id: string;
+    relay_id: string;
+}
 
-const refreshTimeoutMs = 2000;
+const refreshOnlineStatusTimeoutMs = 10000;
 
 export const UserList = (props: { selfName: string }) => {
     const client = useFluenceClient()!;
     const [users, setUsers] = useState<Map<PeerIdB58, User>>(new Map());
 
+    const updateOnlineStatus = (user, onlineStatus) => {
+        setUsers((prev) => {
+            const result = new Map(prev);
+            const u = result.get(user);
+            if (u) {
+                result.set(user, { ...u, isOnline: onlineStatus });
+            }
+            return result;
+        });
+    };
+
     useEffect(() => {
         const listRefreshTimer = setInterval(() => {
-            setUsers((prev) => {
-                const newUsers = Array.from(prev).map(
-                    ([key, user]) => [key, turnUserAsOfflineCandidate(user)] as const,
-                );
-                return new Map(newUsers);
-            });
-
-            // don't block
             withErrorHandlingAsync(async () => {
-                await api.updateOnlineStatuses(client);
+                // await updateOnlineStatuses(client);
             });
-        }, refreshTimeoutMs);
+        }, refreshOnlineStatusTimeoutMs);
 
         const unsub1 = subscribeToEvent(client, fluentPadServiceId, notifyUserAddedFnName, (args, _) => {
-            const [users, setOnline] = args as [api.User[], boolean];
+            const [user, isOnline] = args as [ApiUser, boolean];
             setUsers((prev) => {
+                const u = user;
                 const result = new Map(prev);
-                for (let u of users) {
-                    if (result.has(u.peer_id)) {
-                        continue;
-                    }
-
-                    const isCurrentUser = u.peer_id === client.selfPeerId;
-
-                    result.set(u.peer_id, {
-                        name: u.name,
-                        id: u.peer_id,
-                        isOnline: isCurrentUser || setOnline,
-                        shouldBecomeOnline: isCurrentUser || setOnline,
-                    });
+                if (result.has(u.peer_id)) {
+                    return result;
                 }
+
+                result.set(u.peer_id, {
+                    name: u.name,
+                    id: u.peer_id,
+                    isOnline: isOnline,
+                });
+
                 return result;
             });
         });
@@ -78,26 +75,17 @@ export const UserList = (props: { selfName: string }) => {
         });
 
         const unsub3 = subscribeToEvent(client, fluentPadServiceId, notifyOnlineFnName, (args, _) => {
-            const [userOnline] = args as [PeerIdB58[]];
-            setUsers((prev) => {
-                const result = new Map(prev);
-
-                for (let u of userOnline) {
-                    const toSetOnline = result.get(u);
-                    if (toSetOnline) {
-                        toSetOnline.shouldBecomeOnline = true;
-                        toSetOnline.isOnline = true;
-                    }
-                }
-
-                return result;
-            });
+            const [user, onlineStatus] = args as [PeerIdB58, boolean];
+            updateOnlineStatus(user, onlineStatus);
         });
 
         // don't block
         withErrorHandlingAsync(async () => {
-            await api.getUserList(client);
-            await api.notifySelfAdded(client, props.selfName);
+            await initAfterJoin(client, {
+                name: props.selfName,
+                peer_id: client.selfPeerId,
+                relay_id: client.relayPeerId!,
+            });
         });
 
         return () => {

@@ -1,0 +1,17 @@
+(seq
+    (call %init_peer_id% ({{user_list}} "is_authenticated") [] token)
+    (seq 
+        (call %init_peer_id% ({{user_list}} "get_users") [] all_users)
+        (fold all_users.$.users! u
+            (par
+                (seq
+                    (call u.$.relay_id! ("peer" "is_connected") [u.$.peer_id!] is_connected)
+                    (match is_connected false
+                        (call %init_peer_id% ({{user_list}} "leave") [u.$.peer_id!])
+                    )
+                )
+                (next u)
+            )
+        )
+    )
+)

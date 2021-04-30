@@ -6,7 +6,7 @@ import { setLogLevel } from '@fluencelabs/fluence';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-setLogLevel('INFO');
+setLogLevel('trace');
 
 ReactDOM.render(
     <React.StrictMode>

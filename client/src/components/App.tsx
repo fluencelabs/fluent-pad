@@ -5,11 +5,24 @@ import './App.scss';
 
 import { FluenceClientContext } from '../app/FluenceClientContext';
 import { UserList } from './UserList';
-import * as api from 'src/app/api';
 import { CollaborativeEditor } from './CollaborativeEditor';
-import { relayNode } from 'src/app/constants';
-import { withErrorHandlingAsync } from './util';
-import { toast } from 'react-toastify';
+import { fluentPadApp, relayNode } from 'src/app/constants';
+import { CheckResponse, withErrorHandlingAsync } from './util';
+import { join, leave } from 'src/aqua/app';
+
+const createClientEx = async (relay) => {
+    const client = await createClient(relay);
+    client.aquaCallHandler.on('fluence/get-config', 'getApp', () => {
+        return fluentPadApp;
+    });
+    client.aquaCallHandler.on('fluence/get-config', 'get_init_peer_id', () => {
+        return client.selfPeerId;
+    });
+    client.aquaCallHandler.on('fluence/get-config', 'get_init_relay', () => {
+        return client.relayPeerId!;
+    });
+    return client;
+};
 
 const App = () => {
     const [client, setClient] = useState<FluenceClient | null>(null);
@@ -17,7 +30,7 @@ const App = () => {
     const [nickName, setNickName] = useState('');
 
     useEffect(() => {
-        createClient(relayNode)
+        createClientEx(relayNode)
             .then((client) => setClient(client))
             .catch((err) => console.log('Client initialization failed', err));
     }, []);
@@ -28,8 +41,14 @@ const App = () => {
         }
 
         await withErrorHandlingAsync(async () => {
-            await api.join(client, nickName);
-            setIsInRoom(true);
+            const res = await join(client, {
+                peer_id: client.selfPeerId,
+                relay_id: client.relayPeerId!,
+                name: nickName,
+            });
+            if (CheckResponse(res)) {
+                setIsInRoom(true);
+            }
         });
     };
 
@@ -39,7 +58,7 @@ const App = () => {
         }
 
         await withErrorHandlingAsync(async () => {
-            await api.leave(client);
+            await leave(client);
             setIsInRoom(false);
         });
     };

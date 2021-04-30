@@ -5,8 +5,8 @@ import { PeerIdB58, subscribeToEvent } from '@fluencelabs/fluence';
 import { fluentPadServiceId, notifyTextUpdateFnName } from 'src/app/constants';
 import { useFluenceClient } from '../app/FluenceClientContext';
 import { getUpdatedDocFromText, initDoc, SyncClient } from '../app/sync';
-import * as api from 'src/app/api';
 import { withErrorHandlingAsync } from './util';
+import { addEntry, getHistory } from 'src/aqua/app';
 
 const broadcastUpdates = _.debounce((text: string, syncClient: SyncClient) => {
     let doc = syncClient.getDoc();
@@ -28,15 +28,17 @@ export const CollaborativeEditor = () => {
 
         syncClient.handleSendChanges = (changes: string) => {
             withErrorHandlingAsync(async () => {
-                await api.addEntry(client, changes);
+                const res = await addEntry(client, changes, client.selfPeerId);
+                if (res.ret_code !== 0) {
+                    throw new Error(
+                        `Failed to add message to history service, code=${res.ret_code}, message=${res.err_msg}`,
+                    );
+                }
             });
         };
 
         const unsub = subscribeToEvent(client, fluentPadServiceId, notifyTextUpdateFnName, (args, tetraplets) => {
-            const [authorPeerId, changes, isAuthorized] = args as [PeerIdB58, string, boolean];
-            if (authorPeerId === client.selfPeerId) {
-                return;
-            }
+            const [changes, isAuthorized] = args as [string, boolean];
 
             if (changes) {
                 syncClient.receiveChanges(changes);
@@ -47,8 +49,8 @@ export const CollaborativeEditor = () => {
 
         // don't block
         withErrorHandlingAsync(async () => {
-            const res = await api.getHistory(client);
-            for (let e of res) {
+            const res = await getHistory(client);
+            for (let e of res.entries) {
                 syncClient.receiveChanges(e.body);
             }
 

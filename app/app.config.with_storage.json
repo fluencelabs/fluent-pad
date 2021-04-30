@@ -1,0 +1,42 @@
+{
+	"services": {
+		"history": {
+			"dependencies": ["history_inmemory"],
+			"node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3"
+		},
+		"user_list": {
+			"dependencies": ["user_list_inmemory"],
+			"node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3"
+		}
+	},
+	"modules": {
+		"history_inmemory": {
+			"file": "history.wasm",
+			"config": {
+				"preopened_files": ["/tmp"],
+				"mapped_dirs": { "history": "/tmp" }
+			}
+		},
+		"user_list_inmemory": {
+			"file": "user_list.wasm",
+			"config": {}
+		}
+	},
+	"scripts": {
+		"set_tetraplet": {
+			"file": "set_tetraplet.air",
+			"variables": {
+				"function": "is_authenticated",
+				"json_path": "$.[\"is_authenticated\"]"
+			},
+			"node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3"
+		}
+	},
+	"script_storage": {
+		"remove_disconnected": {
+			"file": "remove_disconnected.air",
+			"interval": 10,
+			"node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3"
+		}
+	}
+}

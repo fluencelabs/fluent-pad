@@ -1,5 +1,4 @@
-
-
+import config from 'src/app.json';
 import { testNet } from '@fluencelabs/fluence-network-environment';
 
 export const fluentPadServiceId = 'fluence/fluent-pad';
@@ -9,10 +8,23 @@ export const notifyUserAddedFnName = 'notifyUserAdded';
 export const notifyUserRemovedFnName = 'notifyUserRemoved';
 export const notifyTextUpdateFnName = 'notifyTextUpdate';
 
-export const historyServiceId = '64ea579e-b863-4a42-b80c-e7b5ec1ab7fa';
-export const userListServiceId = '91041afe-0c3c-451a-9003-6bb92a570aae';
+export const userList = {
+    peer_id: config.services.user_list.node,
+    service_id: config.services.user_list.id,
+};
 
-export const userListNodePeerId = testNet[3].peerId;
-export const historyNodePeerId = testNet[3].peerId;
+export const history = {
+    peer_id: config.services.history.node,
+    service_id: config.services.history.id,
+};
 
-export const relayNode = testNet[0];
+export const fluentPadApp = {
+    user_list: userList,
+    history: history,
+};
+
+// export const relayNode = testNet[0];
+export const relayNode = {
+    multiaddr: '/ip4/127.0.0.1/tcp/4310/ws/p2p/12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3',
+    peerId: '12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3',
+};

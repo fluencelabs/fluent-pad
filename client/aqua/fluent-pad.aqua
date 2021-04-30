@@ -1,0 +1,19 @@
+import "@fluencelabs/aqua-lib/builtin.aqua"
+import "user-list.aqua"
+
+data ServiceInstance:
+    peer_id: PeerId
+    service_id: string
+
+data App:
+    history: ServiceInstance
+    user_list: ServiceInstance
+
+service FluentPad("fluence/fluent-pad"):
+    notifyOnline(userPeerId: string, isOnline: bool)
+    notifyUserAdded(currentUser: User, isOnline: bool)
+    notifyUserRemoved(userPeerId: PeerId)
+    notifyTextUpdate(changes: string, isAuthorized: bool)
+
+service AppConfig("fluence/get-config"):
+    getApp: -> App
