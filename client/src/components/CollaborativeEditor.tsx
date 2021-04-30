@@ -28,7 +28,7 @@ export const CollaborativeEditor = () => {
 
         syncClient.handleSendChanges = (changes: string) => {
             withErrorHandlingAsync(async () => {
-                const res = await addEntry(client, changes);
+                const res = await addEntry(client, changes, client.selfPeerId);
                 if (res.ret_code !== 0) {
                     throw new Error(
                         `Failed to add message to history service, code=${res.ret_code}, message=${res.err_msg}`,

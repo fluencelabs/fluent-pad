@@ -10,10 +10,10 @@ data App:
     user_list: ServiceInstance
 
 service FluentPad("fluence/fluent-pad"):
-    notifyOnline: string, bool -> () -- user peerId, onlineStatus
-    notifyUserAdded: User, bool -> () -- user peerId, onlineStatus
-    notifyUserRemoved: string -> () -- user peerId,
-    notifyTextUpdate: string, bool -> () -- authorPeerId, changes, isAuthorized
+    notifyOnline(userPeerId: string, isOnline: bool)
+    notifyUserAdded(currentUser: User, isOnline: bool)
+    notifyUserRemoved(userPeerId: PeerId)
+    notifyTextUpdate(changes: string, isAuthorized: bool)
 
 service AppConfig("fluence/get-config"):
     getApp: -> App

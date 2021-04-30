@@ -524,6 +524,7 @@ export async function getHistory(
 export async function addEntry(
     client: FluenceClient,
     entry: string,
+    init_peer_id: string,
 ): Promise<{ entry_id: number; err_msg: string; ret_code: number }> {
     let request;
     const promise = new Promise<{ entry_id: number; err_msg: string; ret_code: number }>((resolve, reject) => {
@@ -535,11 +536,11 @@ export async function addEntry(
  (seq
   (seq
    (seq
-    (call %init_peer_id% ("getDataSrv" "relay") [] relay)
-    (seq 
-        (call %init_peer_id% ("getDataSrv" "entry") [] entry)
-        (call %init_peer_id% ("getDataSrv" "init_peer_id") [] init_peer_id)
+    (seq
+     (call %init_peer_id% ("getDataSrv" "relay") [] relay)
+     (call %init_peer_id% ("getDataSrv" "entry") [] entry)
     )
+    (call %init_peer_id% ("getDataSrv" "init_peer_id") [] init_peer_id)
    )
    (seq
     (seq
@@ -611,7 +612,7 @@ export async function addEntry(
                     return entry;
                 });
                 h.on('getDataSrv', 'init_peer_id', () => {
-                    return client.selfPeerId;
+                    return init_peer_id;
                 });
                 h.onEvent('callbackSrv', 'response', (args) => {
                     const [res] = args;
