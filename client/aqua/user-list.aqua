@@ -20,5 +20,5 @@ service UserList:
     is_authenticated: -> AuthResult
     get_users: -> GetUsersServiceResult
     join: User -> EmptyServiceResult
-    leave: string -> EmptyServiceResult -- user peerId
-    is_exists: string -> () -- user peerId
+    leave(userPeerId: PeerID) -> EmptyServiceResult
+    is_exists(userPeerId: PeerID)
