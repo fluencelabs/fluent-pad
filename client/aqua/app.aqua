@@ -63,7 +63,7 @@ func getHistory() -> GetEntriesServiceResult:
         res <- History.get_all(authRes.is_authenticated)
     <- res
 
-func addEntry(entry: string, init_peer_id: PeerId) -> AddServiceResult:
+func addEntry(entry: string) -> AddServiceResult:
     app <- AppConfig.getApp()
     authRes <- auth()
     on app.history.peer_id:
@@ -71,7 +71,7 @@ func addEntry(entry: string, init_peer_id: PeerId) -> AddServiceResult:
         res <- History.add(entry, authRes.is_authenticated)
     allUsers <- getUserList()
     for user <- allUsers par:
-        if user.peer_id != init_peer_id:
+        if user.peer_id != %init_peer_id%:
             on user.peer_id via user.relay_id:
                 FluentPad.notifyTextUpdate(entry, authRes.is_authenticated)
     <- res
