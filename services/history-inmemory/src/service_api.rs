@@ -20,12 +20,12 @@ use crate::history_entry::HistoryEntry;
 use crate::results::{AddServiceResult, EmptyResult, GetEntriesServiceResult};
 use crate::utils::u64_to_usize;
 use crate::Result;
-use fluence::{fce, CallParameters};
+use fluence::{marine, CallParameters};
 
 pub const SUCCESS_CODE: i32 = 0;
 
 // add an entry if authenticated, return an error if not
-#[fce]
+#[marine]
 fn add(entry: String, auth: bool) -> AddServiceResult {
     fn add_impl(entry: String, auth: bool) -> Result<u64> {
         is_authenticated(auth, 1)?;
@@ -36,7 +36,7 @@ fn add(entry: String, auth: bool) -> AddServiceResult {
 }
 
 // get all entries
-#[fce]
+#[marine]
 fn get_all(auth: bool) -> GetEntriesServiceResult {
     fn get_all_impl(auth: bool) -> Result<Vec<HistoryEntry>> {
         is_authenticated(auth, 0)?;
@@ -46,7 +46,7 @@ fn get_all(auth: bool) -> GetEntriesServiceResult {
 }
 
 // get last entry
-#[fce]
+#[marine]
 fn get_last(last: u64, auth: bool) -> GetEntriesServiceResult {
     fn get_last_impl(last: u64, auth: bool) -> Result<Vec<HistoryEntry>> {
         is_authenticated(auth, 1)?;
@@ -56,7 +56,7 @@ fn get_last(last: u64, auth: bool) -> GetEntriesServiceResult {
 }
 
 // set tetraplet to check on the authentication process. Only the service owner could set it
-#[fce]
+#[marine]
 pub fn set_tetraplet(
     peer_id: String,
     service_id: String,

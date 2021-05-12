@@ -15,23 +15,23 @@
  */
 
 use crate::history_entry::HistoryEntry;
-use fluence::fce;
+use fluence::marine;
 
-#[fce]
+#[marine]
 pub struct AddServiceResult {
     pub ret_code: i32,
     pub err_msg: String,
     pub entry_id: u64,
 }
 
-#[fce]
+#[marine]
 pub struct GetEntriesServiceResult {
     pub ret_code: i32,
     pub err_msg: String,
     pub entries: Vec<HistoryEntry>,
 }
 
-#[fce]
+#[marine]
 pub struct EmptyResult {
     pub ret_code: i32,
     pub err_msg: String,

@@ -18,24 +18,24 @@ use crate::results::{AuthResult, EmptyServiceResult, ExistsServiceResult, GetUse
 use crate::storage_api::*;
 use crate::user::User;
 use crate::Result;
-use fluence::{fce, CallParameters};
+use fluence::{marine, CallParameters};
 
 pub const SUCCESS_CODE: i32 = 0;
 
 // get all users
-#[fce]
+#[marine]
 fn get_users() -> GetUsersServiceResult {
     get_all_users().into()
 }
 
 // get user by peer_id
-#[fce]
+#[marine]
 fn get_user(peer_id: String) -> GetUsersServiceResult {
     get_user_by_peer_id(peer_id).into()
 }
 
 // add a user too the service
-#[fce]
+#[marine]
 fn join(user: User) -> EmptyServiceResult {
     fn add_impl(user: User) -> Result<()> {
         // TODO uncomment to have an access to join method only for existing users
@@ -47,7 +47,7 @@ fn join(user: User) -> EmptyServiceResult {
 }
 
 // delete a user from the service
-#[fce]
+#[marine]
 fn leave(peer_id: String) -> EmptyServiceResult {
     fn delete_impl(peer_id: String) -> Result<()> {
         check_auth()?;
@@ -59,13 +59,13 @@ fn leave(peer_id: String) -> EmptyServiceResult {
 }
 
 // check if a user is exists in the service
-#[fce]
+#[marine]
 fn is_exists(peer_id: String) -> ExistsServiceResult {
     user_exists(peer_id).into()
 }
 
 // check if a caller is authenticated in this service
-#[fce]
+#[marine]
 fn is_authenticated() -> AuthResult {
     check_auth().into()
 }

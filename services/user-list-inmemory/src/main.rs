@@ -27,7 +27,7 @@ pub(crate) type Result<T> = std::result::Result<T, errors::UserListError>;
 pub fn main() {
     // instantiate logger
     WasmLoggerBuilder::new()
-        .with_log_level(log::Level::Info)
+        .with_log_level(log::LevelFilter::Info)
         .build()
         .unwrap();
 }

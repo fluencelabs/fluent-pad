@@ -15,29 +15,29 @@
  */
 
 use crate::user::User;
-use fluence::fce;
+use fluence::marine;
 
-#[fce]
+#[marine]
 pub struct GetUsersServiceResult {
     pub ret_code: i32,
     pub err_msg: String,
     pub users: Vec<User>,
 }
 
-#[fce]
+#[marine]
 pub struct EmptyServiceResult {
     pub ret_code: i32,
     pub err_msg: String,
 }
 
-#[fce]
+#[marine]
 pub struct ExistsServiceResult {
     pub ret_code: i32,
     pub err_msg: String,
     pub is_exists: bool,
 }
 
-#[fce]
+#[marine]
 pub struct AuthResult {
     pub ret_code: i32,
     pub err_msg: String,

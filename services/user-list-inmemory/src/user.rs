@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-use fluence::fce;
+use fluence::marine;
 
-#[fce]
+#[marine]
 #[derive(Clone, Debug, Default, Eq, PartialEq, Hash)]
 pub struct User {
     pub peer_id: String,
