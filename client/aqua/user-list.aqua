@@ -8,11 +8,11 @@ data User:
 
 data GetUsersServiceResult:
     users: []User
-    ret_code: s32
+    ret_code: i32
     err_msg: string
 
 data AuthResult:
-    ret_code: s32
+    ret_code: i32
     err_msg: string
     is_authenticated: bool
 

@@ -1,7 +1,7 @@
 import "common.aqua"
 
 data AddServiceResult:
-    ret_code: s32
+    ret_code: i32
     err_msg: string
     entry_id: u64
 
@@ -10,7 +10,7 @@ data HistoryEntry:
     body: string
 
 data GetEntriesServiceResult:
-    ret_code: s32
+    ret_code: i32
     err_msg: string
     entries: []HistoryEntry
 
