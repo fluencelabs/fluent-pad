@@ -1,14 +1,13 @@
-import { createClient, FluenceClient } from '@fluencelabs/fluence';
+import { FluencePeer } from '@fluencelabs/fluence';
 import React, { useEffect, useState } from 'react';
 
 import './App.scss';
 
-import { FluenceClientContext } from '../app/FluenceClientContext';
 import { UserList } from './UserList';
 import { CollaborativeEditor } from './CollaborativeEditor';
 import { fluentPadApp, relayNode } from 'src/app/constants';
 import { CheckResponse, withErrorHandlingAsync } from './util';
-import { join, leave } from 'src/aqua/app';
+import { join, leave } from 'src/_aqua/app';
 
 const createClientEx = async (relay) => {
     const client = await createClient(relay);

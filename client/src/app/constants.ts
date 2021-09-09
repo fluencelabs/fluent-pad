@@ -1,5 +1,5 @@
 import config from 'src/app.json';
-import { testNet } from '@fluencelabs/fluence-network-environment';
+import { krasnodar } from '@fluencelabs/fluence-network-environment';
 
 export const fluentPadServiceId = 'fluence/fluent-pad';
 

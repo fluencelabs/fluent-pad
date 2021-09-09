@@ -1,7 +1,12 @@
-import "@fluencelabs/aqua-lib/builtin.aqua"
-import "fluent-pad.aqua"
-import "history.aqua"
+module App
 
+import PeerId, Op, Peer from "@fluencelabs/aqua-lib/builtin.aqua"
+import AppConfig, FluentPad from "fluent-pad.aqua"
+import User, UserList, AuthResult from "user-list.aqua"
+import EmptyServiceResult from "common.aqua"
+import History, GetEntriesServiceResult, AddServiceResult from "history.aqua"
+
+export join, getUserList, initAfterJoin, updateOnlineStatuses, leave, auth, getHistory, addEntry, FluentPad, AppConfig
 
 func join(user: User) -> EmptyServiceResult:
     app <- AppConfig.getApp()
@@ -25,8 +30,8 @@ func initAfterJoin(me: User) -> []User:
         if isOnline:
             on user.peer_id via user.relay_id:
                 FluentPad.notifyUserAdded(me, true)
-        else:
-            Op.identity()
+        -- else:
+        --`    Op.identity("dontcare")
         par FluentPad.notifyUserAdded(user, isOnline)
     <- allUsers
 

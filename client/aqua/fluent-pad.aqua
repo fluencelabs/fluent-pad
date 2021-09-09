@@ -1,5 +1,7 @@
-import "@fluencelabs/aqua-lib/builtin.aqua"
-import "user-list.aqua"
+module FluentPad declares AppConfig, FluentPad
+
+import PeerId from "@fluencelabs/aqua-lib/builtin.aqua"
+import User from "user-list.aqua"
 
 data ServiceInstance:
     peer_id: PeerId
