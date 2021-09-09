@@ -2,11 +2,11 @@
   "services": {
     "history": {
       "dependencies": ["history_inmemory"],
-      "node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3"
+      "node": "12D3KooWSD5PToNiLQwKDXsu8JSysCwUt8BVUJEqCHcDe7P5h45e"
     },
     "user_list": {
       "dependencies": ["user_list_inmemory"],
-      "node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3"
+      "node": "12D3KooWSD5PToNiLQwKDXsu8JSysCwUt8BVUJEqCHcDe7P5h45e"
     }
   },
   "modules": {
@@ -28,8 +28,7 @@
       "variables": {
         "function": "is_authenticated",
         "json_path": "$.is_authenticated"
-      },
-      "node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3"
+      }
     }
   },
   "script_storage": {}

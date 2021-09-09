@@ -16,8 +16,4 @@ export const fluentPadApp = {
     history: history,
 };
 
-// export const relayNode = krasnodar[0];
-export const relayNode = {
-    multiaddr: '/ip4/127.0.0.1/tcp/4310/ws/p2p/12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3',
-    peerId: '12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3',
-};
+export const relayNode = krasnodar[0];
