@@ -1,12 +1,12 @@
 module App
 
 import PeerId, Op, Peer from "@fluencelabs/aqua-lib/builtin.aqua"
-import AppConfig, FluentPad from "fluent-pad.aqua"
+import AppConfig, UserStatus, TextState from "fluent-pad.aqua"
 import User, UserList, AuthResult from "user-list.aqua"
 import EmptyServiceResult from "common.aqua"
 import History, GetEntriesServiceResult, AddServiceResult from "history.aqua"
 
-export join, getUserList, initAfterJoin, updateOnlineStatuses, leave, auth, getHistory, addEntry, FluentPad, AppConfig
+export join, getUserList, initAfterJoin, updateOnlineStatuses, leave, auth, getHistory, addEntry, UserStatus, TextState, AppConfig
 
 func join(user: User) -> EmptyServiceResult:
     app <- AppConfig.getApp()
@@ -29,10 +29,10 @@ func initAfterJoin(me: User) -> []User:
             isOnline <- Peer.is_connected(user.peer_id)
         if isOnline:
             on user.peer_id via user.relay_id:
-                FluentPad.notifyUserAdded(me, true)
+                UserStatus.notifyUserAdded(me, true)
         -- else:
         --`    Op.identity("dontcare")
-        par FluentPad.notifyUserAdded(user, isOnline)
+        par UserStatus.notifyUserAdded(user, isOnline)
     <- allUsers
 
 
@@ -41,17 +41,17 @@ func updateOnlineStatuses():
     for user <- allUsers par:
         on user.peer_id via user.relay_id:
             isOnline <- Peer.is_connected(user.peer_id)
-        FluentPad.notifyOnline(user.peer_id, isOnline)
+        UserStatus.notifyOnline(user.peer_id, isOnline)
 
 func leave():
     app <- AppConfig.getApp()
     on app.user_list.peer_id:
         UserList app.user_list.service_id
-        res <- UserList.leave(%init_peer_id%)
+        res <- UserList.leave(INIT_PEER_ID)
     allUsers <- getUserList()
     for user <- allUsers par:
         on user.peer_id via user.relay_id:
-            FluentPad.notifyUserRemoved(%init_peer_id%)
+            UserStatus.notifyUserRemoved(INIT_PEER_ID)
 
 func auth() -> AuthResult:
     app <- AppConfig.getApp()
@@ -76,7 +76,7 @@ func addEntry(entry: string) -> AddServiceResult:
         res <- History.add(entry, authRes.is_authenticated)
     allUsers <- getUserList()
     for user <- allUsers par:
-        if user.peer_id != %init_peer_id%:
+        if user.peer_id != INIT_PEER_ID:
             on user.peer_id via user.relay_id:
-                FluentPad.notifyTextUpdate(entry, authRes.is_authenticated)
+                TextState.notifyTextUpdate(entry, authRes.is_authenticated)
     <- res

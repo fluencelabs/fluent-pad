@@ -7,42 +7,44 @@ import { UserList } from './UserList';
 import { CollaborativeEditor } from './CollaborativeEditor';
 import { fluentPadApp, relayNode } from 'src/app/constants';
 import { CheckResponse, withErrorHandlingAsync } from './util';
-import { join, leave } from 'src/_aqua/app';
+import { join, leave, registerAppConfig } from 'src/_aqua/app';
 
-const createClientEx = async (relay) => {
-    const client = await createClient(relay);
-    client.aquaCallHandler.on('fluence/get-config', 'getApp', () => {
-        return fluentPadApp;
-    });
-    client.aquaCallHandler.on('fluence/get-config', 'get_init_peer_id', () => {
-        return client.selfPeerId;
-    });
-    client.aquaCallHandler.on('fluence/get-config', 'get_init_relay', () => {
-        return client.relayPeerId!;
-    });
-    return client;
-};
 
 const App = () => {
-    const [client, setClient] = useState<FluenceClient | null>(null);
+    const [isConnected, setIsConnected] = useState<boolean>(false);
     const [isInRoom, setIsInRoom] = useState<boolean>(false);
     const [nickName, setNickName] = useState('');
 
+    const connect = async () => {
+        try {
+            await FluencePeer.default.init({ connectTo: relayNode });
+
+            setIsConnected(true);
+
+            registerAppConfig({
+                getApp: () => {
+                    return fluentPadApp
+                },
+            })
+        }
+        catch (err) {
+            console.log('Peer initialization failed', err)
+        }
+    }
+
     useEffect(() => {
-        createClientEx(relayNode)
-            .then((client) => setClient(client))
-            .catch((err) => console.log('Client initialization failed', err));
+        connect()
     }, []);
 
     const joinRoom = async () => {
-        if (!client) {
+        if (!isConnected) {
             return;
         }
 
         await withErrorHandlingAsync(async () => {
-            const res = await join(client, {
-                peer_id: client.selfPeerId,
-                relay_id: client.relayPeerId!,
+            const res = await join( {
+                peer_id: FluencePeer.default.connectionInfo.selfPeerId,
+                relay_id: FluencePeer.default.connectionInfo.connectedRelay!,
                 name: nickName,
             });
             if (CheckResponse(res)) {
@@ -52,18 +54,18 @@ const App = () => {
     };
 
     const leaveRoom = async () => {
-        if (!client) {
+        if (!isConnected) {
             return;
         }
 
         await withErrorHandlingAsync(async () => {
-            await leave(client);
+            await leave();
             setIsInRoom(false);
         });
     };
 
     return (
-        <FluenceClientContext.Provider value={client}>
+        <>
             <div className="header-wrapper">
                 <div className="header">
                     <div className="header-item">
@@ -75,7 +77,7 @@ const App = () => {
                     </div>
 
                     <div className="header-item">
-                        Connection status: {client ? <span className="accent">connected</span> : 'disconnected'}
+                        Connection status: {isConnected ? <span className="accent">connected</span> : 'disconnected'}
                     </div>
                 </div>
             </div>
@@ -105,7 +107,7 @@ const App = () => {
                             <input
                                 type="submit"
                                 className="join-button"
-                                disabled={isInRoom || !client || !nickName}
+                                disabled={isInRoom || !isConnected || !nickName}
                                 value="Join"
                             />
                         </form>
@@ -120,7 +122,7 @@ const App = () => {
                     )}
                 </div>
             </div>
-        </FluenceClientContext.Provider>
+        </>
     );
 };
 

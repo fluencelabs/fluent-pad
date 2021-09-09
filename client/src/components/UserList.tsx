@@ -1,14 +1,10 @@
 import { useEffect, useState } from 'react';
-import {
-    fluentPadServiceId,
-    notifyOnlineFnName,
-    notifyUserAddedFnName,
-    notifyUserRemovedFnName,
-} from 'src/app/constants';
-import { useFluenceClient } from '../app/FluenceClientContext';
-import { PeerIdB58, subscribeToEvent } from '@fluencelabs/fluence';
+
+
 import { withErrorHandlingAsync } from './util';
-import { initAfterJoin, updateOnlineStatuses } from 'src/aqua/app';
+import { initAfterJoin, updateOnlineStatuses } from 'src/_aqua/app';
+import { registerUserStatus } from 'src/_aqua/app';
+import { FluencePeer, PeerIdB58 } from '@fluencelabs/fluence';
 
 interface User {
     id: PeerIdB58;
@@ -16,16 +12,9 @@ interface User {
     isOnline: boolean;
 }
 
-interface ApiUser {
-    name: string;
-    peer_id: string;
-    relay_id: string;
-}
-
 const refreshOnlineStatusTimeoutMs = 10000;
 
 export const UserList = (props: { selfName: string }) => {
-    const client = useFluenceClient()!;
     const [users, setUsers] = useState<Map<PeerIdB58, User>>(new Map());
 
     const updateOnlineStatus = (user, onlineStatus) => {
@@ -42,12 +31,15 @@ export const UserList = (props: { selfName: string }) => {
     useEffect(() => {
         const listRefreshTimer = setInterval(() => {
             withErrorHandlingAsync(async () => {
-                // await updateOnlineStatuses(client);
+                await updateOnlineStatuses();
             });
         }, refreshOnlineStatusTimeoutMs);
 
-        const unsub1 = subscribeToEvent(client, fluentPadServiceId, notifyUserAddedFnName, (args, _) => {
-            const [user, isOnline] = args as [ApiUser, boolean];
+        registerUserStatus({
+            notifyOnline: (user, onlineStatus) => {
+            updateOnlineStatus(user, onlineStatus);
+            },
+            notifyUserAdded: (user, isOnline) => {
             setUsers((prev) => {
                 const u = user;
                 const result = new Map(prev);
@@ -63,36 +55,29 @@ export const UserList = (props: { selfName: string }) => {
 
                 return result;
             });
-        });
+            },
 
-        const unsub2 = subscribeToEvent(client, fluentPadServiceId, notifyUserRemovedFnName, (args, _) => {
-            const [userLeft] = args as [PeerIdB58];
+            notifyUserRemoved: (userLeft) => {
             setUsers((prev) => {
                 const result = new Map(prev);
                 result.delete(userLeft);
                 return result;
             });
-        });
+            }
+        })
 
-        const unsub3 = subscribeToEvent(client, fluentPadServiceId, notifyOnlineFnName, (args, _) => {
-            const [user, onlineStatus] = args as [PeerIdB58, boolean];
-            updateOnlineStatus(user, onlineStatus);
-        });
 
         // don't block
         withErrorHandlingAsync(async () => {
-            await initAfterJoin(client, {
+            await initAfterJoin({
                 name: props.selfName,
-                peer_id: client.selfPeerId,
-                relay_id: client.relayPeerId!,
+                peer_id: FluencePeer.default.connectionInfo.selfPeerId,
+                relay_id: FluencePeer.default.connectionInfo.connectedRelay!,
             });
         });
 
         return () => {
             clearTimeout(listRefreshTimer);
-            unsub1();
-            unsub2();
-            unsub3();
         };
     }, []);
 
@@ -105,7 +90,7 @@ export const UserList = (props: { selfName: string }) => {
             <ul>
                 {usersArray.map((x) => (
                     <li key={x.id}>
-                        <span className={x.id === client.selfPeerId ? 'bold' : ''}>{x.name}</span>
+                        <span className={x.id === FluencePeer.default.connectionInfo.selfPeerId ? 'bold' : ''}>{x.name}</span>
                         <span className={x.isOnline ? 'green' : 'red'}> ({x.isOnline ? 'online' : 'offline'})</span>
                     </li>
                 ))}
