@@ -1,4 +1,6 @@
-import "common.aqua"
+module History declares History, GetEntriesServiceResult, AddServiceResult
+
+import EmptyServiceResult from "common.aqua"
 
 data AddServiceResult:
     ret_code: i32
@@ -15,7 +17,7 @@ data GetEntriesServiceResult:
     entries: []HistoryEntry
 
 service History:
-    get_all: bool -> GetEntriesServiceResult
-    get_last: u64, bool -> GetEntriesServiceResult
-    add: string, bool -> AddServiceResult
-    set_tetraplet: string, string, string, string -> EmptyServiceResult
+    get_all(arg1: bool) -> GetEntriesServiceResult
+    get_last(arg1: u64, arg2: bool) -> GetEntriesServiceResult
+    add(arg1: string, arg2: bool) -> AddServiceResult
+    set_tetraplet(arg1: string, arg2: string, arg3: string, arg4: string) -> EmptyServiceResult

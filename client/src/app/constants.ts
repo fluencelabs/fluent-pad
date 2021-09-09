@@ -1,12 +1,5 @@
 import config from 'src/app.json';
-import { testNet } from '@fluencelabs/fluence-network-environment';
-
-export const fluentPadServiceId = 'fluence/fluent-pad';
-
-export const notifyOnlineFnName = 'notifyOnline';
-export const notifyUserAddedFnName = 'notifyUserAdded';
-export const notifyUserRemovedFnName = 'notifyUserRemoved';
-export const notifyTextUpdateFnName = 'notifyTextUpdate';
+import { krasnodar } from '@fluencelabs/fluence-network-environment';
 
 export const userList = {
     peer_id: config.services.user_list.node,
@@ -23,8 +16,4 @@ export const fluentPadApp = {
     history: history,
 };
 
-// export const relayNode = testNet[0];
-export const relayNode = {
-    multiaddr: '/ip4/127.0.0.1/tcp/4310/ws/p2p/12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3',
-    peerId: '12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3',
-};
+export const relayNode = krasnodar[0];

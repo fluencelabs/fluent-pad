@@ -1,5 +1,7 @@
-import "@fluencelabs/aqua-lib/builtin.aqua"
-import "user-list.aqua"
+module FluentPad declares AppConfig, UserStatus, TextState
+
+import PeerId from "@fluencelabs/aqua-lib/builtin.aqua"
+import User from "user-list.aqua"
 
 data ServiceInstance:
     peer_id: PeerId
@@ -9,10 +11,12 @@ data App:
     history: ServiceInstance
     user_list: ServiceInstance
 
-service FluentPad("fluence/fluent-pad"):
+service UserStatus("fluence/fluent-pad/status"):
     notifyOnline(userPeerId: string, isOnline: bool)
     notifyUserAdded(currentUser: User, isOnline: bool)
     notifyUserRemoved(userPeerId: PeerId)
+
+service TextState("fluence/fluent-pad/text-state"):
     notifyTextUpdate(changes: string, isAuthorized: bool)
 
 service AppConfig("fluence/get-config"):

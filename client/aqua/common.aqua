@@ -1,3 +1,5 @@
+module Common declares EmptyServiceResult
+
 data EmptyServiceResult:
     ret_code: i32
     err_msg: string

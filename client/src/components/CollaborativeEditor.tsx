@@ -1,12 +1,9 @@
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
-import { PeerIdB58, subscribeToEvent } from '@fluencelabs/fluence';
 
-import { fluentPadServiceId, notifyTextUpdateFnName } from 'src/app/constants';
-import { useFluenceClient } from '../app/FluenceClientContext';
 import { getUpdatedDocFromText, initDoc, SyncClient } from '../app/sync';
 import { withErrorHandlingAsync } from './util';
-import { addEntry, getHistory } from 'src/aqua/app';
+import { addEntry, getHistory, registerTextState } from 'src/_aqua/app';
 
 const broadcastUpdates = _.debounce((text: string, syncClient: SyncClient) => {
     let doc = syncClient.getDoc();
@@ -17,7 +14,6 @@ const broadcastUpdates = _.debounce((text: string, syncClient: SyncClient) => {
 }, 100);
 
 export const CollaborativeEditor = () => {
-    const client = useFluenceClient()!;
     const [text, setText] = useState<string | null>(null);
     const [syncClient, setSyncClient] = useState(new SyncClient());
 
@@ -28,7 +24,7 @@ export const CollaborativeEditor = () => {
 
         syncClient.handleSendChanges = (changes: string) => {
             withErrorHandlingAsync(async () => {
-                const res = await addEntry(client, changes);
+                const res = await addEntry(changes);
                 if (res.ret_code !== 0) {
                     throw new Error(
                         `Failed to add message to history service, code=${res.ret_code}, message=${res.err_msg}`,
@@ -37,19 +33,19 @@ export const CollaborativeEditor = () => {
             });
         };
 
-        const unsub = subscribeToEvent(client, fluentPadServiceId, notifyTextUpdateFnName, (args, tetraplets) => {
-            const [changes, isAuthorized] = args as [string, boolean];
-
-            if (changes) {
-                syncClient.receiveChanges(changes);
+        registerTextState({
+            notifyTextUpdate: (changes, isAuthorized) => {
+                if (changes) {
+                    syncClient.receiveChanges(changes);
+                }
             }
-        });
+        })
 
         syncClient.start();
 
         // don't block
         withErrorHandlingAsync(async () => {
-            const res = await getHistory(client);
+            const res = await getHistory();
             for (let e of res.entries) {
                 syncClient.receiveChanges(e.body);
             }
@@ -60,7 +56,6 @@ export const CollaborativeEditor = () => {
         });
 
         return () => {
-            unsub();
             syncClient.stop();
         };
     }, []);
