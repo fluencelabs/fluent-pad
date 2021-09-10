@@ -4,23 +4,23 @@
             "dependencies": [
                 "history_inmemory"
             ],
-            "node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3",
+            "node": "12D3KooWSD5PToNiLQwKDXsu8JSysCwUt8BVUJEqCHcDe7P5h45e",
             "hashDependencies": [
-                "hash:6ee648216089b876a34353f485f1bf19dd863b861f0d798a0ac0cb65cc3b4e2f"
+                "hash:080ddd728c1d62f2cd7e8460b8db5020b5e4fa40e9eabac18ca883a7ca08bd8e"
             ],
-            "blueprint_id": "5df598924434974291d98c6d72e0922f2e8cbd7f7f291ca44f1b2f8e198f421b",
-            "id": "69f14695-3989-4733-b4f3-9a204a8615b9"
+            "blueprint_id": "4cba09d379488f365cfaf3be4b695c53b5856dd489a063eca65a0cfd36b37dc2",
+            "id": "9c3b441d-f41b-4501-8c61-7bfb5960b109"
         },
         "user_list": {
             "dependencies": [
                 "user_list_inmemory"
             ],
-            "node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3",
+            "node": "12D3KooWSD5PToNiLQwKDXsu8JSysCwUt8BVUJEqCHcDe7P5h45e",
             "hashDependencies": [
-                "hash:691ebcd74409bd931a9a68d0e0001f8d9d4b8482c8aaac3184e28c2a322e5a82"
+                "hash:f083b600d1f965a4e7862088a67cb1b33a4bcfbfa8fb1d26db56bdd61ae86c60"
             ],
-            "blueprint_id": "d46fb511eb5a5dcea7b5a6777e04f95d48cbbe9fde040bd6bd69b4d9cd8fbb88",
-            "id": "caa3de3e-e5c0-4514-8bc4-efca631becce"
+            "blueprint_id": "a537c1ef87711e8b8cd1d8de30f5a8b125cf73b469727035c6c92e2bd87e699e",
+            "id": "f027e5da-d2f9-4ec5-92fc-ae7f26215846"
         }
     },
     "modules": {
@@ -34,12 +34,12 @@
                     "history": "/tmp"
                 }
             },
-            "hash": "6ee648216089b876a34353f485f1bf19dd863b861f0d798a0ac0cb65cc3b4e2f"
+            "hash": "080ddd728c1d62f2cd7e8460b8db5020b5e4fa40e9eabac18ca883a7ca08bd8e"
         },
         "user_list_inmemory": {
             "file": "user_list.wasm",
             "config": {},
-            "hash": "691ebcd74409bd931a9a68d0e0001f8d9d4b8482c8aaac3184e28c2a322e5a82"
+            "hash": "f083b600d1f965a4e7862088a67cb1b33a4bcfbfa8fb1d26db56bdd61ae86c60"
         }
     },
     "scripts": {
@@ -48,8 +48,7 @@
             "variables": {
                 "function": "is_authenticated",
                 "json_path": "$.is_authenticated"
-            },
-            "node": "12D3KooWKEprYXUXqoV5xSBeyqrWLpQLLH4PXfvVkDJtmcqmh5V3"
+            }
         }
     },
     "script_storage": {}

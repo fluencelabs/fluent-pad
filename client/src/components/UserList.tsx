@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { withErrorHandlingAsync } from './util';
 import { initAfterJoin, updateOnlineStatuses } from 'src/_aqua/app';
 import { registerUserStatus } from 'src/_aqua/app';
-import { FluencePeer, PeerIdB58 } from '@fluencelabs/fluence';
+import { Fluence, FluencePeer, PeerIdB58 } from '@fluencelabs/fluence';
 
 interface User {
     id: PeerIdB58;
@@ -71,8 +71,8 @@ export const UserList = (props: { selfName: string }) => {
         withErrorHandlingAsync(async () => {
             await initAfterJoin({
                 name: props.selfName,
-                peer_id: FluencePeer.default.connectionInfo.selfPeerId,
-                relay_id: FluencePeer.default.connectionInfo.connectedRelay!,
+                peer_id: Fluence.getStatus().peerId!,
+                relay_id: Fluence.getStatus().relayPeerId!,
             });
         });
 
@@ -90,7 +90,7 @@ export const UserList = (props: { selfName: string }) => {
             <ul>
                 {usersArray.map((x) => (
                     <li key={x.id}>
-                        <span className={x.id === FluencePeer.default.connectionInfo.selfPeerId ? 'bold' : ''}>{x.name}</span>
+                        <span className={x.id === Fluence.getStatus().peerId ? 'bold' : ''}>{x.name}</span>
                         <span className={x.isOnline ? 'green' : 'red'}> ({x.isOnline ? 'online' : 'offline'})</span>
                     </li>
                 ))}

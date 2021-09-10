@@ -1,4 +1,4 @@
-import { FluencePeer } from '@fluencelabs/fluence';
+import { Fluence } from '@fluencelabs/fluence';
 import React, { useEffect, useState } from 'react';
 
 import './App.scss';
@@ -17,7 +17,7 @@ const App = () => {
 
     const connect = async () => {
         try {
-            await FluencePeer.default.init({ connectTo: relayNode });
+            await Fluence.start({ connectTo: relayNode });
 
             setIsConnected(true);
 
@@ -43,8 +43,8 @@ const App = () => {
 
         await withErrorHandlingAsync(async () => {
             const res = await join( {
-                peer_id: FluencePeer.default.connectionInfo.selfPeerId,
-                relay_id: FluencePeer.default.connectionInfo.connectedRelay!,
+                peer_id: Fluence.getStatus().peerId!,
+                relay_id: Fluence.getStatus().relayPeerId!,
                 name: nickName,
             });
             if (CheckResponse(res)) {
