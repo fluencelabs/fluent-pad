@@ -2,11 +2,11 @@
   "services": {
     "history": {
       "dependencies": ["history_inmemory"],
-      "node": "12D3KooWSD5PToNiLQwKDXsu8JSysCwUt8BVUJEqCHcDe7P5h45e"
+      "node": "12D3KooWFEwNWcHqi9rtsmDhsYcDbRUCDXH84RC4FW6UfsFWaoHi"
     },
     "user_list": {
       "dependencies": ["user_list_inmemory"],
-      "node": "12D3KooWSD5PToNiLQwKDXsu8JSysCwUt8BVUJEqCHcDe7P5h45e"
+      "node": "12D3KooWFEwNWcHqi9rtsmDhsYcDbRUCDXH84RC4FW6UfsFWaoHi"
     }
   },
   "modules": {
