@@ -16,4 +16,4 @@ export const fluentPadApp = {
     history: history,
 };
 
-export const relayNode = krasnodar[0];
+export const relayNode = krasnodar[5];
