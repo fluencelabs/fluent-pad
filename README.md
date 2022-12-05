@@ -1,4 +1,11 @@
-# What is fluent-pad
+# Archived, no longer maintained
+This project exists as a historical example of a collaborative application built on Fluence stack. 
+
+Expect dependencies to be outdated, and old API used.
+
+# Below is the old readme
+
+## What is fluent-pad
 
 Fluent-pad is a collaborative code and text editor built with Fluence stack
 
